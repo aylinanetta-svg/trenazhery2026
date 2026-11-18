@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Самостійна робота: властивості функцій — 3 завдання і сертифікат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFF8EE;--ink:#2B2D42;--muted:#6B6F86;--line:#ECE3D3;--teal:#16B3A6;--sky:#3A86FF;--violet:#7B61FF;--sun:#FFC93C;--ok:#22A86A;--bad:#F0507E}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:17px;line-height:1.5;
+ background-image:radial-gradient(circle at 10% 5%,#FFE7C2 0,transparent 35%),radial-gradient(circle at 95% 10%,#D8F3EF 0,transparent 35%),radial-gradient(circle at 70% 100%,#E9E3FF 0,transparent 40%);background-attachment:fixed}
+h1,h2,h3{font-family:'Comfortaa','Nunito',sans-serif;line-height:1.25;margin:.2em 0 .5em}
+h1{font-size:1.6rem}h2{font-size:1.3rem}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 70px}
+.card{background:#fff;border-radius:22px;padding:18px;margin:14px 0;border:2px solid #F3EBDD;box-shadow:0 5px 0 var(--line)}
+.hero{text-align:center}.big{font-size:2.6rem}
+.prog{display:flex;gap:6px;margin:8px 0}.prog i{flex:1;height:8px;border-radius:9px;background:var(--line)}.prog i.on{background:linear-gradient(90deg,var(--teal),var(--violet))}
+.m{font-family:'Cambria Math','Times New Roman',serif;font-size:1.1em;white-space:nowrap}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-family:'Cambria Math','Times New Roman',serif;line-height:1.05;margin:0 2px}
+.frac span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.btn{border:none;border-radius:14px;padding:12px 20px;font:800 1rem 'Nunito',sans-serif;cursor:pointer;background:var(--ink);color:#fff;box-shadow:0 4px 0 #11121f}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #11121f}
+.btn.t{background:var(--teal);box-shadow:0 4px 0 #0e8077}.btn.y{background:var(--sun);color:var(--ink);box-shadow:0 4px 0 #d9a21a}
+.btn.g{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn:disabled{opacity:.45}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input.f{font:800 1.05rem 'Nunito',sans-serif;border:2px solid var(--line);border-radius:14px;padding:11px 14px;color:var(--ink);background:#fff;outline:none;min-width:0}
+input.f:focus{border-color:var(--sky)}
+input.n{width:110px;text-align:center}
+.q{border:2px solid var(--line);border-radius:18px;padding:12px 14px;margin:12px 0;background:#FFFDF9}
+.q .qt{font-weight:800;margin-bottom:6px}
+.opts{display:grid;gap:8px}
+.opt{border:2px solid var(--line);background:#fff;border-radius:14px;padding:11px 13px;font:700 1rem 'Nunito',sans-serif;text-align:left;cursor:pointer;color:var(--ink)}
+.opt.right{border-color:var(--ok);background:#E5F8EE}.opt.wrong{border-color:var(--bad);background:#FFE9EF}
+.fb{border-radius:14px;padding:10px 13px;margin-top:8px;font-weight:700}
+.fb.ok{background:#E5F8EE}.fb.no{background:#FFF0F3}
+.plot{background:#fff;border:2px solid #E3E8F5;border-radius:16px;padding:4px;margin:8px 0}
+.plot svg{width:100%;height:auto;display:block}
+.chip{display:inline-block;border-radius:999px;padding:3px 12px;font-weight:800;font-size:.8rem;background:#FFF3C4}
+#certImg{width:100%;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;font-weight:800;transition:.3s;z-index:50;pointer-events:none}
+.toast.on{transform:translateX(-50%) translateY(0)}
+textarea#rep{width:100%;min-height:170px;font:600 .85rem/1.45 ui-monospace,Consolas,monospace;border:2px dashed var(--violet);border-radius:14px;padding:12px;background:#FBFAFF;color:var(--ink)}
+.view{display:none}.view.on{display:block;animation:pop .3s}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.small{color:var(--muted);font-size:.9rem;font-weight:600}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<main class="wrap">
+ <section class="view on" id="v0">
+  <div class="card hero">
+   <div class="big">🏁📜</div>
+   <h1>Фінальне випробування</h1>
+   <p><b>Властивості функцій · Алгебра, 9 клас</b></p>
+   <p>Виконай <b>3 завдання</b> самостійно й отримай <b>сертифікат</b>. Кожна відповідь зараховується з першої спроби, тож думай уважно! 🍀</p>
+   <div class="row" style="justify-content:center">
+    <input class="f" id="nm" placeholder="Прізвище та ім’я" style="flex:1;min-width:200px">
+    <input class="f" id="cl" placeholder="Клас" style="width:100px">
+   </div>
+   <p><button class="btn y" id="go">Почати 🚀</button></p>
+  </div>
+ </section>
+ <section class="view" id="v1"></section>
+ <section class="view" id="v2"></section>
+ <section class="view" id="v3"></section>
+ <section class="view" id="v4">
+  <div class="card hero">
+   <h2>🎉 Вітаю! Твій сертифікат</h2>
+   <img id="certImg" alt="Сертифікат">
+   <p class="small">📱 На телефоні: натисни й утримуй зображення → «Зберегти зображення». На комп’ютері: натисни праву кнопку миші → «Зберегти зображення як…».</p>
+  </div>
+  <div class="card">
+   <h3>📤 Надішли результат у Google Classroom</h3>
+   <p class="small">Скопіюй текст і встав його в приватний коментар до завдання. Або прикріпи збережене зображення сертифіката.</p>
+   <textarea id="rep" readonly></textarea>
+   <div class="row" style="margin-top:8px"><button class="btn y" id="copy">📋 Скопіювати результат</button><button class="btn g" id="again">🔄 Пройти ще раз</button></div>
+  </div>
+ </section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200);}
+const mf=n=>String(n).replace('-','−');
+const norm=v=>String(v).trim().replace(/\s/g,'').replace(/[−–—]/g,'-').replace(',','.');
+const num=v=>{const n=parseFloat(norm(v));return isNaN(n)?null:n;};
+let S={name:'',cls:'',ans:{},score:0,step:0};
+
+/* plot for piecewise f (8.16) */
+function plotF(){
+ const f=x=>x<=-2?2*x+8:(x<2?x*x:-2*x+8);
+ const W=420,H=380,xr=[-6,6],yr=[-5,6];const X=x=>(x-xr[0])/(xr[1]-xr[0])*W,Y=y=>H-(y-yr[0])/(yr[1]-yr[0])*H;
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;
+ for(let i=xr[0];i<=xr[1];i++)s+=`<line x1="${X(i)}" y1="0" x2="${X(i)}" y2="${H}" stroke="#E7ECF7"/>`;
+ for(let j=yr[0];j<=yr[1];j++)s+=`<line x1="0" y1="${Y(j)}" x2="${W}" y2="${Y(j)}" stroke="#E7ECF7"/>`;
+ s+=`<line x1="0" y1="${Y(0)}" x2="${W}" y2="${Y(0)}" stroke="#2B2D42" stroke-width="1.6"/><line x1="${X(0)}" y1="0" x2="${X(0)}" y2="${H}" stroke="#2B2D42" stroke-width="1.6"/>`;
+ for(let i=xr[0]+1;i<xr[1];i++)if(i)s+=`<text x="${X(i)}" y="${Y(0)+14}" font-size="11" text-anchor="middle" fill="#7d8197" font-family="Nunito">${mf(i)}</text>`;
+ for(let j=yr[0]+1;j<yr[1];j++)if(j)s+=`<text x="${X(0)-5}" y="${Y(j)+4}" font-size="11" text-anchor="end" fill="#7d8197" font-family="Nunito">${mf(j)}</text>`;
+ s+=`<text x="${W-12}" y="${Y(0)-8}" font-style="italic" font-weight="800">x</text><text x="${X(0)+8}" y="14" font-style="italic" font-weight="800">y</text>`;
+ let p=[];for(let i=0;i<=600;i++){const x=xr[0]+(xr[1]-xr[0])*i/600;p.push(X(x).toFixed(1)+','+Y(f(x)).toFixed(1));}
+ s+=`<polyline points="${p.join(' ')}" fill="none" stroke="#3A86FF" stroke-width="4" stroke-linejoin="round"/>`;
+ [[-2,4],[2,4],[0,0]].forEach(([x,y])=>s+=`<circle cx="${X(x)}" cy="${Y(y)}" r="4" fill="#3A86FF"/>`);
+ return s+`<text x="10" y="20" font-weight="800" font-family="Nunito">y = f(x)</text></svg>`;
+}
+
+/* tasks */
+const TASKS=[
+ {title:'Завдання 1. Нулі функції',emoji:'🎯',items:[
+  {id:'1a',type:'in',q:'Знайдіть нуль функції <span class="m">y = 3x + 12</span>.',a:[-4],e:'3x + 12 = 0 ⇒ 3x = −12 ⇒ x = −4.'},
+  {id:'1b',type:'in2',q:'Знайдіть нулі функції <span class="m">f(x) = x² − 5x</span>. (Впиши обидва числа.)',a:[0,5],e:'x² − 5x = 0 ⇒ x(x − 5) = 0 ⇒ x = 0 або x = 5.'}]},
+ {title:'Завдання 2. Читаємо графік',emoji:'📈',graph:true,intro:'На малюнку — графік функції <span class="m">y = f(x)</span>, визначеної на всій числовій прямій (як у вправі 8.16).',items:[
+  {id:'2a',type:'mc',q:'Нулі функції:',o:['−2; 2','−4; 0; 4','−4; 4','0; 4'],c:1,e:'Графік перетинає або торкається осі Ox при x = −4, x = 0 і x = 4.'},
+  {id:'2b',type:'mc',q:'f(x) < 0 при x ∈',o:['(−4; 4)','(−4; 0) ∪ (0; 4)','(−∞; −4) ∪ (4; +∞)','(−∞; −2) ∪ (2; +∞)'],c:2,e:'Нижче осі Ox графік лежить ліворуч від −4 і праворуч від 4.'},
+  {id:'2c',type:'mc',q:'Проміжки спадання функції:',o:['(−∞; −2] і [0; 2]','[−2; 0] і [2; +∞)','[−4; 0] і [4; +∞)','[0; +∞)'],c:1,e:'Ідучи зліва направо, графік спускається на [−2; 0] і на [2; +∞).'}]},
+ {title:'Завдання 3. Гіпербола',emoji:'〰️',intro:'Функція <span class="m">y = −</span><span class="frac"><span>6</span><span>x</span></span>.',items:[
+  {id:'3a',type:'in',q:'Знайдіть значення функції при <span class="m">x = 2</span>.',a:[-3],e:'y = −6 : 2 = −3.'},
+  {id:'3b',type:'mc',q:'Гілки гіперболи розташовані в чвертях:',o:['I і III','II і IV','I і II'],c:1,e:'k = −6 < 0, тому гілки лежать у II і IV чвертях.'},
+  {id:'3c',type:'mc',q:'Яке твердження правильне?',o:['функція має нуль x = −6','функція спадає на кожному з проміжків (−∞; 0) і (0; +∞)','функція зростає на кожному з проміжків (−∞; 0) і (0; +∞)'],c:2,e:'k < 0 ⇒ функція зростає на кожному з проміжків (−∞; 0) і (0; +∞). Нулів немає.'}]}
+];
+const MAX=TASKS.reduce((s,t)=>s+t.items.length,0);
+
+function renderTask(ti){
+ const T=TASKS[ti],box=$('#v'+(ti+1));
+ let h=`<div class="prog">${TASKS.map((_,i)=>`<i class="${i<=ti?'on':''}"></i>`).join('')}</div><div class="card"><span class="chip">${ti+1} з 3</span><h2>${T.emoji} ${T.title}</h2>`;
+ if(T.intro)h+=`<p>${T.intro}</p>`;
+ if(T.graph)h+=`<div class="plot">${plotF()}</div>`;
+ T.items.forEach(it=>{const a=S.ans[it.id];
+  h+=`<div class="q"><div class="qt">${it.q}</div>`;
+  if(it.type==='mc')h+=`<div class="opts">${it.o.map((o,i)=>`<button class="opt ${a?(i===it.c?'right':(i===a.v?'wrong':'')):''}" data-id="${it.id}" data-i="${i}" ${a?'disabled':''}>${o}</button>`).join('')}</div>`;
+  else{const vs=a?a.v:[];h+=`<div class="row"><input class="f n" id="in-${it.id}-0" inputmode="text" placeholder="x =" ${a?`disabled value="${vs[0]}"`:''}>${it.type==='in2'?`<input class="f n" id="in-${it.id}-1" placeholder="x =" ${a?`disabled value="${vs[1]}"`:''}>`:''}${a?'':`<button class="btn t" data-chk="${it.id}">Відповісти</button>`}</div>`;}
+  if(a)h+=`<div class="fb ${a.ok?'ok':'no'}">${a.ok?'✅ Правильно!':'❌ Неправильно.'} ${it.e}</div>`;
+  h+=`</div>`;});
+ const done=T.items.every(it=>S.ans[it.id]);
+ h+=`<div class="row"><span style="flex:1"></span><button class="btn y" id="next${ti}" ${done?'':'disabled'}>${ti<2?'Далі →':'Отримати сертифікат 📜'}</button></div></div>`;
+ box.innerHTML=h;
+ box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const it=T.items.find(x=>x.id===b.dataset.id);S.ans[it.id]={v:+b.dataset.i,ok:+b.dataset.i===it.c};renderTask(ti);});
+ box.querySelectorAll('[data-chk]').forEach(b=>b.onclick=()=>{const it=T.items.find(x=>x.id===b.dataset.chk);
+  if(it.type==='in'){const v=$(`#in-${it.id}-0`).value;if(num(v)===null){toast('Впиши число 🙂');return;}S.ans[it.id]={v:[v],ok:Math.abs(num(v)-it.a[0])<1e-9};}
+  else{const v0=$(`#in-${it.id}-0`).value,v1=$(`#in-${it.id}-1`).value;if(num(v0)===null||num(v1)===null){toast('Впиши обидва числа 🙂');return;}
+   const got=[num(v0),num(v1)].sort((a,b)=>a-b),need=[...it.a].sort((a,b)=>a-b);S.ans[it.id]={v:[v0,v1],ok:got[0]===need[0]&&got[1]===need[1]};}
+  renderTask(ti);});
+ $('#next'+ti).onclick=()=>{if(ti<2){show(ti+2);renderTask(ti+1);}else finish();};
+}
+function show(i){document.querySelectorAll('.view').forEach((v,k)=>v.classList.toggle('on',v.id==='v'+i));window.scrollTo({top:0,behavior:'smooth'});}
+function level(s){return s===MAX?['ЗОЛОТИЙ','з відзнакою','#E0A800','🥇']:s>=6?['СРІБНИЙ','за впевнені знання','#8A94A6','🥈']:s>=4?['БРОНЗОВИЙ','за старанність','#C0763A','🥉']:['УЧАСНИКА','за участь — ти на правильному шляху!','#7B61FF','🌱'];}
+
+async function drawCert(sc){
+ try{await document.fonts.ready;}catch(e){}
+ const c=document.createElement('canvas');c.width=1400;c.height=990;const x=c.getContext('2d');
+ const [lv,why,col,medal]=level(sc);
+ const g=x.createLinearGradient(0,0,1400,990);g.addColorStop(0,'#FFF8E7');g.addColorStop(1,'#EEF8FF');x.fillStyle=g;x.fillRect(0,0,1400,990);
+ // confetti dots
+ const cs=['#FF6B6B','#FFC93C','#16B3A6','#3A86FF','#7B61FF'];for(let i=0;i<70;i++){x.fillStyle=cs[i%5];x.globalAlpha=.35;x.beginPath();const px=(i*197)%1400,py=(i*331)%990;if(px>120&&px<1280&&py>120&&py<870)continue;x.arc(px,py,6+(i%4)*3,0,7);x.fill();}
+ x.globalAlpha=1;x.strokeStyle=col;x.lineWidth=14;x.strokeRect(40,40,1320,910);x.lineWidth=3;x.strokeRect(70,70,1260,850);
+ x.textAlign='center';x.fillStyle='#2B2D42';
+ x.font='700 76px Comfortaa, sans-serif';x.fillText('СЕРТИФІКАТ',700,200);
+ x.font='800 34px Nunito, sans-serif';x.fillStyle=col;x.fillText(`${medal}  ${lv} РІВЕНЬ  ${medal}`,700,262);
+ x.fillStyle='#6B6F86';x.font='600 30px Nunito, sans-serif';x.fillText('засвідчує, що',700,335);
+ x.fillStyle='#2B2D42';let nm=S.name||'Учень';let fs=64;x.font=`900 ${fs}px Nunito, sans-serif`;while(x.measureText(nm).width>1100&&fs>30){fs-=4;x.font=`900 ${fs}px Nunito, sans-serif`;}
+ x.fillText(nm,700,420);x.fillStyle=col;x.fillRect(350,445,700,4);
+ x.fillStyle='#2B2D42';x.font='700 32px Nunito, sans-serif';x.fillText((S.cls?`учень/учениця ${S.cls} класу, `:'')+'успішно пройшов(ла) Фінальне випробування',700,515);
+ x.fillText('з теми «Властивості функцій» (алгебра, 9 клас)',700,560);
+ x.font='800 40px Nunito, sans-serif';x.fillStyle=col;x.fillText(`Результат: ${sc} з ${MAX} балів — ${why}`,700,640);
+ x.font='600 26px Nunito, sans-serif';x.fillStyle='#6B6F86';
+ const d=new Date();x.fillText(`Дата: ${d.toLocaleDateString('uk-UA')}`,360,820);x.fillText('Учитель алгебри: ________________',980,820);
+ x.font='54px serif';x.fillText('📐 📈 〰️ 🏆',700,750);
+ return c.toDataURL('image/png');
+}
+async function finish(){
+ const sc=TASKS.flatMap(t=>t.items).filter(it=>S.ans[it.id]&&S.ans[it.id].ok).length;S.score=sc;
+ const [lv,why]=level(sc);
+ $('#certImg').src=await drawCert(sc);
+ const d=new Date();
+ let r=`📜 ФІНАЛЬНЕ ВИПРОБУВАННЯ «ВЛАСТИВОСТІ ФУНКЦІЙ» (9 клас)\nУчень/учениця: ${S.name}\nКлас: ${S.cls||'—'}\nДата: ${d.toLocaleDateString('uk-UA')} ${d.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'})}\n\n`;
+ TASKS.forEach((t,i)=>{r+=`${t.title}: `+t.items.map(it=>`${it.id}${S.ans[it.id].ok?'✅':'❌'}`).join(' ')+`\n`;});
+ r+=`\n🏆 РЕЗУЛЬТАТ: ${sc} з ${MAX}\n📜 Сертифікат: ${lv.toLowerCase()} рівень (${why})\n`;
+ $('#rep').value=r;show(4);
+}
+$('#go').onclick=()=>{const n=$('#nm').value.trim();if(!n){toast('Впиши прізвище та ім’я ✍️');$('#nm').focus();return;}S.name=n;S.cls=$('#cl').value.trim();show(1);renderTask(0);};
+$('#copy').onclick=async()=>{const t=$('#rep');try{await navigator.clipboard.writeText(t.value);toast('✅ Скопійовано! Встав у Google Classroom');}catch(e){t.select();try{document.execCommand('copy');toast('✅ Скопійовано!');}catch(_){toast('Виділи текст і скопіюй');}}};
+$('#again').onclick=()=>{S={name:S.name,cls:S.cls,ans:{},score:0};show(1);renderTask(0);};
+</script>
+</body>
+</html>
