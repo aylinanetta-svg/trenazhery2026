@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Симулятор: БЖД, брандмауер і захист від реклами</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef3fb; --card:#fff; --ink:#1d2a3a; --muted:#5b6b80; --line:#d8e1ee;
+  --blue:#2f6fed; --blue2:#e6efff; --green:#1f9d55; --green2:#e3f7ec;
+  --red:#d93a3a; --red2:#fde8e8; --amber:#e8a317; --amber2:#fff4dc; --violet:#7a4fe0;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Nunito,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+header.top h1{font-size:20px;margin:0;font-weight:900}
+.steps{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.step{font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted)}
+.step.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.step.done{background:var(--green2);color:var(--green);border-color:#b9e8cc}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 6px 20px rgba(30,60,120,.06);margin-bottom:16px}
+.card h2{margin:0 0 6px;font-size:22px;font-weight:900}
+.card h3{margin:18px 0 8px;font-size:17px}
+.lead{color:var(--muted);margin:0 0 14px}
+.btn{border:none;border-radius:12px;padding:12px 18px;font-weight:800;font-size:15px;background:var(--blue);color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+.btn.green{background:var(--green)}
+.btn.red{background:var(--red)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+input[type=text],select{font-family:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--line);border-radius:12px;min-width:220px;background:#fff}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--blue)}
+.task{border:2px dashed var(--line);border-radius:14px;padding:14px;margin:12px 0;background:#fafcff}
+.task .tt{font-weight:900;display:flex;gap:8px;align-items:center}
+.badge{font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--blue2);color:var(--blue)}
+.badge.ok{background:var(--green2);color:var(--green)}
+.badge.bad{background:var(--red2);color:var(--red)}
+.tip{background:var(--amber2);border-left:4px solid var(--amber);padding:10px 12px;border-radius:8px;font-size:14px;margin:10px 0}
+.fb{padding:10px 12px;border-radius:10px;margin-top:10px;font-weight:700;font-size:14px}
+.fb.ok{background:var(--green2);color:#14683a}
+.fb.bad{background:var(--red2);color:#9b1c1c}
+.score-pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:900;font-size:14px}
+/* hazard hunt */
+.room{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.item{border:2px solid var(--line);border-radius:14px;padding:12px;background:#fff;text-align:left;font-size:14px;display:flex;gap:10px;align-items:flex-start;transition:.12s}
+.item .em{font-size:30px;line-height:1}
+.item:hover{border-color:var(--blue)}
+.item.sel{border-color:var(--red);background:var(--red2)}
+.item.right-h{border-color:var(--green);background:var(--green2)}
+.item.wrong-h{border-color:var(--red);background:var(--red2)}
+.item.missed{border-color:var(--amber);background:var(--amber2)}
+/* quiz */
+.q{margin:14px 0 6px;font-weight:800}
+.opts{display:grid;gap:8px}
+.opt{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;text-align:left;font-size:15px}
+.opt:hover:not(:disabled){border-color:var(--blue)}
+.opt.ok{border-color:var(--green);background:var(--green2)}
+.opt.bad{border-color:var(--red);background:var(--red2)}
+.opt:disabled{cursor:default}
+/* windows-like firewall */
+.win{border:1px solid #b8c4d6;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.win .bar{background:#f3f5f9;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #dde3ec}
+.win .bar .dots{margin-left:auto;display:flex;gap:6px}
+.win .bar .dots span{width:11px;height:11px;border-radius:50%;background:#cfd6e2}
+.win .body{display:grid;grid-template-columns:200px 1fr;min-height:260px}
+.win .side{background:#f7f9fc;border-right:1px solid #e3e8f0;padding:10px;font-size:13px}
+.win .side div{padding:7px 8px;border-radius:6px;color:#2a4a80;cursor:pointer}
+.win .side div.act{background:#dfe9fb;font-weight:800}
+.win .main{padding:14px}
+.net{border:1px solid #e1e6ee;border-radius:10px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.shield{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:20px;color:#fff}
+.shield.on{background:var(--green)} .shield.off{background:var(--red)}
+.switch{position:relative;width:52px;height:28px;border-radius:999px;background:#c9d1de;border:none;margin-left:auto;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s}
+.switch.on{background:var(--green)}
+.switch.on::after{left:27px}
+.req{border:1px solid #e1e6ee;border-radius:12px;padding:12px;display:grid;grid-template-columns:44px 1fr;gap:12px;margin-bottom:10px;background:#fff}
+.req .ic{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;background:#eef2f8}
+.req small{color:var(--muted);display:block}
+.req .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.req.ok{border-color:#9fd9b6;background:#f3fbf6}
+.req.bad{border-color:#f0aaaa;background:#fff5f5}
+.wizard{display:grid;gap:12px}
+.wizard label{font-weight:800;font-size:14px;display:grid;gap:6px}
+/* browser */
+.browser{border:1px solid #b8c4d6;border-radius:12px;overflow:hidden;background:#fff;position:relative}
+.browser .tabs{background:#dfe5ee;padding:6px 8px 0;display:flex;gap:4px}
+.browser .tabs span{background:#fff;padding:7px 14px;border-radius:8px 8px 0 0;font-size:13px}
+.browser .addr{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid #e3e8f0;background:#fff}
+.browser .addr .url{flex:1;background:#f1f4f9;border-radius:999px;padding:7px 14px;font-size:13px;color:#445}
+.browser .addr button{background:none;border:none;font-size:18px;padding:2px 6px;border-radius:6px}
+.browser .addr button:hover{background:#eef2f8}
+.page{min-height:340px;padding:18px;position:relative;background:linear-gradient(180deg,#fdfdff,#f3f6fb)}
+.fakesite h4{margin:0 0 8px}
+.gamegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gamegrid div{height:60px;border-radius:10px;background:#dde6f5;display:grid;place-items:center;font-size:26px}
+.popup{position:absolute;background:#fff;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.25);width:min(300px,80%);padding:14px;border:3px solid #ffcc00;z-index:5}
+.popup .xs{position:absolute;top:4px;right:6px;font-size:11px;color:#bbb;background:none;border:none;padding:2px 4px}
+.popup .xs:hover{color:#333}
+.popup .big{width:100%;margin-top:10px;background:linear-gradient(90deg,#ff3d00,#ff9100);color:#fff;font-weight:900;border:none;border-radius:10px;padding:12px;font-size:16px}
+.popup .fakex{position:absolute;top:8px;left:10px;font-size:18px;font-weight:900;background:#eee;border:none;border-radius:6px;width:28px;height:28px}
+.notif{position:absolute;top:6px;left:12px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:12px;width:290px;z-index:6;font-size:14px;border:1px solid #ddd}
+.settings{display:grid;gap:10px}
+.set{border:1px solid #e1e6ee;border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.set .ttl{font-weight:800}
+.set small{color:var(--muted);display:block}
+.ext{border:2px solid var(--line);border-radius:14px;padding:12px;background:#fff;text-align:left;display:grid;gap:4px;font-size:14px}
+.ext:hover:not(:disabled){border-color:var(--blue)}
+.ext b{font-size:16px}
+.ext.ok{border-color:var(--green);background:var(--green2)}
+.ext.bad{border-color:var(--red);background:var(--red2)}
+.exts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+/* results */
+.cert{border:3px solid var(--blue);border-radius:20px;padding:26px;text-align:center;background:radial-gradient(circle at top,#f2f7ff,#fff 60%)}
+.grade{font-size:72px;font-weight:900;color:var(--blue);line-height:1}
+.bars{display:grid;gap:12px;margin:18px 0;text-align:left}
+.barrow .lbl{display:flex;justify-content:space-between;font-weight:800;font-size:14px;margin-bottom:4px}
+.bar{height:14px;border-radius:999px;background:#e6ecf5;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:var(--blue)}
+.mist li{margin-bottom:8px}
+.hidden{display:none!important}
+@media (max-width:640px){.win .body{grid-template-columns:1fr}.win .side{display:none}.gamegrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>🛡️ Кібертренажер · 8 клас</h1>
+    <div class="steps" id="steps">
+      <span class="step" data-s="0">Старт</span>
+      <span class="step" data-s="1">1. БЖД</span>
+      <span class="step" data-s="2">2. Брандмауер</span>
+      <span class="step" data-s="3">3. Реклама</span>
+      <span class="step" data-s="4">Результат</span>
+    </div>
+  </header>
+
+  <!-- START -->
+  <section id="s0" class="card">
+    <h2>Вітаємо в симуляторі!</h2>
+    <p class="lead">Тебе чекають три місії: перевірити кабінет на безпеку, налаштувати брандмауер і очистити браузер від набридливої реклами. За кожну правильну дію ти отримуєш бали, а в кінці — оцінку за 12-бальною шкалою та сертифікат.</p>
+    <div class="row">
+      <input type="text" id="name" placeholder="Прізвище та ім'я" maxlength="40">
+      <input type="text" id="cls" placeholder="Клас, напр. 8-Б" maxlength="10" style="min-width:140px">
+      <button class="btn" id="startBtn" disabled>Почати ▶</button>
+    </div>
+    <div class="tip">💡 Уважно читай підказки та назви програм — у симуляторі, як і в житті, є пастки!</div>
+  </section>
+
+  <!-- STAGE 1 -->
+  <section id="s1" class="card hidden">
+    <div class="row"><h2>Місія 1. Інструктаж з БЖД</h2><span class="score-pill right" id="sc1">0 балів</span></div>
+    <p class="lead">Ти перший зайшов у комп'ютерний клас. Знайди всі порушення правил безпеки — натисни на них, а потім «Перевірити».</p>
+    <div class="room" id="room"></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="hazCheck">Перевірити</button></div>
+    <div id="hazFb"></div>
+
+    <div id="quiz1" class="hidden">
+      <h3>Ситуації в кабінеті</h3>
+      <div id="q1box"></div>
+    </div>
+    <div class="row" style="margin-top:16px"><button class="btn green right hidden" id="next1">Далі: Брандмауер ▶</button></div>
+  </section>
+
+  <!-- STAGE 2 -->
+  <section id="s2" class="card hidden">
+    <div class="row"><h2>Місія 2. Брандмауер</h2><span class="score-pill right" id="sc2">0 балів</span></div>
+    <p class="lead"><b>Брандмауер (фаєрвол, мережевий екран)</b> — це «охоронець» між комп'ютером і мережею. Він перевіряє з'єднання та за правилами вирішує: пропустити чи заблокувати.</p>
+
+    <div class="task" id="t2a">
+      <div class="tt">Завдання А <span class="badge" id="b2a">2 бали</span></div>
+      <p style="margin:6px 0 10px">Ноутбук підключено до Wi-Fi у кафе. Перевір стан захисту і виправ небезпечне налаштування.</p>
+      <div class="win">
+        <div class="bar">🛡️ Брандмауер Захисника Windows <div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="body">
+          <div class="side"><div class="act">Стан</div><div>Дозволені програми</div><div>Додаткові параметри</div><div>Відновити типові</div></div>
+          <div class="main">
+            <div class="net"><div class="shield on" id="sh1">✔</div><div><b>Приватна мережа</b><small style="color:var(--muted);display:block">Домашня мережа · не підключено</small></div><button class="switch on" id="sw1" aria-label="Приватна мережа"></button></div>
+            <div class="net"><div class="shield off" id="sh2">✖</div><div><b>Загальнодоступна мережа</b><small style="color:var(--muted);display:block">Cafe_Free_WiFi · <b>підключено</b></small></div><button class="switch" id="sw2" aria-label="Загальнодоступна мережа"></button></div>
+            <div class="net"><div class="shield on" id="sh3">✔</div><div><b>Мережа домену</b><small style="color:var(--muted);display:block">Не використовується</small></div><button class="switch on" id="sw3" aria-label="Мережа домену"></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="chk2a">Готово</button></div>
+      <div id="fb2a"></div>
+    </div>
+
+    <div class="task hidden" id="t2b">
+      <div class="tt">Завдання Б <span class="badge">5 балів</span></div>
+      <p style="margin:6px 0 10px">Брандмауер питає, чи дозволяти програмам доступ до мережі. Подивись на <b>видавця</b> і <b>розташування файлу</b> — і прийми рішення.</p>
+      <div id="reqs"></div>
+      <div id="fb2b"></div>
+    </div>
+
+    <div class="task hidden" id="t2c">
+      <div class="tt">Завдання В <span class="badge">3 бали</span></div>
+      <p style="margin:6px 0 10px">Молодший брат завантажив <b>GameCheat.exe</b>, який сам щось надсилає в Інтернет. Створи <b>правило для вихідних підключень</b>, яке заборонить йому вихід у мережу.</p>
+      <div class="win">
+        <div class="bar">⚙️ Майстер створення правила для вихідного підключення<div class="dots"><span></span><span></span><span></span></div></div>
+        <div class="main" style="padding:16px">
+          <div class="wizard">
+            <label>1. Тип правила
+              <select id="w1"><option value="">— обери —</option><option value="port">Для порту</option><option value="prog">Для програми</option><option value="pre">Наперед визначені</option></select>
+            </label>
+            <label>2. Шлях до програми
+              <select id="w2"><option value="">— обери —</option><option value="sys">C:\Windows\System32\svchost.exe</option><option value="cheat">C:\Users\Brat\Downloads\GameCheat.exe</option><option value="chrome">C:\Program Files\Google\Chrome\chrome.exe</option></select>
+            </label>
+            <label>3. Дія
+              <select id="w3"><option value="">— обери —</option><option value="allow">Дозволити підключення</option><option value="sec">Дозволити безпечне підключення</option><option value="block">Блокувати підключення</option></select>
+            </label>
+          </div>
+          <div class="row" style="margin-top:12px"><button class="btn" id="chk2c">Створити правило</button></div>
+          <div id="fb2c"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="quiz2" class="hidden">
+      <h3>Перевір себе</h3>
+      <div id="q2box"></div>
+    </div>
+    <div class="row" style="margin-top:16px"><button class="btn green right hidden" id="next2">Далі: Реклама ▶</button></div>
+  </section>
+
+  <!-- STAGE 3 -->
+  <section id="s3" class="card hidden">
+    <div class="row"><h2>Місія 3. Позбуваємось реклами</h2><span class="score-pill right" id="sc3">0 балів</span></div>
+    <p class="lead">Однокласник поскаржився: «Браузер весь у рекламі!» Допоможи йому крок за кроком.</p>
+
+    <div class="task" id="t3a">
+      <div class="tt">Крок 1. Закрий спливаючі вікна <span class="badge">3 бали</span></div>
+      <p style="margin:6px 0 10px">Закрий усі вікна <b>безпечно</b>. Не натискай нічого, що може запустити завантаження!</p>
+      <div class="browser">
+        <div class="tabs"><span>🎮 Ігри онлайн</span></div>
+        <div class="addr"><button>←</button><button>⟳</button><div class="url">🔓 free-games-online.example/play</div><button id="menuBtn" title="Налаштування">⋮</button></div>
+        <div class="page" id="page3">
+          <div class="fakesite"><h4>Найкращі безкоштовні ігри</h4><div class="gamegrid"><div>🏎️</div><div>⚽</div><div>🧩</div><div>🐉</div><div>🏰</div><div>🚀</div><div>🎯</div><div>🃏</div></div></div>
+        </div>
+      </div>
+      <div id="fb3a"></div>
+    </div>
+
+    <div class="task hidden" id="t3b">
+      <div class="tt">Крок 2. Налаштуй браузер <span class="badge">3 бали</span></div>
+      <p style="margin:6px 0 10px">Відкрито: <b>Налаштування → Конфіденційність і безпека → Налаштування сайтів</b>. Зроби так, щоб сайти не могли самі відкривати вікна і надсилати спам-сповіщення.</p>
+      <div class="settings">
+        <div class="set"><div><div class="ttl">🪟 Спливаючі вікна та переспрямування</div><small id="popLbl">Сайти можуть надсилати спливаючі вікна</small></div><button class="switch on right" id="swPop"></button></div>
+        <div class="set"><div><div class="ttl">🔔 Сповіщення</div><small id="notLbl">Сайти можуть запитувати дозвіл надсилати сповіщення</small></div><button class="switch on right" id="swNot"></button></div>
+        <div class="set" id="spamRow"><div><div class="ttl">Дозволено надсилати сповіщення:</div><small>⚠️ win-prizes-now.example — «Ваш ПК заражений! Натисніть тут»</small></div><button class="btn red right" id="rmSpam" style="padding:8px 12px;font-size:14px">Видалити</button></div>
+        <div class="set"><div><div class="ttl">📍 Геодані</div><small>Запитувати перед доступом</small></div><button class="switch on right" id="swGeo"></button></div>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="chk3b">Зберегти</button></div>
+      <div id="fb3b"></div>
+    </div>
+
+    <div class="task hidden" id="t3c">
+      <div class="tt">Крок 3. Встанови блокувальник реклами <span class="badge">2 бали</span></div>
+      <p style="margin:6px 0 10px">Магазин розширень браузера. Обери <b>надійне</b> розширення-блокувальник.</p>
+      <div class="exts" id="exts"></div>
+      <div id="fb3c"></div>
+    </div>
+
+    <div id="quiz3" class="hidden">
+      <h3>Підступна реклама</h3>
+      <div id="q3box"></div>
+    </div>
+    <div class="row" style="margin-top:16px"><button class="btn green right hidden" id="next3">Переглянути результат 🏁</button></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="s4" class="hidden">
+    <div class="card cert" id="certBox"></div>
+    <div class="card">
+      <h2>Над чим попрацювати</h2>
+      <ul class="mist" id="mist"></ul>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="copyBtn">📋 Скопіювати результат для вчителя</button>
+        <button class="btn ghost" id="againBtn">↺ Пройти ще раз</button>
+      </div>
+      <div id="copyFb"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const S={name:'',cls:'',t0:0,score:[0,0,0],max:[10,12,10],mist:[]};
+const $=id=>document.getElementById(id);
+function show(n){for(let i=0;i<=4;i++)$('s'+i).classList.toggle('hidden',i!==n);
+  document.querySelectorAll('.step').forEach(e=>{const s=+e.dataset.s;e.classList.toggle('on',s===n);e.classList.toggle('done',s<n)});
+  window.scrollTo({top:0,behavior:'smooth'});}
+function add(st,p){S.score[st]+=p;$('sc'+(st+1)).textContent=S.score[st]+' з '+S.max[st]+' балів';}
+function miss(t){S.mist.push(t);}
+function fb(el,ok,txt){$(el).innerHTML=`<div class="fb ${ok?'ok':'bad'}">${ok?'✅ ':'❌ '}${txt}</div>`;}
+
+/* ---------- start ---------- */
+['name','cls'].forEach(i=>$(i).addEventListener('input',()=>{$('startBtn').disabled=$('name').value.trim().length<2;}));
+$('startBtn').onclick=()=>{S.name=$('name').value.trim();S.cls=$('cls').value.trim();S.t0=Date.now();initStage1();show(1);};
+
+/* ---------- quiz helper ---------- */
+function quiz(box,qs,st,done){
+  let left=qs.length;const b=$(box);b.innerHTML='';
+  qs.forEach((q,qi)=>{
+    const w=document.createElement('div');
+    w.innerHTML=`<div class="q">${qi+1}. ${q.q}</div><div class="opts"></div><div class="exp"></div>`;
+    const o=w.querySelector('.opts');
+    q.o.forEach((t,i)=>{const bt=document.createElement('button');bt.className='opt';bt.textContent=t;
+      bt.onclick=()=>{o.querySelectorAll('button').forEach(x=>x.disabled=true);
+        const ok=i===q.a; bt.classList.add(ok?'ok':'bad'); if(!ok)o.children[q.a].classList.add('ok');
+        if(ok)add(st,1);else miss(q.m);
+        w.querySelector('.exp').innerHTML=`<div class="fb ${ok?'ok':'bad'}">${ok?'✅ Правильно! ':'❌ Ні. '}${q.e}</div>`;
+        if(--left===0)done();};
+      o.appendChild(bt);});
+    b.appendChild(w);});
+}
+
+/* ---------- STAGE 1 ---------- */
+const HAZ=[
+ {em:'🥤',t:'Склянка соку стоїть біля клавіатури',h:1,e:'Рідина біля техніки — ризик ураження струмом і поломки.'},
+ {em:'🔌',t:'Кабель живлення з пошкодженою ізоляцією',h:1,e:'Пошкоджені дроти не можна чіпати — одразу повідомити вчителя.'},
+ {em:'🎒',t:'Рюкзак лежить у проході між партами',h:1,e:'У проходах не має бути речей — можна перечепитися.'},
+ {em:'🧯',t:'Вогнегасник висить біля дверей',h:0},
+ {em:'👀',t:'Учень сидить на відстані 20 см від монітора',h:1,e:'Оптимальна відстань до екрана — 50–70 см.'},
+ {em:'🪟',t:'Кабінет провітрюється під час перерви',h:0},
+ {em:'🍔',t:'Учень їсть бутерброд за комп\'ютером',h:1,e:'Їсти за комп\'ютером заборонено: крихти й жир псують техніку, руки брудні.'},
+ {em:'💡',t:'Увімкнене загальне освітлення',h:0},
+ {em:'🪛',t:'Учень відкручує задню кришку системного блока',h:1,e:'Самостійно відкривати чи ремонтувати техніку заборонено.'},
+];
+let hazDone=false;
+function initStage1(){
+  const r=$('room');r.innerHTML='';
+  HAZ.forEach((h,i)=>{const b=document.createElement('button');b.className='item';b.innerHTML=`<span class="em">${h.em}</span><span>${h.t}</span>`;
+    b.onclick=()=>{if(!hazDone)b.classList.toggle('sel');};b.dataset.i=i;r.appendChild(b);});
+  add(0,0);
+}
+$('hazCheck').onclick=()=>{
+  if(hazDone)return;hazDone=true;$('hazCheck').disabled=true;
+  let found=0,wrong=0,total=HAZ.filter(h=>h.h).length;
+  document.querySelectorAll('#room .item').forEach(b=>{const h=HAZ[b.dataset.i];const s=b.classList.contains('sel');b.classList.remove('sel');
+    if(h.h&&s){found++;b.classList.add('right-h');}
+    else if(h.h&&!s){b.classList.add('missed');miss('БЖД: не помічено — «'+h.t+'». '+h.e);}
+    else if(!h.h&&s){wrong++;b.classList.add('wrong-h');miss('БЖД: «'+h.t+'» — це не порушення.');}});
+  const pts=Math.max(0,found-wrong);add(0,pts);
+  fb('hazFb',found===total&&!wrong,`Знайдено ${found} з ${total} порушень${wrong?`, помилкових виборів: ${wrong}`:''}. Зелені — знайдені, жовті — пропущені, червоні — це не порушення. Балів: ${pts} з ${total}.`);
+  $('quiz1').classList.remove('hidden');
+  quiz('q1box',[
+   {q:'З монітора пішов дим і запахло горілою пластмасою. Що робити СПОЧАТКУ?',o:['Залити водою з пляшки','Негайно повідомити вчителя, не торкаючись техніки','Відкрити системний блок і подивитись','Продовжити роботу — може, минеться'],a:1,e:'Вчитель знеструмить обладнання. Електроприлади під напругою водою гасити не можна!',m:'БЖД: при задимленні — одразу повідомити вчителя, водою техніку не гасити.'},
+   {q:'Яку правильну позу треба тримати за комп\'ютером?',o:['Спина рівна, ступні на підлозі, лікті зігнуті приблизно під прямим кутом','Сидіти, підібгавши ногу, так зручніше','Нахилитися ближче до екрана, щоб краще бачити','Покласти лікті на клавіатуру'],a:0,e:'Правильна постава зберігає хребет і зір.',m:'БЖД: повтори правила правильної постави.'},
+   {q:'Очі почали сльозитися та втомлюватися. Що варто зробити?',o:['Збільшити яскравість екрана на максимум','Протерти очі брудними руками','Зробити перерву та гімнастику для очей (подивитися вдалину, покліпати)','Не звертати уваги'],a:2,e:'Регулярні перерви й вправи для очей знімають напругу.',m:'БЖД: при втомі очей — перерва і гімнастика для очей.'},
+   {q:'Миша перестала працювати. Твої дії?',o:['Самостійно перепідключити кабель позаду комп\'ютера','Повідомити вчителя','Постукати мишею по столу','Взяти мишу із сусіднього комп\'ютера'],a:1,e:'Підключати й відключати обладнання учні самостійно не мають.',m:'БЖД: при несправності обладнання — звертатися до вчителя.'},
+  ],0,()=>$('next1').classList.remove('hidden'));
+};
+$('next1').onclick=()=>{initStage2();show(2);};
+
+/* ---------- STAGE 2 ---------- */
+function initStage2(){add(1,0);}
+['sw1','sw2','sw3'].forEach((id,i)=>$(id).onclick=function(){if($('chk2a').disabled)return;this.classList.toggle('on');const on=this.classList.contains('on');const sh=$('sh'+(i+1));sh.className='shield '+(on?'on':'off');sh.textContent=on?'✔':'✖';});
+$('chk2a').onclick=()=>{
+  $('chk2a').disabled=true;
+  const pub=$('sw2').classList.contains('on'),others=$('sw1').classList.contains('on')&&$('sw3').classList.contains('on');
+  let p=(pub?1:0)+(others&&pub?1:0);add(1,p);
+  if(pub&&others)fb('fb2a',true,'Чудово! У загальнодоступній мережі (кафе, вокзал) брандмауер особливо потрібен — там можуть бути чужі пристрої.');
+  else{fb('fb2a',false,pub?'Публічну мережу захищено, але ти вимкнув захист в іншій мережі. Брандмауер має бути увімкнений для всіх профілів.':'У публічному Wi-Fi брандмауер залишився вимкненим — це найнебезпечніше місце!');
+    miss('Брандмауер: має бути УВІМКНЕНИЙ для всіх мереж, особливо для загальнодоступної (кафе, вокзал).');}
+  $('t2b').classList.remove('hidden');initReqs();
+};
+const REQ=[
+ {ic:'🌐',n:'Google Chrome',pub:'Google LLC (перевірений)',path:'C:\\Program Files\\Google\\Chrome\\chrome.exe',good:1},
+ {ic:'💰',n:'free_robux_generator.exe',pub:'Невідомий видавець',path:'C:\\Users\\Student\\Downloads\\free_robux_generator.exe',good:0,e:'«Генератори» ігрової валюти — типова приманка для шкідливих програм.'},
+ {ic:'📹',n:'Zoom Workplace',pub:'Zoom Video Communications, Inc. (перевірений)',path:'C:\\Program Files\\Zoom\\bin\\Zoom.exe',good:1},
+ {ic:'⚙️',n:'svch0st.exe',pub:'Невідомий видавець',path:'C:\\Users\\Student\\AppData\\Roaming\\svch0st.exe',good:0,e:'Справжній svchost.exe лежить у System32, а тут цифра 0 замість «о» і дивна папка — маскування вірусу.'},
+ {ic:'⛏️',n:'Minecraft Launcher',pub:'Microsoft Corporation (перевірений)',path:'C:\\Program Files\\Minecraft Launcher\\MinecraftLauncher.exe',good:1},
+];
+function initReqs(){
+  const box=$('reqs');box.innerHTML='';let left=REQ.length;
+  REQ.forEach(r=>{const d=document.createElement('div');d.className='req';
+    d.innerHTML=`<div class="ic">${r.ic}</div><div><b>${r.n}</b><small>Видавець: ${r.pub}</small><small>Шлях: ${r.path}</small></div><div class="acts"><button class="btn green" style="padding:8px 14px;font-size:14px">Дозволити доступ</button><button class="btn red" style="padding:8px 14px;font-size:14px">Блокувати</button></div>`;
+    const [a,b]=d.querySelectorAll('.acts button');
+    const pick=allow=>{a.disabled=b.disabled=true;const ok=allow===!!r.good;d.classList.add(ok?'ok':'bad');
+      if(ok)add(1,1);else miss('Брандмауер: '+r.n+' — '+(r.good?'перевірена програма від відомого видавця, її можна дозволити.':'треба було БЛОКУВАТИ. '+r.e));
+      d.querySelector('.acts').insertAdjacentHTML('beforeend',`<span class="badge ${ok?'ok':'bad'}">${ok?'Правильно':'Помилка'}${!r.good?' · '+r.e:''}</span>`);
+      if(--left===0){$('fb2b').innerHTML='<div class="tip">Запам\'ятай: <b>перевірений видавець</b> + програма в <b>Program Files</b> — зазвичай безпечно. <b>Невідомий видавець</b> + папка Downloads/AppData — привід заблокувати.</div>';$('t2c').classList.remove('hidden');}};
+    a.onclick=()=>pick(true);b.onclick=()=>pick(false);box.appendChild(d);});
+}
+$('chk2c').onclick=()=>{
+  $('chk2c').disabled=true;['w1','w2','w3'].forEach(i=>$(i).disabled=true);
+  let p=0,errs=[];
+  if($('w1').value==='prog')p++;else errs.push('тип правила — «Для програми»');
+  if($('w2').value==='cheat')p++;else errs.push('шлях — GameCheat.exe у Downloads');
+  if($('w3').value==='block')p++;else errs.push('дія — «Блокувати підключення»');
+  add(1,p);
+  if(!errs.length)fb('fb2c',true,'Правило створено! GameCheat.exe більше не зможе нічого надіслати в Інтернет.');
+  else{fb('fb2c',false,'Правило налаштоване неправильно. Треба: '+errs.join('; ')+'.');miss('Брандмауер, правило: '+errs.join('; ')+'.');}
+  $('quiz2').classList.remove('hidden');
+  quiz('q2box',[
+   {q:'Друг каже: «Вимкни брандмауер, тоді гра з торента запуститься». Що відповіси?',o:['Добре, це ж ненадовго','Ні: вимикати захист заради неперевіреної програми небезпечно','Вимкну, а потім увімкну антивірус','Вимкну назавжди — він тільки заважає'],a:1,e:'Програма, яка вимагає вимкнути захист, — серйозний сигнал небезпеки.',m:'Брандмауер: ніколи не вимикай захист на прохання неперевіреної програми.'},
+   {q:'Від чого брандмауер НЕ захищає?',o:['Від несанкціонованих вхідних з\'єднань','Від того, що ти сам введеш пароль на фішинговому сайті','Від передавання даних заблокованою програмою','Від спроб підключитися до твого ПК з публічної мережі'],a:1,e:'Брандмауер контролює з\'єднання, але не захистить від обману. Тому потрібні й антивірус, і уважність.',m:'Брандмауер не захищає від фішингу — потрібна власна уважність.'},
+  ],1,()=>$('next2').classList.remove('hidden'));
+};
+$('next2').onclick=()=>{initStage3();show(3);};
+
+/* ---------- STAGE 3 ---------- */
+const POPS=[
+ {top:'30px',left:'20px',h:'🎁 Вітаємо! Ви 1 000 000-й відвідувач!',t:'Отримайте приз прямо зараз!',big:'ОТРИМАТИ ПРИЗ',fake:false},
+ {top:'110px',left:'30%',h:'⚠️ Ваш комп\'ютер заражено 5 вірусами!',t:'Терміново завантажте очищувач',big:'ЗАВАНТАЖИТИ ОЧИЩУВАЧ',fake:true},
+ {top:'60px',left:'45%',h:'🎮 Супер-гра без реєстрації',t:'Встанови і грай!',big:'⬇ ВСТАНОВИТИ',fake:false},
+];
+let popsLeft=0,popPts=0;
+function initStage3(){
+  add(2,0);const pg=$('page3');popsLeft=POPS.length;
+  POPS.forEach((p,i)=>{const d=document.createElement('div');d.className='popup';d.style.top=p.top;d.style.left=p.left;d.style.zIndex=5+i;
+    d.innerHTML=`${p.fake?'<button class="fakex">✕</button>':''}<button class="xs" title="Закрити">закрити ✕</button><div style="font-weight:900;margin:${p.fake?'26px':'8px'} 0 4px">${p.h}</div><div style="font-size:14px">${p.t}</div><button class="big">${p.big}</button>`;
+    let bad=false;
+    const close=()=>{d.remove();if(!bad){popPts++;add(2,1);}if(--popsLeft===0)popsDone();};
+    d.querySelector('.xs').onclick=close;
+    d.querySelector('.big').onclick=()=>{if(!bad){bad=true;miss('Реклама: не можна натискати кнопки у спливаючих вікнах («'+p.big+'») — це запускає завантаження шкідливих програм.');}
+      d.style.borderColor='#d93a3a';flash('⛔ Почалося завантаження «setup_prize.exe»! Так шкідливі програми й потрапляють на комп\'ютер. Шукай справжню кнопку закриття.');};
+    if(p.fake)d.querySelector('.fakex').onclick=()=>{if(!bad){bad=true;miss('Реклама: великий «хрестик» у вікні може бути фальшивим — це частина картинки-реклами.');}
+      d.style.borderColor='#d93a3a';flash('⛔ Цей «хрестик» — частина реклами! Він відкрив ще одну вкладку. Справжня кнопка закриття зазвичай маленька й непомітна.');};
+    pg.appendChild(d);});
+}
+function flash(t){fb('fb3a',false,t);}
+function popsDone(){
+  fb('fb3a',popPts===3,popPts===3?'Усі вікна закрито безпечно! Але реклама повернеться — треба налаштувати браузер.':'Вікна закрито, але були небезпечні натискання. Балів: '+popPts+' з 3.');
+  const pg=$('page3');const n=document.createElement('div');n.className='notif';
+  n.innerHTML='<b>free-games-online.example</b> хоче:<br>🔔 Показувати сповіщення<div class="row" style="margin-top:10px"><button class="btn green" style="padding:7px 14px;font-size:14px">Дозволити</button><button class="btn ghost" style="padding:7px 14px;font-size:14px">Блокувати</button></div>';
+  const [al,bl]=n.querySelectorAll('button');
+  al.onclick=()=>{miss('Реклама: не дозволяй сайтам надсилати сповіщення — через них приходить спам.');n.remove();$('fb3a').insertAdjacentHTML('beforeend','<div class="fb bad">❌ Тепер сайт засипатиме тебе рекламою навіть коли він закритий. Сповіщення від незнайомих сайтів — блокуй!</div>');$('t3b').classList.remove('hidden');};
+  bl.onclick=()=>{add(2,1);n.remove();$('fb3a').insertAdjacentHTML('beforeend','<div class="fb ok">✅ Правильно заблоковано сповіщення! (+1 бал до кроку 2)</div>');$('t3b').classList.remove('hidden');};
+  pg.appendChild(n);
+}
+// note: notification bonus counts into step 2 total (3 = popups toggle + spam removal + notification)
+let spamRemoved=false;
+['swPop','swNot','swGeo'].forEach(id=>$(id).onclick=function(){if($('chk3b').disabled)return;this.classList.toggle('on');
+  if(id==='swPop')$('popLbl').textContent=this.classList.contains('on')?'Сайти можуть надсилати спливаючі вікна':'Заборонено надсилати спливаючі вікна';
+  if(id==='swNot')$('notLbl').textContent=this.classList.contains('on')?'Сайти можуть запитувати дозвіл надсилати сповіщення':'Сайтам заборонено надсилати сповіщення';});
+$('rmSpam').onclick=()=>{if($('chk3b').disabled)return;spamRemoved=true;$('spamRow').innerHTML='<div><div class="ttl">Дозволено надсилати сповіщення:</div><small>Список порожній ✔</small></div>';};
+$('chk3b').onclick=()=>{
+  $('chk3b').disabled=true;let p=0,e=[];
+  if(!$('swPop').classList.contains('on'))p++;else e.push('заборонити спливаючі вікна');
+  if(spamRemoved)p++;else e.push('видалити спам-сайт зі списку дозволених сповіщень');
+  // optional: notifications switch off is fine but not required; geodata irrelevant
+  add(2,p);
+  if(!e.length)fb('fb3b',true,'Браузер налаштовано! Спливаючі вікна заборонені, спам-сайт більше не надсилатиме «тривожні» сповіщення.');
+  else{fb('fb3b',false,'Не все виправлено. Треба: '+e.join('; ')+'.');miss('Налаштування браузера: '+e.join('; ')+'.');}
+  $('t3c').classList.remove('hidden');initExts();
+};
+const EXTS=[
+ {n:'AdBlock PRO 2026 FREE!!! 🔥',u:'Користувачів: 340',r:'★★★★★ (12 відгуків)',perm:'Доступ: читати й змінювати всі дані на всіх сайтах, керувати завантаженнями, керувати платежами',dev:'Розробник: best-free-tools.example',ok:0,e:'мало користувачів, підозрілі 12 «ідеальних» відгуків і зайвий доступ до платежів'},
+ {n:'uBlock Origin Lite',u:'Користувачів: понад 10 000 000',r:'★★★★★ (тисячі відгуків)',perm:'Доступ: блокувати вміст на сайтах',dev:'Розробник: Raymond Hill · відкритий код',ok:1},
+ {n:'Super Video Downloader + AdBlock',u:'Користувачів: 2 100',r:'★★☆☆☆',perm:'Доступ: читати історію браузера, змінювати пошукову систему',dev:'Розробник: невідомий',ok:0,e:'змінює пошукову систему і читає історію — так поводяться рекламні програми'},
+];
+function initExts(){
+  const b=$('exts');b.innerHTML='';
+  EXTS.forEach(x=>{const d=document.createElement('button');d.className='ext';d.innerHTML=`<b>${x.n}</b><span>${x.u}</span><span>${x.r}</span><span style="color:var(--muted)">${x.perm}</span><span style="color:var(--muted)">${x.dev}</span>`;
+    d.onclick=()=>{b.querySelectorAll('button').forEach(z=>z.disabled=true);d.classList.add(x.ok?'ok':'bad');
+      if(x.ok){add(2,2);fb('fb3c',true,'Відмінний вибір! Мільйони користувачів, відомий розробник, відкритий код і лише потрібні дозволи.');}
+      else{b.children[1].classList.add('ok');fb('fb3c',false,'Небезпечний вибір: '+x.e+'. Надійне — uBlock Origin Lite.');miss('Розширення: обирай з великою кількістю користувачів, відомим розробником і мінімумом дозволів ('+x.n+' — '+x.e+').');}
+      $('quiz3').classList.remove('hidden');
+      quiz('q3box',[
+       {q:'Серед відео з\'явився банер: «Ви виграли iPhone 17! Введіть номер картки для оплати доставки». Що робити?',o:['Ввести дані картки — доставка ж дешева','Закрити сторінку і нікому не повідомляти дані','Надіслати посилання друзям, щоб теж виграли','Ввести номер маминої картки'],a:1,e:'Це шахрайство (фішинг). Справжні призи не вимагають даних картки.',m:'Реклама-шахрайство: ніколи не вводь дані картки чи паролі через рекламні банери.'},
+       {q:'Після встановлення «безкоштовної гри» в браузері змінилася стартова сторінка і всюди реклама. Що найкраще зробити?',o:['Нічого, так і має бути','Видалити підозрілу програму й зайві розширення, відновити налаштування браузера, перевірити ПК антивірусом','Встановити ще 5 блокувальників','Перевстановити гру'],a:1,e:'Рекламне ПЗ треба прибрати повністю: програму, розширення і змінені налаштування.',m:'Рекламне ПЗ: видаляй підозрілі програми та розширення, відновлюй налаштування, перевіряй антивірусом.'},
+      ],2,()=>$('next3').classList.remove('hidden'));};
+    b.appendChild(d);});
+}
+$('next3').onclick=()=>{renderResult();show(4);};
+
+/* ---------- RESULT ---------- */
+function grade(p){return Math.max(1,Math.min(12,Math.round(p*12)));}
+function level(g){return g>=10?'Високий рівень':g>=7?'Достатній рівень':g>=4?'Середній рівень':'Початковий рівень';}
+function renderResult(){
+  const tot=S.score.reduce((a,b)=>a+b,0),max=S.max.reduce((a,b)=>a+b,0),g=grade(tot/max);
+  const sec=Math.round((Date.now()-S.t0)/1000),mm=Math.floor(sec/60),ss=String(sec%60).padStart(2,'0');
+  const names=['🦺 Інструктаж з БЖД','🛡️ Брандмауер','🚫 Захист від реклами'];
+  const medal=g>=10?'🏆':g>=7?'🥈':g>=4?'🥉':'📘';
+  const msg=g>=10?'Ти справжній кіберзахисник! Можеш допомагати однокласникам.':g>=7?'Добрий результат! Ще трохи уваги до деталей — і буде відмінно.':g>=4?'Основи засвоєно, але є що повторити. Переглянь поради нижче.':'Варто ще раз уважно пройти тему. Ти впораєшся!';
+  $('certBox').innerHTML=`<div style="font-size:48px">${medal}</div><div style="font-weight:800;color:var(--muted);letter-spacing:.08em;font-size:13px">СЕРТИФІКАТ ПРО ПРОХОДЖЕННЯ СИМУЛЯТОРА</div>
+   <h2 style="font-size:28px;margin:8px 0 2px">${esc(S.name)}</h2><div style="color:var(--muted)">${S.cls?esc(S.cls)+' · ':''}${new Date().toLocaleDateString('uk-UA')} · час: ${mm} хв ${ss} с</div>
+   <div style="margin:18px 0 4px" class="grade">${g}</div><div style="font-weight:900">балів із 12 · ${level(g)}</div>
+   <div style="color:var(--muted);margin-top:4px">Набрано ${tot} з ${max} очок (${Math.round(tot/max*100)}%)</div>
+   <div class="bars">${S.score.map((s,i)=>`<div class="barrow"><div class="lbl"><span>${names[i]}</span><span>${s} / ${S.max[i]}</span></div><div class="bar"><i style="width:${s/S.max[i]*100}%;background:${s/S.max[i]>=.8?'var(--green)':s/S.max[i]>=.5?'var(--amber)':'var(--red)'}"></i></div></div>`).join('')}</div>
+   <p style="font-weight:700;margin:0">${msg}</p>`;
+  $('mist').innerHTML=S.mist.length?S.mist.map(m=>`<li>${esc(m)}</li>`).join(''):'<li>Помилок немає — бездоганна робота! 🎉</li>';
+  S.text=`Симулятор «БЖД, брандмауер, захист від реклами»\nУчень: ${S.name}${S.cls?' ('+S.cls+')':''}\nДата: ${new Date().toLocaleDateString('uk-UA')}, час проходження: ${mm} хв ${ss} с\nОцінка: ${g}/12 (${level(g)}), ${tot}/${max} очок\n`+S.score.map((s,i)=>`- ${names[i].slice(3)}: ${s}/${S.max[i]}`).join('\n')+`\nПомилок: ${S.mist.length}`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+$('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(S.text);$('copyFb').innerHTML='<div class="fb ok">✅ Скопійовано! Встав у повідомлення вчителю.</div>';}
+  catch(e){$('copyFb').innerHTML='<div class="fb bad">Не вдалося скопіювати автоматично. Виділи текст нижче:</div><pre style="white-space:pre-wrap;background:#f4f6fa;padding:10px;border-radius:8px;user-select:all">'+esc(S.text)+'</pre>';}};
+$('againBtn').onclick=()=>location.reload();
+show(0);
+</script>
+</body>
+</html>
