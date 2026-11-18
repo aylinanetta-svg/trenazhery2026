@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажер: СПР з підрядними означальними</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Manrope:wght@400;600;700&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EFE6; --ink:#2E2E2E; --muted:#6b6660; --terra:#C07A5A; --sage:#A7B59E;
+    --sage-d:#6f8466; --blue:#8DA4B5; --blue-d:#5e7a8f; --pink:#E3C4BC; --card:#FFFDF8; --line:#e2d9cb;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:Manrope,system-ui,sans-serif; color:var(--ink); font-size:17px; line-height:1.5;
+    background-color:var(--paper);
+    background-image:linear-gradient(rgba(141,164,181,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(141,164,181,.13) 1px,transparent 1px);
+    background-size:22px 22px; min-height:100vh;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:18px 14px 60px}
+  h1,h2{font-family:Unbounded,sans-serif;font-weight:700;line-height:1.2;margin:0 0 10px}
+  h1{font-size:22px} h2{font-size:19px}
+  .hand{font-family:Caveat,cursive;font-size:24px;color:var(--terra);line-height:1.1}
+  .card{background:var(--card);border-radius:14px;padding:18px 16px;margin:14px 0;box-shadow:0 2px 0 var(--line),0 6px 18px rgba(46,46,46,.06);position:relative}
+  .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-2deg);width:90px;height:20px;background:var(--pink);opacity:.85;border-radius:2px}
+  .sticker{display:inline-block;background:var(--blue);color:#fff;font-weight:700;font-size:13px;padding:4px 10px;border-radius:20px;margin-bottom:8px;letter-spacing:.02em}
+  .sticker.sage{background:var(--sage-d)} .sticker.terra{background:var(--terra)}
+  label{display:block;font-weight:600;margin:12px 0 6px}
+  input[type=text],textarea{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  textarea{min-height:80px;resize:vertical}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
+  .opt.sel{border-color:var(--blue-d);background:#eef3f6}
+  .opt.ok{border-color:var(--sage-d);background:#eef3ea}
+  .opt.bad{border-color:var(--terra);background:#f8ece6}
+  .opt:disabled{cursor:default}
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .scale button{font:inherit;padding:10px 2px;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-size:24px;line-height:1.1}
+  .scale button small{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+  .scale button.sel{border-color:var(--blue-d);background:#eef3f6}
+  .scale-label{margin-top:8px;font-weight:600;color:var(--blue-d);min-height:1.5em}
+  .check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-weight:400;margin:0;cursor:pointer}
+  .check input{width:22px;height:22px;margin-top:2px;accent-color:var(--sage-d);flex:none}
+  .btn{display:block;width:100%;font:700 17px Manrope,sans-serif;padding:14px;border:none;border-radius:12px;background:var(--ink);color:#fff;cursor:pointer;margin-top:14px}
+  .btn.light{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+  .btn:disabled{opacity:.35;cursor:default}
+  .progress{height:8px;background:#fff;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .progress div{height:100%;background:var(--sage-d);transition:width .3s}
+  .meta{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin:8px 0 4px}
+  .sentence{font-size:20px;line-height:1.6;margin:6px 0 4px}
+  .words{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .word{font:inherit;font-size:19px;padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
+  .word.sel{border-color:var(--terra);box-shadow:0 0 0 2px var(--terra) inset}
+  .word.ok{border-color:var(--sage-d);background:#eef3ea}
+  .word.bad{border-color:var(--terra);background:#f8ece6}
+  .cline{display:flex;flex-wrap:wrap;align-items:center;row-gap:10px;margin:10px 0}
+  .cw{font-size:20px}
+  .gap{font:700 20px Manrope,sans-serif;width:30px;height:34px;margin:0 3px;border:1.5px dashed var(--blue);border-radius:8px;background:transparent;color:var(--terra);cursor:pointer;padding:0;line-height:1}
+  .gap.on{border-style:solid;border-color:var(--terra);background:#f8ece6}
+  .gap.okc{border-color:var(--sage-d);border-style:solid;background:#eef3ea;color:var(--sage-d)}
+  .gap.badc{border-color:var(--terra);border-style:solid;background:#f8ece6}
+  .fb{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:16px}
+  .fb.ok{background:#eef3ea;border-left:5px solid var(--sage-d)}
+  .fb.bad{background:#f8ece6;border-left:5px solid var(--terra)}
+  .fb b{display:block;margin-bottom:2px}
+  details{background:#fff;border-radius:12px;border:1.5px solid var(--line);padding:10px 14px;margin-top:10px}
+  summary{cursor:pointer;font-weight:700}
+  .rule{margin:8px 0;padding-left:10px;border-left:4px solid var(--sage)}
+  .hl{background:linear-gradient(transparent 55%,rgba(167,181,158,.6) 55%)}
+  .noun{border:2px solid var(--terra);border-radius:40% 50% 45% 55%;padding:0 4px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:8px 4px;border-bottom:1px solid var(--line)}
+  td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+  .big{font-family:Unbounded,sans-serif;font-size:40px;font-weight:700;color:var(--sage-d);line-height:1}
+  .report{width:100%;min-height:240px;font:14px/1.45 ui-monospace,Menlo,Consolas,monospace;background:#fbf8f2}
+  .note{font-size:14px;color:var(--muted)}
+  .copied{color:var(--sage-d);font-weight:700;min-height:1.4em;margin-top:6px}
+  ol.steps{padding-left:20px;margin:6px 0} ol.steps li{margin:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- Дані ---------- */
+const SCALE = [
+  {e:"🌫", t:"Ще в тумані"},
+  {e:"🌱", t:"Дещо зрозумів(-ла)"},
+  {e:"🧭", t:"Розумію з підказкою"},
+  {e:"💪", t:"Майже впевнено"},
+  {e:"🎓", t:"Можу пояснити іншим"}
+];
+const CAN = [
+  "Знаходжу іменник, до якого «прилипла» підрядна, і ставлю питання «який?»",
+  "Відрізняю означальну від інших підрядних (трюк «заміни на ЯКИЙ»)",
+  "Ставлю коми й будую схему"
+];
+const HOW = ["Був(-ла) на уроці", "Вивчав(-ла) за презентацією", "Розбирався(-лася) самостійно"];
+
+const ROUNDS = [
+  { id:"r1", type:"tap", title:"Знайди господаря",
+    task:"Торкнися іменника, який пояснює підрядна означальна.",
+    items:[
+      {w:["Я","прочитав","книжку,","яку","порадив","учитель."], a:2, why:"книжку (яку?) — яку порадив учитель."},
+      {w:["Місто,","де","живе","моя","бабуся,","стоїть","над","морем."], a:0, why:"місто (яке?) — де живе бабуся. «Де» = «в якому»."},
+      {w:["Ми","чекали","на","день,","коли","почнуться","канікули."], a:3, why:"день (який?) — коли почнуться канікули. «Коли» = «в який»."},
+      {w:["Хлопець,","чия","собака","загубилася,","розклеїв","оголошення."], a:0, why:"хлопець (який?) — чия собака загубилася."},
+      {w:["Тренер","похвалив","гравця,","що","забив","вирішальний","гол."], a:2, why:"гравця (якого?) — що забив гол. «Що» = «який»."}
+    ]},
+  { id:"r2", type:"choice", title:"Означальна чи ні?",
+    task:"Визнач, чи це СПР з підрядною означальною. Не забувай про трюк «заміни на ЯКИЙ».",
+    items:[
+      {s:"Я знаю пісню, яку ти співав.", o:["Означальна","Інша підрядна"], a:0, why:"пісню (яку?) — питання від іменника."},
+      {s:"Я знаю, що ти співав.", o:["Означальна","Інша підрядна"], a:1, why:"знаю (що?) — питання від дієслова, це з'ясувальна. «Що» не замінюється на «який»."},
+      {s:"Ми поїхали туди, де народився дідусь.", o:["Означальна","Інша підрядна"], a:1, why:"поїхали (куди?) — «туди» не іменник, це підрядна місця."},
+      {s:"Ми побачили село, де народився дідусь.", o:["Означальна","Інша підрядна"], a:0, why:"село (яке?) — «де» = «в якому»."},
+      {s:"Він прийшов, коли почався дощ.", o:["Означальна","Інша підрядна"], a:1, why:"прийшов (коли?) — питання від дієслова, це підрядна часу."},
+      {s:"Настала хвилина, коли всі замовкли.", o:["Означальна","Інша підрядна"], a:0, why:"хвилина (яка?) — «коли» = «в яку»."},
+      {s:"Камінь, що лежав біля дороги, був мокрий.", o:["Означальна","Інша підрядна"], a:0, why:"камінь (який?) — «що» = «який»."},
+      {s:"Мама сказала, щоб ми не запізнювалися.", o:["Означальна","Інша підрядна"], a:1, why:"сказала (що?) — це з'ясувальна."},
+      {s:"Я не розумію, чому він засмутився.", o:["Означальна","Інша підрядна"], a:1, why:"не розумію (чого?) — питання від дієслова, з'ясувальна."},
+      {s:"Це людина, чиїм порадам я довіряю.", o:["Означальна","Інша підрядна"], a:0, why:"людина (яка?) — чиїм порадам я довіряю."}
+    ]},
+  { id:"r3", type:"choice", title:"Підбери слово",
+    task:"Обери сполучне слово, яке правильно приєднає підрядну до іменника.",
+    items:[
+      {s:"Щітка, ___ натирають лід, легка.", o:["яка","якою","якої"], a:1, why:"натирають (чим?) якою — щітка, якою натирають лід."},
+      {s:"Я пам'ятаю вечір, ___ ми вперше зустрілися.", o:["коли","де","що"], a:0, why:"вечір (який?) — коли ми зустрілися (= в який)."},
+      {s:"Це школа, ___ навчалася моя мама.", o:["куди","де","звідки"], a:1, why:"навчалася (де?) — школа, де (= в якій) навчалася мама."},
+      {s:"Письменник, ___ книжки я люблю, приїде до нас.", o:["який","чиї","якого"], a:1, why:"книжки (чиї?) — письменник, чиї книжки я люблю."},
+      {s:"Ось річка, ___ починається наша подорож.", o:["звідки","куди","коли"], a:0, why:"річка (яка?) — звідки (= від якої) починається подорож."},
+      {s:"Друзі, ___ я довіряю, ніколи не підведуть.", o:["які","яким","якими"], a:1, why:"довіряю (кому?) яким — друзі, яким я довіряю."}
+    ]},
+  { id:"r4", type:"comma", title:"Кома на місці",
+    task:"Торкнися пропусків між словами, де потрібна кома. Торкнися ще раз — кома зникне.",
+    items:[
+      {w:["Людина","яка","вміє","слухати","завжди","має","друзів."], c:[0,3], why:"Підрядна всередині головної — коми з обох боків. [ ім., (яка …), … ]."},
+      {w:["Я","ніколи","не","забуду","літо","коли","навчився","плавати."], c:[4], why:"Підрядна в кінці — одна кома перед «коли». [ … ім. ], (коли …)."},
+      {w:["Дім","де","ми","жили","раніше","тепер","стоїть","порожній."], c:[0,4], why:"Підрядна всередині — коми з обох боків. [ ім., (де …), … ]."},
+      {w:["Мені","подобаються","книжки","в","яких","багато","пригод."], c:[2], why:"Кома стоїть перед прийменником «в», бо він — частина підрядної. [ … ім. ], (в яких …)."}
+    ]}
+];
+const CREATIVE = [
+  {p:"Опиши свого друга або подругу.", start:"У мене є друг (подруга), який (яка) "},
+  {p:"Загадай предмет, не називаючи його.", start:"Це предмет, який "}
+];
+
+/* ---------- Стан ---------- */
+const S = {
+  name:"", cls:"", how:null, before:null, beforeCan:[false,false,false],
+  results:{}, creative:["",""], creativeCheck:[false,false],
+  after:null, afterCan:[false,false,false], hardest:""
+};
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const toTop = () => window.scrollTo({top:0, behavior:"smooth"});
+
+/* ---------- Екран 1: старт ---------- */
+function screenStart(){
+  app.innerHTML = `
+  <div class="card"><div class="tape"></div>
+    <span class="sticker">Домашнє завдання</span>
+    <h1>Тренажер: складнопідрядні речення з підрядними означальними</h1>
+    <p class="hand">4 раунди · 25 завдань · ≈ 15 хвилин</p>
+    <p>Спершу оціни себе, потім пройди раунди. У кінці отримаєш результат, який треба скопіювати й надіслати вчителю в Google Клас.</p>
+  </div>
+  <div class="card">
+    <span class="sticker sage">Хто проходить</span>
+    <label for="nm">Прізвище та ім'я</label>
+    <input type="text" id="nm" placeholder="Напр.: Коваленко Марія" value="${esc(S.name)}">
+    <label for="cl">Клас</label>
+    <input type="text" id="cl" placeholder="Напр.: 9-Б" value="${esc(S.cls)}">
+  </div>
+  <div class="card">
+    <span class="sticker terra">Самооцінка до тренажера</span>
+    <label>Як ти вивчав(-ла) тему?</label>
+    <div class="opts" id="how">${HOW.map((h,i)=>`<button class="opt${S.how===i?' sel':''}" data-i="${i}">${h}</button>`).join("")}</div>
+    <label>Наскільки впевнено ти почуваєшся в темі зараз?</label>
+    ${scaleHTML("bf", S.before)}
+    <label>Що з цього ти вже вмієш? (познач чесно)</label>
+    ${CAN.map((c,i)=>`<label class="check"><input type="checkbox" data-c="${i}" ${S.beforeCan[i]?'checked':''}> <span>${c}</span></label>`).join("")}
+    ${ruleCard()}
+    <button class="btn" id="go" disabled>Почати тренування →</button>
+    <p class="note" id="hint">Заповни ім'я, клас і обери, як вивчав(-ла) тему та наскільки впевнено почуваєшся.</p>
+  </div>`;
+  const upd = () => {
+    S.name = document.getElementById("nm").value.trim();
+    S.cls = document.getElementById("cl").value.trim();
+    const ok = S.name && S.cls && S.how!==null && S.before!==null;
+    document.getElementById("go").disabled = !ok;
+    document.getElementById("hint").style.display = ok ? "none" : "block";
+  };
+  document.getElementById("nm").oninput = upd;
+  document.getElementById("cl").oninput = upd;
+  document.querySelectorAll("#how .opt").forEach(b => b.onclick = () => {
+    S.how = +b.dataset.i;
+    document.querySelectorAll("#how .opt").forEach(x => x.classList.toggle("sel", x===b));
+    upd();
+  });
+  bindScale("bf", v => { S.before = v; upd(); });
+  document.querySelectorAll("[data-c]").forEach(cb => cb.onchange = () => S.beforeCan[+cb.dataset.c] = cb.checked);
+  document.getElementById("go").onclick = () => { runRound(0); toTop(); };
+  upd();
+}
+
+function scaleHTML(id, val){
+  return `<div class="scale" id="${id}">${SCALE.map((s,i)=>`<button data-v="${i+1}" class="${val===i+1?'sel':''}" aria-label="${s.t}">${s.e}<small>${i+1}</small></button>`).join("")}</div>
+  <div class="scale-label" id="${id}L">${val ? val+" — "+SCALE[val-1].t : ""}</div>`;
+}
+function bindScale(id, cb){
+  document.querySelectorAll(`#${id} button`).forEach(b => b.onclick = () => {
+    const v = +b.dataset.v;
+    document.querySelectorAll(`#${id} button`).forEach(x => x.classList.toggle("sel", x===b));
+    document.getElementById(id+"L").textContent = v+" — "+SCALE[v-1].t;
+    cb(v);
+  });
+}
+function ruleCard(){
+  return `<details><summary>📌 Нагадати правило (опорна картка)</summary>
+    <div class="rule"><b>Підрядна означальна — «довгий прикметник».</b> Вона пояснює <span class="noun">іменник</span> (рідше займенник) у головній частині й відповідає на питання <b>який? чий? котрий?</b><br><i>гладенький лід → лід, <span class="hl">який ретельно натерли</span></i></div>
+    <div class="rule"><b>3 кроки:</b> знайди підрядну → знайди слово в головній, від якого ставиш питання → іменник + «який?» = означальна.</div>
+    <div class="rule"><b>Слова:</b> який, чий, котрий; а також що, де, куди, звідки, коли.<br><b>Трюк «Заміни на ЯКИЙ»:</b> якщо «що», «де», «коли» можна замінити формою слова «який» — це означальна.</div>
+    <div class="rule"><b>Коми:</b> підрядна стоїть одразу після свого іменника; якщо вона всередині головної — коми з обох боків.<br>[ … ім. ], (який …). &nbsp; [ ім., (який …), … ].</div>
+  </details>`;
+}
+
+/* ---------- Раунди ---------- */
+function runRound(ri){
+  const R = ROUNDS[ri];
+  S.results[R.id] = {score:0, total:R.items.length, mistakes:[]};
+  showItem(ri, 0);
+}
+
+function header(ri, ii){
+  const R = ROUNDS[ri];
+  const done = ROUNDS.slice(0,ri).reduce((a,r)=>a+r.items.length,0) + ii;
+  const all = ROUNDS.reduce((a,r)=>a+r.items.length,0);
+  return `<div class="meta"><span>Раунд ${ri+1} з ${ROUNDS.length}</span><span>Завдання ${ii+1} з ${R.items.length}</span></div>
+  <div class="progress"><div style="width:${Math.round(done/all*100)}%"></div></div>
+  <div class="card"><span class="sticker">${R.title}</span><p style="margin:0">${R.task}</p></div>`;
+}
+
+function showItem(ri, ii){
+  const R = ROUNDS[ri], it = R.items[ii];
+  let body = "";
+  if (R.type==="tap"){
+    body = `<div class="words">${it.w.map((w,i)=>`<button class="word" data-i="${i}">${esc(w)}</button>`).join("")}</div>`;
+  } else if (R.type==="choice"){
+    body = `<p class="sentence">${esc(it.s).replace("___",'<b style="color:var(--terra)">___</b>')}</p>
+      <div class="opts">${it.o.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;
+  } else {
+    body = `<div class="cline">${it.w.map((w,i)=> `<span class="cw">${esc(w)}</span>` + (i<it.w.length-1 ? `<button class="gap" data-i="${i}" aria-label="пропуск після слова ${esc(w)}"></button>` : "")).join("")}</div>`;
+  }
+  app.innerHTML = header(ri, ii) + `<div class="card">${body}
+    <div id="fb"></div>
+    <button class="btn" id="check" disabled>Перевірити</button>
+    <button class="btn" id="next" style="display:none">${nextLabel(ri,ii)}</button>
+  </div>
+  <details><summary>📌 Нагадати правило</summary>${ruleCard().replace(/<\/?details>|<summary>.*?<\/summary>/g,"")}</details>`;
+
+  let choice = null; const commas = new Set();
+  const checkBtn = document.getElementById("check");
+  if (R.type==="tap"){
+    document.querySelectorAll(".word").forEach(b => b.onclick = () => {
+      choice = +b.dataset.i;
+      document.querySelectorAll(".word").forEach(x => x.classList.toggle("sel", x===b));
+      checkBtn.disabled = false;
+    });
+  } else if (R.type==="choice"){
+    document.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      choice = +b.dataset.i;
+      document.querySelectorAll(".opt").forEach(x => x.classList.toggle("sel", x===b));
+      checkBtn.disabled = false;
+    });
+  } else {
+    checkBtn.disabled = false;
+    document.querySelectorAll(".gap").forEach(b => b.onclick = () => {
+      const i = +b.dataset.i;
+      if (commas.has(i)) { commas.delete(i); b.classList.remove("on"); b.textContent=""; }
+      else { commas.add(i); b.classList.add("on"); b.textContent=","; }
+    });
+  }
+
+  checkBtn.onclick = () => {
+    let ok, correctText = "";
+    if (R.type==="tap"){
+      ok = choice===it.a;
+      document.querySelectorAll(".word").forEach(b => {
+        b.disabled = true;
+        const i=+b.dataset.i;
+        if (i===it.a) b.classList.add("ok"); else if (i===choice) b.classList.add("bad");
+      });
+    } else if (R.type==="choice"){
+      ok = choice===it.a;
+      document.querySelectorAll(".opt").forEach(b => {
+        b.disabled = true; b.classList.remove("sel");
+        const i=+b.dataset.i;
+        if (i===it.a) b.classList.add("ok"); else if (i===choice) b.classList.add("bad");
+      });
+    } else {
+      const need = new Set(it.c);
+      ok = need.size===commas.size && [...need].every(x=>commas.has(x));
+      document.querySelectorAll(".gap").forEach(b => {
+        b.disabled = true; const i=+b.dataset.i;
+        const want = need.has(i), has = commas.has(i);
+        b.classList.remove("on");
+        if (want){ b.textContent=","; b.classList.add(has?"okc":"badc"); }
+        else if (has){ b.textContent="✕"; b.classList.add("badc"); }
+        else { b.style.visibility="hidden"; b.style.width="6px"; b.style.margin="0"; }
+      });
+      correctText = it.w.map((w,i)=> w + (need.has(i)?",":"")).join(" ");
+    }
+    const res = S.results[R.id];
+    if (ok) res.score++;
+    else res.mistakes.push(R.type==="tap" ? it.w.join(" ") : R.type==="choice" ? it.s : it.w.join(" "));
+    document.getElementById("fb").innerHTML = `<div class="fb ${ok?'ok':'bad'}"><b>${ok? pick(["Влучно!","Саме так!","Чудово!","Правильно!"]) : "Не зовсім."}</b>${correctText && !ok ? "Правильно: <i>"+esc(correctText)+"</i><br>" : ""}${esc(it.why)}</div>`;
+    checkBtn.style.display = "none";
+    document.getElementById("next").style.display = "block";
+  };
+  document.getElementById("next").onclick = () => {
+    if (ii+1 < R.items.length) showItem(ri, ii+1);
+    else roundDone(ri);
+    toTop();
+  };
+}
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function nextLabel(ri, ii){ return ii+1 < ROUNDS[ri].items.length ? "Далі →" : "Завершити раунд →"; }
+
+function roundDone(ri){
+  const R = ROUNDS[ri], r = S.results[R.id];
+  const last = ri+1 >= ROUNDS.length;
+  app.innerHTML = `<div class="card"><div class="tape"></div>
+    <span class="sticker sage">Раунд ${ri+1} завершено</span>
+    <h2>${R.title}</h2>
+    <p class="big">${r.score}/${r.total}</p>
+    <p class="hand">${r.score===r.total ? "Ідеальний раунд! ✨" : r.score >= r.total*0.7 ? "Добрий результат 👍" : "Нічого, далі буде краще 🌱"}</p>
+    <button class="btn" id="go">${last ? "До творчого завдання →" : "Раунд "+(ri+2)+": "+ROUNDS[ri+1].title+" →"}</button>
+  </div>`;
+  document.getElementById("go").onclick = () => { last ? screenCreative() : runRound(ri+1); toTop(); };
+}
+
+/* ---------- Творче завдання ---------- */
+function screenCreative(){
+  app.innerHTML = `<div class="card"><div class="tape"></div>
+    <span class="sticker terra">Творче завдання</span>
+    <h2>Склади сам(а)</h2>
+    <p>Доповни речення так, щоб вийшло СПР з підрядною означальною. Ці речення побачить учитель.</p>
+    ${CREATIVE.map((c,i)=>`<label for="cr${i}">${i+1}. ${c.p}</label>
+      <textarea id="cr${i}">${esc(S.creative[i] || c.start)}</textarea>`).join("")}
+    <label>Перевір себе:</label>
+    <label class="check"><input type="checkbox" id="cc0"> <span>Підрядна пояснює іменник і відповідає на питання «який?»</span></label>
+    <label class="check"><input type="checkbox" id="cc1"> <span>Я поставив(-ла) кому перед сполучним словом</span></label>
+    <button class="btn" id="go">До самооцінки →</button>
+  </div>`;
+  document.getElementById("go").onclick = () => {
+    CREATIVE.forEach((c,i)=> { const v = document.getElementById("cr"+i).value.trim(); S.creative[i] = (v === c.start.trim()) ? "" : v; });
+    S.creativeCheck = [document.getElementById("cc0").checked, document.getElementById("cc1").checked];
+    screenAfter(); toTop();
+  };
+}
+
+/* ---------- Самооцінка після ---------- */
+function screenAfter(){
+  app.innerHTML = `<div class="card"><div class="tape"></div>
+    <span class="sticker terra">Самооцінка після тренажера</span>
+    <label>Наскільки впевнено ти почуваєшся в темі тепер?</label>
+    ${scaleHTML("af", S.after)}
+    <label>Що з цього ти тепер умієш?</label>
+    ${CAN.map((c,i)=>`<label class="check"><input type="checkbox" data-a="${i}" ${S.afterCan[i]?'checked':''}> <span>${c}</span></label>`).join("")}
+    <label for="hd">Що було найважче? (необов'язково)</label>
+    <textarea id="hd" placeholder="Напр.: відрізнити «де» в означальній і в підрядній місця">${esc(S.hardest)}</textarea>
+    <button class="btn" id="go" disabled>Показати результат →</button>
+  </div>`;
+  const go = document.getElementById("go");
+  bindScale("af", v => { S.after = v; go.disabled = false; });
+  if (S.after) go.disabled = false;
+  document.querySelectorAll("[data-a]").forEach(cb => cb.onchange = () => S.afterCan[+cb.dataset.a] = cb.checked);
+  go.onclick = () => { S.hardest = document.getElementById("hd").value.trim(); screenResult(); toTop(); };
+}
+
+/* ---------- Результат ---------- */
+function level(p){
+  if (p>=90) return "Майстер означальних 🎓";
+  if (p>=70) return "Впевнено 💪";
+  if (p>=50) return "Майже 🧭 — повтори опорну картку";
+  return "Варто ще раз розібрати правило 🌱";
+}
+function levelPlain(p){
+  if (p>=90) return "Майстер означальних";
+  if (p>=70) return "Впевнено";
+  if (p>=50) return "Майже — треба повторити опорну картку";
+  return "Варто ще раз розібрати правило";
+}
+function buildReport(){
+  let sc=0, tt=0;
+  ROUNDS.forEach(R => { sc += S.results[R.id].score; tt += S.results[R.id].total; });
+  const p = Math.round(sc/tt*100);
+  const date = new Date().toLocaleDateString("uk-UA");
+  const can = arr => arr.map((v,i)=> v ? "✓ "+CAN[i] : null).filter(Boolean);
+  const L = [];
+  L.push("ТРЕНАЖЕР: СПР з підрядними означальними");
+  L.push("Учень/учениця: " + S.name + ", " + S.cls);
+  L.push("Дата: " + date);
+  L.push("Як вивчав(-ла) тему: " + HOW[S.how]);
+  L.push("");
+  L.push("САМООЦІНКА ДО: " + S.before + "/5 — " + SCALE[S.before-1].t);
+  const cb = can(S.beforeCan); L.push(cb.length ? cb.join("\n") : "(нічого не позначено)");
+  L.push("");
+  L.push("РЕЗУЛЬТАТИ:");
+  ROUNDS.forEach((R,i) => { const r=S.results[R.id]; L.push(`${i+1}. ${R.title} — ${r.score}/${r.total}`); });
+  L.push(`РАЗОМ: ${sc}/${tt} (${p}%) — ${levelPlain(p)}`);
+  L.push("");
+  const mist = ROUNDS.flatMap(R => S.results[R.id].mistakes.map(m => "• " + R.title + ": " + m));
+  L.push("ПОМИЛКИ:"); L.push(mist.length ? mist.join("\n") : "немає 🎉");
+  L.push("");
+  L.push("МОЇ РЕЧЕННЯ:");
+  S.creative.forEach((c,i)=> L.push((i+1)+") " + (c || "—")));
+  L.push("Самоперевірка речень: " + (S.creativeCheck[0]?"питання «який?» ✓":"питання «який?» ✗") + "; " + (S.creativeCheck[1]?"кома ✓":"кома ✗"));
+  L.push("");
+  L.push("САМООЦІНКА ПІСЛЯ: " + S.after + "/5 — " + SCALE[S.after-1].t);
+  const ca = can(S.afterCan); L.push(ca.length ? ca.join("\n") : "(нічого не позначено)");
+  if (S.hardest) { L.push(""); L.push("Найважче: " + S.hardest); }
+  return {text:L.join("\n"), sc, tt, p};
+}
+function screenResult(){
+  const R = buildReport();
+  const diff = S.after - S.before;
+  app.innerHTML = `<div class="card"><div class="tape"></div>
+    <span class="sticker sage">Результат</span>
+    <h2>${esc(S.name)}, ти впорався(-лася)!</h2>
+    <p class="big">${R.p}%</p>
+    <p class="hand">${level(R.p)}</p>
+    <table>${ROUNDS.map((r,i)=>`<tr><td>${i+1}. ${r.title}</td><td>${S.results[r.id].score}/${S.results[r.id].total}</td></tr>`).join("")}
+      <tr><td><b>Разом</b></td><td>${R.sc}/${R.tt}</td></tr>
+      <tr><td>Самооцінка: до → після</td><td>${S.before} → ${S.after} ${diff>0?"⬆":diff<0?"⬇":"="}</td></tr></table>
+  </div>
+  <div class="card">
+    <span class="sticker terra">Надішли вчителю</span>
+    <ol class="steps">
+      <li>Натисни <b>«Скопіювати результат»</b>.</li>
+      <li>Відкрий завдання в <b>Google Класі</b>.</li>
+      <li>Встав текст у поле <b>«Особистий коментар»</b> (або створи документ у розділі «Ваша робота») і натисни <b>«Здати»</b>.</li>
+    </ol>
+    <button class="btn" id="copy">📋 Скопіювати результат</button>
+    <div class="copied" id="cmsg"></div>
+    <textarea class="report" id="rep" readonly>${esc(R.text)}</textarea>
+    <p class="note">Якщо кнопка не спрацювала, торкнися тексту, виділи все й скопіюй вручну.</p>
+  </div>
+  <div class="card">
+    <button class="btn light" id="again">↺ Пройти тренажер ще раз</button>
+    <p class="note">Повторне проходження почнеться з нуля. Спершу скопіюй і надішли цей результат!</p>
+  </div>`;
+  const rep = document.getElementById("rep"), msg = document.getElementById("cmsg");
+  document.getElementById("copy").onclick = async () => {
+    let done = false;
+    try { await navigator.clipboard.writeText(rep.value); done = true; } catch(e) {}
+    if (!done) { try { rep.focus(); rep.select(); rep.setSelectionRange(0, rep.value.length); done = document.execCommand("copy"); } catch(e) {} }
+    msg.textContent = done ? "Скопійовано! Тепер встав у Google Клас ✔" : "Не вдалося скопіювати автоматично — виділи текст нижче й скопіюй вручну.";
+    if (!done) { rep.focus(); rep.select(); }
+  };
+  rep.onclick = () => rep.select();
+  document.getElementById("again").onclick = () => {
+    Object.assign(S, {before:null, beforeCan:[false,false,false], results:{}, creative:["",""], creativeCheck:[false,false], after:null, afterCan:[false,false,false], hardest:""});
+    screenStart(); toTop();
+  };
+}
+
+screenStart();
+</script>
+</body>
+</html>
