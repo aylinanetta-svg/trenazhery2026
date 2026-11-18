@@ -14,53 +14,81 @@ h1{font-size:30px;font-weight:900;margin:0 0 4px}
 .subj h2{margin:0 0 10px;font-size:21px}
 .tr{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px dashed #d8e1ee;padding:12px 0 2px}
 .tr .nm{flex:1;min-width:220px;font-weight:700}
-.tr .nm small{display:block;color:#5b6b80;font-weight:400}
+.tr .nm small{display:block;color:#5b6b80;font-weight:400;font-size:12px}
 a.btn,button.btn{border:none;border-radius:10px;padding:9px 14px;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;font-family:inherit}
 a.btn{background:#2f6fed;color:#fff}
 button.btn{background:#fff;color:#2f6fed;border:2px solid #2f6fed}
 .empty{color:#8a97a8;font-style:italic}
 .ok{color:#1f9d55;font-weight:800;font-size:14px}
+.msg{background:#fff4dc;border-left:4px solid #e8a317;padding:12px;border-radius:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>📚 Тренажери для учнів</h1>
   <p class="lead">Обери предмет і тренажер. Кнопка «Копіювати посилання» копіює адресу, яку можна надіслати учням.</p>
-  <div id="list"></div>
+  <div id="list"><p class="empty">Завантаження…</p></div>
 </div>
 <script>
-/* ===== ЯК ДОДАТИ НОВИЙ ТРЕНАЖЕР =====
-   Знайди потрібний предмет і допиши в його квадратні дужки рядок:
-   {name:"Назва тренажера", note:"для якого класу", file:"шлях/до/файлу.html"},
-   Шлях — це папка/назва файлу так, як на GitHub.                         */
-const SUBJECTS = [
-  {title:"💻 Інформатика", items:[
-    {name:"Інструктаж з БЖД. Брандмауер. Позбуваємось реклами", note:"8 клас", file:"informatyka/Усе з інформатики/bzhd-firewall-reklama-8klas.html"},
-  ]},
-  {title:"🇺🇦 Українська мова", items:[]},
-  {title:"📖 Українська література", items:[]},
-  {title:"➗ Алгебра", items:[]},
-  {title:"📐 Геометрія", items:[]},
-];
+/* Каталог будується АВТОМАТИЧНО: показує всі .html-файли з папок сховку.
+   Назва тренажера береться з його заголовка <title>.
+   Нову папку-предмет можна додати в список нижче, щоб мала гарну назву й порядок. */
+const OWNER = "aylinanetta-svg", REPO = "trenazhery2026", BRANCH = "main";
+const SUBJECTS = {
+  "informatyka":          "💻 Інформатика",
+  "ukrainska-mova":       "🇺🇦 Українська мова",
+  "ukrainska-literatura": "📖 Українська література",
+  "alhebra":              "➗ Алгебра",
+  "heometriia":           "📐 Геометрія",
+};
 
-const base = location.href.replace(/[^/]*$/, "");
+const base = location.origin + "/" + REPO + "/";
 const list = document.getElementById("list");
-SUBJECTS.forEach(s=>{
-  const d=document.createElement("div");d.className="subj";
-  d.innerHTML=`<h2>${s.title}</h2>`;
-  if(!s.items.length){d.innerHTML+=`<div class="empty">Тренажери скоро з'являться</div>`;}
-  s.items.forEach(t=>{
-    const url=base+t.file.split("/").map(encodeURIComponent).join("/");
-    const r=document.createElement("div");r.className="tr";
-    r.innerHTML=`<div class="nm">${t.name}<small>${t.note||""}</small></div><a class="btn" href="${url}">Відкрити</a><button class="btn">Копіювати посилання</button><span class="ok"></span>`;
-    r.querySelector("button").onclick=async()=>{
-      try{await navigator.clipboard.writeText(url);r.querySelector(".ok").textContent="✔ Скопійовано";}
-      catch(e){prompt("Скопіюйте посилання:",url);}
-    };
-    d.appendChild(r);
-  });
-  list.appendChild(d);
-});
+const enc = p => p.split("/").map(encodeURIComponent).join("/");
+
+async function getTree(){
+  const KEY = "trenTree", now = Date.now();
+  try{ const c = JSON.parse(localStorage.getItem(KEY)||"null"); if(c && now - c.t < 5*60*1000) return c.d; }catch(e){}
+  const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`);
+  if(!r.ok) throw new Error(r.status);
+  const d = (await r.json()).tree.filter(x => x.type==="blob" && /\.html?$/i.test(x.path) && x.path.includes("/")).map(x=>x.path);
+  try{ localStorage.setItem(KEY, JSON.stringify({t:now,d})); }catch(e){}
+  return d;
+}
+async function titleOf(path){
+  try{ const t = await (await fetch(base + enc(path))).text();
+       const m = t.match(/<title[^>]*>([\s\S]*?)<\/title>/i); if(m && m[1].trim()) return m[1].trim(); }catch(e){}
+  return path.split("/").pop().replace(/\.html?$/i,"").replace(/[-_]/g," ");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+async function build(){
+  let files;
+  try{ files = await getTree(); }
+  catch(e){ list.innerHTML = '<div class="msg">Не вдалося завантажити список тренажерів. Спробуйте оновити сторінку за кілька хвилин.</div>'; return; }
+  const groups = {};
+  Object.keys(SUBJECTS).forEach(k => groups[k] = []);
+  files.forEach(p => { const top = p.split("/")[0]; (groups[top] = groups[top] || []).push(p); });
+  list.innerHTML = "";
+  for(const key of Object.keys(groups)){
+    const d = document.createElement("div"); d.className = "subj";
+    d.innerHTML = `<h2>${esc(SUBJECTS[key] || "📁 " + key)}</h2>`;
+    if(!groups[key].length) d.innerHTML += `<div class="empty">Тренажери скоро з'являться</div>`;
+    list.appendChild(d);
+    for(const p of groups[key].sort()){
+      const url = base + enc(p);
+      const r = document.createElement("div"); r.className = "tr";
+      r.innerHTML = `<div class="nm">…<small>${esc(p)}</small></div><a class="btn" href="${url}">Відкрити</a><button class="btn">Копіювати посилання</button><span class="ok"></span>`;
+      r.querySelector("button").onclick = async () => {
+        try{ await navigator.clipboard.writeText(url); r.querySelector(".ok").textContent = "✔ Скопійовано"; }
+        catch(e){ prompt("Скопіюйте посилання:", url); }
+      };
+      d.appendChild(r);
+      titleOf(p).then(t => r.querySelector(".nm").firstChild.textContent = t);
+    }
+  }
+}
+build();
 </script>
 </body>
 </html>
