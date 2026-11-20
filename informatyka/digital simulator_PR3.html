@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Цифровий детектив · ПР 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: жвава криміналістична лабораторія для 9 класу, без дитячості
+   IDEA: справа детектива — стрічка «ДОКАЗИ», печатки ФЕЙК/ПЕРЕВІРЕНО, панелі інструментів
+   PICTURE: кожен етап — живий симулятор інструмента (пошук, EXIF, ELA, аудіо, кадри)
+   COLOUR and TYPE: папір/графіт, сигнальна жовта стрічка, червона печатка, синій інструмент; Unbounded + Golos Text
+   LAYOUT: стрічка кроків угорі, далі одна справа: симулятор ліворуч, питання праворуч, на телефоні — стовпчиком */
+:root{color-scheme:light dark;
+--bg:light-dark(#efede6,#131417);--paper:light-dark(#ffffff,#1d1f23);--ink:light-dark(#16171b,#eceae4);--muted:light-dark(#5b5e66,#a2a5ad);
+--line:light-dark(#d8d5cb,#33363c);--tape:#ffd400;--fake:light-dark(#d62b23,#ff5a4f);--ok:light-dark(#17805a,#3fc28c);--tool:light-dark(#2453c9,#7aa2ff);--soft:light-dark(#f6f5f0,#25282d)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Golos Text",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Unbounded,"Golos Text",sans-serif;line-height:1.1;text-wrap:balance;margin:0 0 .4em}
+h1{font-size:clamp(28px,4.4vw,48px);font-weight:700}h2{font-size:clamp(22px,2.8vw,32px);font-weight:700}h3{font-size:18px;font-weight:500}
+.tape{background:repeating-linear-gradient(-45deg,var(--tape) 0 22px,#16171b 22px 44px);height:12px}
+header.top{background:#16171b;color:#f3f1ea;padding:14px max(4vw,16px);display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.brand{font-family:Unbounded;font-weight:700;font-size:15px}.brand b{background:var(--tape);color:#16171b;padding:2px 7px;margin-right:6px}
+.meta{display:flex;gap:14px;font-size:14px;color:#c9c7bf;flex-wrap:wrap}.meta strong{color:#fff;font-variant-numeric:tabular-nums}
+nav.steps{display:flex;gap:6px;overflow-x:auto;padding:10px max(4vw,16px);background:var(--paper);border-bottom:1px solid var(--line)}
+nav.steps button{flex:none;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:999px;padding:8px 14px;font:500 14px "Golos Text";min-height:40px;cursor:pointer}
+nav.steps button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}nav.steps button.done{color:var(--ok);border-color:var(--ok)}
+nav.steps button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1240px;margin:0 auto;padding:clamp(18px,3vw,40px) max(4vw,16px) 60px}
+section.stage{display:none}section.stage.on{display:block;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){section.stage.on{animation:none}}
+.kicker{display:inline-block;background:var(--tape);color:#16171b;font:600 13px "Golos Text";padding:3px 10px;margin-bottom:12px}
+.lead{color:var(--muted);max-width:70ch;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:clamp(14px,2vw,22px)}
+.tool{border-top:5px solid var(--tool)}.tool .bar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.tool .bar i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}
+.q{margin:0 0 18px}.q p{margin:0 0 8px;font-weight:600}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--soft);min-height:44px}
+.opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--tool);flex:none}
+.opt.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--paper))}.opt.bad{border-color:var(--fake);background:color-mix(in srgb,var(--fake) 12%,var(--paper))}
+.btn{border:0;border-radius:10px;padding:12px 20px;font:600 16px "Golos Text";cursor:pointer;min-height:46px;background:var(--ink);color:var(--bg)}
+.btn.y{background:var(--tape);color:#16171b}.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn.blue{background:var(--tool);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.opt:focus-within{outline:3px solid var(--tool);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fb{margin-top:16px;border-radius:12px;padding:14px 16px;background:var(--soft);border-left:5px solid var(--tool)}
+.fb .pts{font:700 20px Unbounded}.fb ul{margin:8px 0 0;padding-left:20px}
+.stamp{display:inline-block;border:3px solid currentColor;padding:2px 10px;font:700 14px Unbounded;transform:rotate(-4deg);border-radius:4px}
+.stamp.f{color:var(--fake)}.stamp.v{color:var(--ok)}
+input[type=text],input[type=email],select,textarea{width:100%;font:16px "Golos Text";padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--ink);min-height:46px}
+textarea{min-height:84px;resize:vertical}
+label.f{display:block;font-weight:600;margin:12px 0 6px;font-size:15px}
+.hint{font-size:14px;color:var(--muted)}
+svg.ph{width:100%;height:auto;display:block;border-radius:10px;background:#888}
+/* warm-up */
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:12px 0}
+.head .two{display:flex;gap:6px}.head .two button{min-width:78px}
+.pick{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:8px 12px;font:600 14px "Golos Text";min-height:44px;cursor:pointer}
+.pick.sel{background:var(--ink);color:var(--bg)}
+.pick.good{background:var(--ok);color:#fff;border-color:var(--ok)}.pick.bad{background:var(--fake);color:#fff;border-color:var(--fake)}
+@media(max-width:600px){.head{grid-template-columns:minmax(0,1fr)}}
+/* search */
+.drop{border:2px dashed var(--tool);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;background:color-mix(in srgb,var(--tool) 7%,var(--paper))}
+.drop.over{background:color-mix(in srgb,var(--tool) 20%,var(--paper))}
+.res{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;border-bottom:1px solid var(--line);padding:10px 0}
+.res svg{width:110px;height:72px;border-radius:6px}.res a{color:var(--tool);font-weight:600;text-decoration:none}.res .d{font-size:13px;color:var(--muted)}
+.loading{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--tool) 0 30%,var(--line) 30%);background-size:200% 100%;animation:ld 1s linear infinite}
+@keyframes ld{to{background-position:-200% 0}}
+/* exif */
+table{border-collapse:collapse;width:100%;font-size:15px}td,th{border-bottom:1px solid var(--line);padding:9px 8px;text-align:left;vertical-align:middle}
+th{font-size:13px;color:var(--muted);font-weight:600}td.v{font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere}
+.tog{display:flex;gap:4px}.tog button{font-size:13px;padding:6px 9px;min-height:38px}
+/* ela / audio / video */
+.fig{position:relative}
+.slider{width:100%;accent-color:var(--tool);height:28px}
+canvas#wave{width:100%;height:200px;display:block;border-radius:10px;background:#0f1114;cursor:crosshair}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.chip{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}
+.frames{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-top:10px}
+.frames button{padding:0;border:2px solid transparent;border-radius:6px;background:none;cursor:pointer;position:relative}
+.frames button.cur{border-color:var(--tool)}.frames button.flag::after{content:"!";position:absolute;top:2px;right:4px;background:var(--fake);color:#fff;font:700 12px Unbounded;border-radius:50%;width:18px;height:18px;line-height:18px}
+.frames svg{width:100%;height:auto;display:block;border-radius:4px}
+@media(max-width:600px){.frames{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sub{background:#000;color:#fff;text-align:center;padding:6px 10px;font-size:15px;border-radius:0 0 10px 10px}
+/* card preview */
+.toolcard{border:2px solid var(--ink);border-radius:14px;padding:18px;background:var(--paper);position:relative}
+.toolcard h3{font-size:20px}.toolcard .lab{font-weight:700;margin:10px 0 2px}.toolcard p{margin:0;white-space:pre-wrap}
+.toolcard .secret{margin-top:12px;background:var(--tape);color:#16171b;padding:8px 12px;border-radius:8px}
+/* final */
+.score{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center}
+.big{font:700 clamp(72px,12vw,140px)/1 Unbounded;color:var(--ink)}.big small{font-size:.28em;color:var(--muted)}
+.meter{height:12px;background:var(--soft);border-radius:6px;overflow:hidden;border:1px solid var(--line)}.meter i{display:block;height:100%;background:var(--tool)}
+.lvl{font-weight:700}.lvl.h{color:var(--ok)}.lvl.l{color:var(--fake)}
+pre#report{white-space:pre-wrap;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px;font:14px/1.5 ui-monospace,Menlo,monospace;max-height:340px;overflow:auto}
+.rules{display:grid;gap:8px;margin:12px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+details{margin-top:18px}summary{cursor:pointer;font-weight:600;min-height:32px}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--muted)}.stack td:empty{display:none}.score{grid-template-columns:minmax(0,1fr)}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>ПР 3</b>Цифровий детектив</div>
+  <div class="meta"><span>Учень: <strong id="hName">—</strong></span><span>Час: <strong id="hTime">00:00</strong></span><span>Бали: <strong id="hPts">0</strong> / 100</span></div>
+</header>
+<div class="tape"></div>
+<nav class="steps" id="steps"></nav>
+<main>
+
+<!-- 0 START -->
+<section class="stage" id="s-start">
+  <div class="grid">
+    <div>
+      <span class="kicker">Інформатика · 9 клас · Практична робота 3</span>
+      <h1>Аналіз медіатекстів: знайди сліди редагування</h1>
+      <p class="lead">Ти — фахівець відділу перевірки фактів. За урок треба розслідувати шість справ: фото, метадані, змонтоване аудіо, діпфейк-відео і вірусна історія про 5G. Усі інструменти вже тут, нікуди перемикатися не треба. Наприкінці отримаєш оцінку, лист оцінювання і текст звіту, який можна скопіювати й надіслати вчителю.</p>
+      <div class="card">
+        <h3>Справа відкривається на ім'я</h3>
+        <label class="f" for="iName">Прізвище та ім'я</label><input type="text" id="iName" autocomplete="name" placeholder="Напр., Коваленко Марія">
+        <div class="row" style="margin-top:4px">
+          <div style="flex:1 1 140px"><label class="f" for="iCls">Клас</label><input type="text" id="iCls" placeholder="9-А"></div>
+          <div style="flex:1 1 140px"><label class="f" for="iTeam">Команда (за бажанням)</label><input type="text" id="iTeam" placeholder="Кібердетективи"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Інструктаж з безпеки життєдіяльності</h3>
+      <p class="hint">Підтверди кожне правило — без цього справа не відкриється.</p>
+      <div class="rules" id="rules"></div>
+      <button class="btn y" id="go" disabled>Почати розслідування</button>
+      <p class="hint" id="goHint">Заповни ім'я, клас і підтверди всі правила.</p>
+    </div>
+  </div>
+  <details class="card"><summary>Для вчителя: як провести урок (45 хв)</summary>
+    <p>0–5 хв: інструктаж БЖД (вбудований), мотивація «Чому фейки працюють?». 5–33 хв: справи 1–6, учні працюють індивідуально або в парах, кожна справа перевіряється одразу, одна спроба. 33–40 хв: картка інструменту (Завдання 10 підручника). 40–45 хв: оцінка, рефлексія, учні копіюють звіт і надсилають у Classroom, Viber або на пошту. Код перевірки в звіті залежить від імені, балів і часу, тож виправлений вручну звіт видно. Прогрес зберігається в браузері учня, тож випадкове оновлення сторінки нічого не зітре.</p>
+  </details>
+</section>
+
+<!-- 1 WARM -->
+<section class="stage" id="s-warm">
+  <span class="kicker">Розминка · 5 балів</span>
+  <h2>Фейк чи факт? Вирішуй за 10 секунд</h2>
+  <p class="lead">Перший фільтр безпеки — твоя реакція. Познач кожен заголовок, потім натисни «Перевірити».</p>
+  <div class="card" id="warmList"></div>
+  <div class="row" style="margin-top:16px"><button class="btn" data-check="warm">Перевірити</button></div>
+  <div id="fb-warm"></div>
+</section>
+
+<!-- 2 REVERSE -->
+<section class="stage" id="s-rev">
+  <span class="kicker">Справа №1 · Зворотний пошук зображення · 15 балів</span>
+  <h2>«Акула пливе вулицею Одеси після зливи»</h2>
+  <p class="lead">Цей допис набрав 40 тисяч поширень за ніч. Перетягни фото в поле пошуку (або натисни кнопку) і з'ясуй, звідки воно насправді.</p>
+  <div class="grid">
+    <div class="card tool">
+      <div class="bar"><i></i><i></i><i></i> Пошук за зображенням (симулятор Google Lens / TinEye)</div>
+      <div id="revPhoto" draggable="true" style="cursor:grab"></div>
+      <p class="hint" style="margin:6px 0 12px">Підпис допису: «ОДЕСА ЗАРАЗ!!! Поширте, поки не видалили!» · 20.11.2026</p>
+      <div class="drop" id="drop"><span style="flex:1">Перетягни фото сюди</span><button class="btn blue" id="revGo">Шукати</button></div>
+      <div id="revRes" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <div class="q"><p>1. Коли цей фотомонтаж уперше з'явився в мережі?</p><div class="opts" data-q="rev1"></div></div>
+      <div class="q"><p>2. Із чого складено зображення?</p><div class="opts" data-q="rev2"></div></div>
+      <div class="q"><p>3. Твій висновок</p><div class="opts" data-q="rev3"></div></div>
+      <button class="btn" data-check="rev">Перевірити</button>
+      <div id="fb-rev"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 EXIF -->
+<section class="stage" id="s-exif">
+  <span class="kicker">Справа №2 · Метадані фото (EXIF) · 15 балів</span>
+  <h2>«Черга по хліб у Львові, сьогодні вранці»</h2>
+  <p class="lead">Камера записує у файл фото приховані дані: коли, де і чим знімали, якою програмою редагували. Відкрий файл у переглядачі й познач кожен рядок: норма чи підозріло для цього підпису.</p>
+  <div class="grid">
+    <div class="card tool">
+      <div class="bar"><i></i><i></i><i></i> Переглядач EXIF · IMG_4471.jpg</div>
+      <div id="exifPhoto"></div>
+      <p class="hint" style="margin:8px 0">Підпис допису: «Львів, 20.11, 7:30. Ось що відбувається насправді!»</p>
+      <button class="btn blue" id="exifGo">Прочитати метадані</button>
+    </div>
+    <div class="card">
+      <div id="exifTable"><p class="hint">Тут з'явиться таблиця метаданих.</p></div>
+      <button class="btn" data-check="exif" style="margin-top:14px">Перевірити</button>
+      <div id="fb-exif"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 ELA -->
+<section class="stage" id="s-ela">
+  <span class="kicker">Справа №3 · Аналіз рівня помилок (ELA) · 15 балів</span>
+  <h2>«НЛО над Дніпром: фото очевидця»</h2>
+  <p class="lead">Коли у JPEG вставляють чужий фрагмент, він стискається інакше, ніж решта кадру. ELA підсвічує такі ділянки. Посунь повзунок, щоб увімкнути ELA, і клацни по кожній вставленій ділянці. Є дві. Маєш 5 клацань.</p>
+  <div class="grid">
+    <div class="card tool">
+      <div class="bar"><i></i><i></i><i></i> Криміналістика фото (симулятор FotoForensics)</div>
+      <div class="fig" id="elaWrap"></div>
+      <label class="f" for="elaSl">Шар ELA: <span id="elaPct">0</span>%</label>
+      <input type="range" id="elaSl" class="slider" min="0" max="100" value="0">
+      <p class="hint">Клацань залишилось: <strong id="elaLeft">5</strong> · Знайдено: <strong id="elaFound">0</strong> з 2</p>
+    </div>
+    <div class="card">
+      <div class="q"><p>Що насправді показує ELA?</p><div class="opts" data-q="ela1"></div></div>
+      <button class="btn" data-check="ela">Перевірити</button>
+      <div id="fb-ela"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 AUDIO -->
+<section class="stage" id="s-audio">
+  <span class="kicker">Справа №4 · Змонтоване аудіо · 15 балів</span>
+  <h2>Голосове «від директора» у чаті класу</h2>
+  <p class="lead">Розшифровка: «Шановні учні, нагадую про… завтра уроків не буде… екскурсію до музею». Послухай і подивись на хвилю та смугу фонового шуму. Клацни по хвилі в тих місцях, де запис склеєно. Міток можна поставити не більше трьох.</p>
+  <div class="grid">
+    <div class="card tool">
+      <div class="bar"><i></i><i></i><i></i> Аудіоаналізатор · voice_0412.ogg · 10,0 с</div>
+      <canvas id="wave" width="900" height="240"></canvas>
+      <div class="row" style="margin-top:10px"><button class="btn blue" id="play">▶ Відтворити</button><button class="btn ghost" id="clr">Прибрати мітки</button><span class="hint">Звук змодельовано: це не мова, а її ритм і фон.</span></div>
+      <div class="chips" id="trans"></div>
+    </div>
+    <div class="card">
+      <div class="q"><p>Які ознаки монтажу ти помітив(-ла)? Обери всі правильні.</p><div class="opts" data-q="aud1" data-multi="1"></div></div>
+      <button class="btn" data-check="audio">Перевірити</button>
+      <div id="fb-audio"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 VIDEO -->
+<section class="stage" id="s-video">
+  <span class="kicker">Справа №5 · Діпфейк-відео · 15 балів</span>
+  <h2>«Відомий блогер роздає по 1000 гривень»</h2>
+  <p class="lead">Інструмент InVID розкладає відео на кадри, щоб їх можна було роздивитися по одному. Переглянь усі 8 кадрів і познач ті, де видно артефакти підробки. Порівнюй з сусідніми кадрами.</p>
+  <div class="grid">
+    <div class="card tool">
+      <div class="bar"><i></i><i></i><i></i> Покадровий аналіз (симулятор InVID-WeVerify)</div>
+      <div id="vidMain"></div>
+      <div class="sub" id="vidSub"></div>
+      <input type="range" id="vidSl" class="slider" min="0" max="7" value="0" aria-label="Кадр">
+      <div class="row"><button class="btn" id="flagBtn">Позначити кадр як підозрілий</button><span class="hint" id="frameLbl">Кадр 1 з 8</span></div>
+      <div class="frames" id="frames"></div>
+    </div>
+    <div class="card">
+      <div class="q"><p>Яку ознаку видно не на одному кадрі, а на всьому відео?</p><div class="opts" data-q="vid1"></div></div>
+      <button class="btn" data-check="video">Перевірити</button>
+      <div id="fb-video"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 5G -->
+<section class="stage" id="s-g5">
+  <span class="kicker">Справа №6 · Ситуація з підручника · 10 балів</span>
+  <h2>Підпали веж 5G у Великій Британії, 2020</h2>
+  <p class="lead">На початку пандемії COVID-19 у соцмережах поширювали відео, нібито вежі 5G «викликають коронавірус». Люди підпалювали вежі зв'язку, серед іншого й ті, що обслуговували виклики швидкої. Розсортуй твердження і обери, що зробив би фахівець з кіберзахисту.</p>
+  <div class="grid">
+    <div class="card" id="g5List"></div>
+    <div class="card">
+      <div class="q"><p>Що зробив би фахівець? Обери рівно три дії.</p><div class="opts" data-q="g5a" data-multi="1"></div></div>
+      <button class="btn" data-check="g5">Перевірити</button>
+      <div id="fb-g5"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 CARD -->
+<section class="stage" id="s-card">
+  <span class="kicker">Завдання 10 · Картка інструменту · 10 балів</span>
+  <h2>Створи інформаційну картку інструменту фактчекінгу</h2>
+  <p class="lead">Картка — це коротка пам'ятка для однокласника, який цим інструментом ще не користувався. Обери один інструмент із сьогоднішніх справ і опиши його за зразком нижче. Картка, яку ти заповнюєш, з'являється праворуч і потрапить у звіт.</p>
+  <details class="card" open style="margin:0 0 18px"><summary>Зразок з підручника: Google Reverse Image Search</summary>
+    <div class="row" style="align-items:flex-start;gap:24px;margin-top:8px">
+      <div style="flex:1 1 260px"><p class="lab" style="font-weight:700;margin:0">Що це?</p><p style="margin:0 0 8px">Сервіс від Google, який показує, де ще в інтернеті трапляється це зображення і чи воно оригінальне.</p>
+      <p style="font-weight:700;margin:0">Як працює?</p><p style="margin:0">1. Завантажуєш фото або вставляєш посилання.<br>2. Google шукає сайти, де трапляється це зображення.<br>3. Дивишся дату першої появи та схожі картинки, чи це не фотомонтаж.</p></div>
+      <div style="flex:1 1 260px"><p style="font-weight:700;margin:0">Яку інформацію ним перевірити?</p><p style="margin:0 0 8px">Вірусне фото «з місця подій», яке підозріло схоже на кадр з іншої новини.</p>
+      <p style="font-weight:700;margin:0">Секрет фахівця</p><p style="margin:0">Сортуй результати від найдавніших, бо так видно першоджерело.</p></div>
+    </div>
+  </details>
+  <div class="grid">
+    <div class="card">
+      <label class="f" for="cTool">1. Обери інструмент</label><select id="cTool"></select>
+      <p class="hint" id="cToolHint" style="margin:6px 0 0"></p>
+      <label class="f" for="cWhat">2. Що це? Одне-два речення: що за сервіс і для чого він</label><textarea id="cWhat" placeholder="Напр.: Безкоштовний онлайн-сервіс, який показує…"></textarea>
+      <label class="f" for="cHow">3. Як працює? Мінімум 3 кроки, кожен з нового рядка</label><textarea id="cHow" placeholder="1. Відкриваю сайт і завантажую…&#10;2. Натискаю…&#10;3. Дивлюся на…"></textarea>
+      <label class="f" for="cWhen">4. Яку інформацію ним можна перевірити? Наведи приклад підозрілого допису чи файлу з життя (не з уроку)</label><textarea id="cWhen" placeholder="Напр.: Друг надіслав фото «з концерту вчора», а …"></textarea>
+      <label class="f" for="cSecret">5. Секрет фахівця: на що звернути увагу, щоб не помилитися</label><textarea id="cSecret" placeholder="Напр.: Якщо метаданих немає, це ще не доказ фейку, бо…"></textarea>
+      <button class="btn" data-check="card" style="margin-top:14px">Здати картку</button>
+      <div id="fb-card"></div>
+    </div>
+    <div><div class="toolcard" id="cPrev"></div><div class="row" style="margin-top:10px"><button class="btn ghost" id="cCopy">Копіювати картку</button></div></div>
+  </div>
+</section>
+
+<!-- 9 FINAL -->
+<section class="stage" id="s-final">
+  <span class="kicker">Результат</span>
+  <h2 id="finTitle">Розслідування завершено</h2>
+  <div class="card score">
+    <div class="big" id="finGrade">0<small> / 12</small></div>
+    <div><p style="margin:0 0 8px"><strong id="finPts">0</strong> балів зі 100 · час роботи <strong id="finTime"></strong></p><div class="meter"><i id="finBar" style="width:0"></i></div><p class="hint" id="finCode" style="margin-top:8px"></p></div>
+  </div>
+  <h3 style="margin-top:26px">Лист оцінювання практичної роботи</h3>
+  <div class="card"><table class="stack" id="finTable"><thead><tr><th>Критерій</th><th>Справи</th><th>Бали</th><th>Рівень</th><th>Порада</th></tr></thead><tbody></tbody></table></div>
+  <div class="grid" style="margin-top:22px">
+    <div class="card">
+      <h3>Саморефлексія</h3>
+      <div class="q"><p>Наскільки зрозумілими були інструменти?</p><div class="row" data-r="r1"></div></div>
+      <div class="q"><p>Наскільки було цікаво?</p><div class="row" data-r="r2"></div></div>
+      <div class="q"><p>Чи знадобиться це тобі в житті?</p><div class="row" data-r="r3"></div></div>
+      <label class="f" for="rText">Що я тепер перевірятиму перед тим, як поширити допис?</label><textarea id="rText"></textarea>
+    </div>
+    <div class="card">
+      <h3>Звіт для вчителя</h3>
+      <pre id="report"></pre>
+      <div class="row"><button class="btn y" id="repCopy">Копіювати звіт</button><a class="btn ghost" id="mail" href="#" style="text-decoration:none">Відкрити в пошті</a></div>
+      <label class="f" for="tMail">Пошта вчителя (за бажанням)</label><input type="email" id="tMail" placeholder="teacher@school.ua">
+      <p class="hint">Якщо пошта не відкрилась, скопіюй звіт і встав його в Classroom, Viber чи лист.</p>
+      <button class="btn ghost" id="reset" style="margin-top:10px">Почати заново</button>
+    </div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const STAGES=[['start','Старт'],['warm','Розминка'],['rev','Справа 1'],['exif','Справа 2'],['ela','Справа 3'],['audio','Справа 4'],['video','Справа 5'],['g5','Справа 6'],['card','Картка'],['final','Результат']];
+const MAX={warm:5,rev:15,exif:15,ela:15,audio:15,video:15,g5:10,card:10};
+let S={name:'',cls:'',team:'',start:0,end:0,cur:0,reach:0,pts:{},fb:{},card:{},refl:{},mail:''};
+try{const o=JSON.parse(localStorage.getItem('pr3det')||'null');if(o)S=Object.assign(S,o)}catch(e){}
+const save=()=>{try{localStorage.setItem('pr3det',JSON.stringify(S))}catch(e){}};
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)};
+const total=()=>Object.values(S.pts).reduce((a,b)=>a+b,0);
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- navigation ---------- */
+function nav(){
+  $('#steps').innerHTML=STAGES.map(([id,t],i)=>`<button data-i="${i}" class="${i===S.cur?'on':''} ${S.fb[id]?'done':''}" ${i>S.reach?'disabled':''}>${t}</button>`).join('');
+  $$('section.stage').forEach(s=>s.classList.toggle('on',s.id==='s-'+STAGES[S.cur][0]));
+  $('#hName').textContent=S.name||'—';$('#hPts').textContent=Math.round(total());
+  if(STAGES[S.cur][0]==='final')renderFinal();
+}
+$('#steps').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;S.cur=+b.dataset.i;save();nav();scrollTo(0,0)});
+function next(){S.cur=Math.min(S.cur+1,STAGES.length-1);S.reach=Math.max(S.reach,S.cur);if(STAGES[S.cur][0]==='final'&&!S.end)S.end=Date.now();save();nav();scrollTo({top:0,behavior:'smooth'})}
+setInterval(()=>{if(!S.start)return;const t=Math.floor(((S.end||Date.now())-S.start)/1000);$('#hTime').textContent=fmt(t)},1000);
+const fmt=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+
+/* ---------- options helper ---------- */
+const Q={
+ rev1:{o:['2005','2011','2017','20.11.2026, сьогодні'],a:[1]},
+ rev2:{o:['Це один справжній кадр без змін','Фото затопленої вулиці + окреме фото акули з журналу','Кадр із фільму жахів','Зображення згенерував ШІ сьогодні'],a:[1]},
+ rev3:{o:['Правда: це Одеса сьогодні','Фейк: старий фотомонтаж із новим підписом','Неможливо перевірити, тож можна поширити'],a:[1]},
+ ela1:{o:['Ділянки, що стиснуті інакше, ніж решта JPEG-файлу: часто це вставки','Точне місце й дату зйомки','Чи є на фото люди','Автора фотографії'],a:[0]},
+ aud1:{o:['Різко змінюється фоновий шум і гул','Цифрова тиша: на мить звук зникає повністю','Змінюється висота голосу, наче говорить інша людина','Голос надто гучний','Повідомлення записане українською','Зміст фрази різко «перескакує», бракує зв\'язку між частинами'],a:[0,1,2,5]},
+ vid1:{o:['Людина жодного разу не кліпає','Відео надто коротке','У кімнаті тепле освітлення','Блогер говорить швидко'],a:[0]},
+ g5a:{o:['Знайти першоджерело відео та дату його першої появи','Поширити з приміткою «а раптом правда?»','Звернутися до фактчекерів і наукових джерел (FullFact, науковці)','Написати автору образливий коментар','Поскаржитися на відео на платформі як на шкідливу дезінформацію','Вимкнути мобільний інтернет, щоб не опромінитися'],a:[0,2,4]}
+};
+$$('[data-q]').forEach(box=>{const k=box.dataset.q,m=box.dataset.multi;box.innerHTML=Q[k].o.map((t,i)=>`<label class="opt"><input type="${m?'checkbox':'radio'}" name="${k}" value="${i}"><span>${esc(t)}</span></label>`).join('')});
+const getSel=k=>$$(`input[name="${k}"]:checked`).map(i=>+i.value);
+function markOpts(k){const a=Q[k].a;$$(`input[name="${k}"]`).forEach(i=>{const l=i.closest('.opt'),v=+i.value;if(a.includes(v))l.classList.add('good');else if(i.checked)l.classList.add('bad');i.disabled=true})}
+function scoreMulti(k){const s=getSel(k),a=Q[k].a;let r=0;Q[k].o.forEach((_,i)=>{if(a.includes(i)===s.includes(i))r++});return r/Q[k].o.length}
+
+/* ---------- START ---------- */
+const RULES=['Сиджу рівно, екран на відстані 50–70 см від очей','Не торкаюся дротів, розеток і задніх панелей комп\'ютера','Не їм і не п\'ю за робочим місцем','Кожні 15–20 хв даю очам відпочити: дивлюся вдалину 20 секунд','Не переходжу за невідомими посиланнями й не вводжу особисті дані'];
+$('#rules').innerHTML=RULES.map((r,i)=>`<label class="opt"><input type="checkbox" class="rl"><span>${r}</span></label>`).join('');
+$('#iName').value=S.name;$('#iCls').value=S.cls;$('#iTeam').value=S.team;
+function startOk(){const ok=$('#iName').value.trim().length>2&&$('#iCls').value.trim()&&$$('.rl').every(c=>c.checked);$('#go').disabled=!ok;$('#goHint').style.display=ok?'none':''}
+$('#s-start').addEventListener('input',startOk);$('#s-start').addEventListener('change',startOk);
+if(S.start)$$('.rl').forEach(c=>c.checked=true);startOk();
+$('#go').addEventListener('click',()=>{S.name=$('#iName').value.trim();S.cls=$('#iCls').value.trim();S.team=$('#iTeam').value.trim();if(!S.start)S.start=Date.now();S.fb.start='ok';next()});
+
+/* ---------- WARM ---------- */
+const WARM=[
+ ['«ТЕРМІНОВО!!! Поширте всім: з понеділка в школах скасовують усі оцінки»',1,'Капслок, знаки оклику, «поширте всім» і жодного джерела.'],
+ ['«За нормального атмосферного тиску вода кипить при 100 °C»',0,'Перевірюваний науковий факт.'],
+ ['«Лікарі приховують: часник за 3 дні замінює щеплення»',1,'«Приховують» і чудодійні обіцянки — класичні маркери маніпуляції.'],
+ ['«Звук у воді поширюється швидше, ніж у повітрі»',0,'Факт: приблизно 1500 м/с проти 340 м/с.'],
+ ['«Відео: акула пливе вулицею міста після зливи»',1,'Сенсаційне фото без автора й дати. Наступна справа саме про нього.']];
+$('#warmList').innerHTML=WARM.map((w,i)=>`<div class="head"><span>${w[0]}</span><span class="two" data-w="${i}"><button class="pick" data-v="0">Факт</button><button class="pick" data-v="1">Фейк</button></span></div>`).join('');
+const warmA={};
+$('#warmList').addEventListener('click',e=>{const b=e.target.closest('.pick');if(!b||S.fb.warm)return;const g=b.parentElement;g.querySelectorAll('.pick').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');warmA[g.dataset.w]=+b.dataset.v});
+
+/* ---------- SVG scenes ---------- */
+function street(shark,w=400,h=260){
+  let b='';const xs=[0,70,150,230,300,350];xs.forEach((x,i)=>{const bh=110+((i*37)%60);b+=`<rect x="${x}" y="${170-bh}" width="${i%2?66:76}" height="${bh+20}" fill="${['#8b8f96','#a39a8c','#7d8794','#9a8f84','#8a929b','#a19a90'][i]}"/>`;for(let r=0;r<4;r++)for(let c=0;c<3;c++)b+=`<rect x="${x+8+c*20}" y="${180-bh+r*24}" width="11" height="14" fill="#3d4651" opacity=".7"/>`});
+  const s=shark?`<g opacity=".88"><path d="M175 205 q55 -26 120 -4 q-20 14 -60 18 q-40 2 -60 -14z" fill="#4c5560"/><path d="M228 190 l14 -34 l10 30z" fill="#3b434c"/><path d="M290 200 l22 -14 l-6 20z" fill="#3b434c"/></g>`:'';
+  return `<svg class="ph" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sk${shark?1:0}" x2="0" y2="1"><stop offset="0" stop-color="#9aa3ab"/><stop offset="1" stop-color="#cfd3d4"/></linearGradient></defs><rect width="400" height="260" fill="url(#sk${shark?1:0})"/>${b}<rect y="168" width="400" height="92" fill="#6f6a52"/><path d="M0 180 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#8c876c" fill="none" stroke-width="2"/><rect x="30" y="175" width="70" height="22" rx="6" fill="#b23b33"/><rect x="40" y="166" width="46" height="14" rx="5" fill="#922f29"/>${s}<path d="M0 230 q30 -5 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" stroke="#5b573f" fill="none" stroke-width="2"/></svg>`;
+}
+function sharkSea(){return `<svg class="ph" viewBox="0 0 400 260"><rect width="400" height="260" fill="#2c6b8a"/><rect width="400" height="90" fill="#9cc7dc"/><path d="M0 90 h400" stroke="#d6eef8" stroke-width="3"/><rect x="250" y="62" width="120" height="30" fill="#e9e4d8"/><g opacity=".9"><path d="M110 170 q90 -40 190 -6 q-30 22 -95 28 q-65 3 -95 -22z" fill="#4c5560"/><path d="M196 146 l22 -52 l16 46z" fill="#3b434c"/></g></svg>`}
+function queue(){let p='';for(let i=0;i<11;i++){const x=30+i*33,hh=70+(i*13)%22;p+=`<circle cx="${x}" cy="${190-hh}" r="11" fill="#2f2c2a"/><rect x="${x-13}" y="${200-hh}" width="26" height="${hh}" rx="10" fill="${['#5b4a3e','#3e4b5b','#6b3d3d','#45584a'][i%4]}"/>`}
+  return `<svg class="ph" viewBox="0 0 400 260"><rect width="400" height="260" fill="#c9c3b5"/><rect y="40" width="400" height="120" fill="#a8a092"/><rect x="250" y="60" width="120" height="90" fill="#6b625a"/><text x="310" y="85" text-anchor="middle" font-size="16" fill="#efe7d6" font-family="sans-serif">ХЛІБ</text><rect y="200" width="400" height="60" fill="#8f877a"/>${p}</svg>`}
+
+/* ---------- REV ---------- */
+$('#revPhoto').innerHTML=street(true);
+const RES=[
+ [street(true),'Форум «Погода і катастрофи»: «Акула на затопленій трасі?»','вересень 2011','Найраніша поява цього колажу. Коментатори одразу назвали його фотомонтажем.'],
+ [street(false),'Новинний сайт: повінь після урагану, затоплена вулиця','серпень 2011','Оригінальне фото вулиці. Акули на ньому немає.'],
+ [sharkSea(),'Журнал про дику природу: акула біля човна','2005','Звідси вирізали акулу.'],
+ [street(true),'Допис у соцмережі: «Акула в місті після шторму!»','2017','Той самий колаж з іншим містом у підписі.'],
+ [street(true),'Допис: «ОДЕСА ЗАРАЗ!!!»','20.11.2026','Допис, який ти перевіряєш.']];
+let revDone=false;
+function runSearch(){if(revDone)return;$('#revRes').innerHTML='<div class="loading"></div><p class="hint">Шукаємо збіги в 2,1 млрд зображень…</p>';setTimeout(()=>{revDone=true;drawRes('rel')},1200)}
+function drawRes(mode){const ord=mode==='old'?[2,1,0,3,4]:[4,0,3,1,2];
+  $('#revRes').innerHTML=`<div class="row" style="justify-content:space-between"><strong>Знайдено 5 збігів</strong><select id="revSort" style="width:auto"><option value="rel" ${mode==='rel'?'selected':''}>За релевантністю</option><option value="old" ${mode==='old'?'selected':''}>Найдавніші спочатку</option></select></div>`+
+  ord.map(i=>{const r=RES[i];return `<div class="res">${r[0].replace('class="ph"','')}<div><a href="#" onclick="return false">${r[1]}</a><div class="d">${r[2]}</div><div style="font-size:14px">${r[3]}</div></div></div>`}).join('');
+  $('#revSort').addEventListener('change',e=>drawRes(e.target.value))}
+$('#revGo').addEventListener('click',runSearch);
+const dz=$('#drop');$('#revPhoto').addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain','photo'));
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');runSearch()});
+
+/* ---------- EXIF ---------- */
+$('#exifPhoto').innerHTML=queue();
+const EXIF=[['Виробник / модель','Canon EOS 600D',0,'Звичайна камера, нічого дивного.'],['Дата зйомки','2014:03:02 08:14:51',1,'Знято у 2014 році, а не «сьогодні».'],['Дата зміни файлу','2026:11:19 23:40:12',0,'Файл щойно зберегли чи переслали, це звично.'],['Програма','Adobe Photoshop 2025',1,'Фото пройшло через графічний редактор.'],['GPS','50.4501 N, 30.5234 E (Київ)',1,'Координати Києва, а не Львова.'],['Витримка','1/250 с',0,'Технічний параметр.'],['Роздільність','6000 × 4000',0,'Типова для цієї камери.'],['Спалах','Не спрацював',0,'Ранок, спалах не потрібен.']];
+const exA={};
+$('#exifGo').addEventListener('click',()=>{$('#exifTable').innerHTML='<div class="loading"></div>';setTimeout(()=>{
+  $('#exifTable').innerHTML=`<table class="stack"><thead><tr><th>Поле</th><th>Значення</th><th>Оцінка</th></tr></thead><tbody>${EXIF.map((r,i)=>`<tr id="ex${i}"><td>${r[0]}</td><td class="v">${r[1]}</td><td><span class="tog" data-e="${i}"><button class="pick" data-v="0">Норма</button><button class="pick" data-v="1">Підозріло</button></span></td></tr>`).join('')}</tbody></table>`},900)});
+$('#exifTable').addEventListener('click',e=>{const b=e.target.closest('.pick');if(!b||S.fb.exif)return;const g=b.parentElement;g.querySelectorAll('.pick').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');exA[g.dataset.e]=+b.dataset.v});
+
+/* ---------- ELA ---------- */
+const TGT=[{x:300,y:88,r:48,n:'НЛО: вставлений об\'єкт'},{x:452,y:238,r:52,n:'Дерево праворуч: клон лівого дерева'}];
+const tree=(x,f)=>`<g transform="translate(${x} 0)"><rect x="-6" y="240" width="12" height="40" fill="${f?'url(#hot)':'#5a3f2a'}"/><circle cx="0" cy="222" r="30" fill="${f?'url(#hot)':'#2f6b3a'}"/><circle cx="-18" cy="236" r="20" fill="${f?'url(#hot)':'#2a6034'}"/><circle cx="18" cy="236" r="20" fill="${f?'url(#hot)':'#367a42'}"/></g>`;
+const ufo=f=>`<g><ellipse cx="300" cy="94" rx="44" ry="11" fill="${f?'url(#hot)':'#9aa4ad'}"/><ellipse cx="300" cy="84" rx="20" ry="13" fill="${f?'url(#hot)':'#c9e4ef'}"/></g>`;
+$('#elaWrap').innerHTML=`<svg id="elaSvg" class="ph" viewBox="0 0 600 360" style="cursor:crosshair">
+<defs><filter id="nz"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .55  0 0 0 .55 0"/></filter>
+<pattern id="hot" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#f2f2ff"/><rect width="3" height="3" fill="#ff8fe0"/><rect x="3" y="3" width="3" height="3" fill="#8ff7ff"/></pattern>
+<clipPath id="elaClip"><rect id="elaRect" x="0" y="0" width="0" height="360"/></clipPath>
+<linearGradient id="sky" x2="0" y2="1"><stop offset="0" stop-color="#ef9f6c"/><stop offset="1" stop-color="#f7d39b"/></linearGradient></defs>
+<g><rect width="600" height="360" fill="url(#sky)"/><circle cx="110" cy="80" r="26" fill="#fff1c9"/><path d="M0 200 q120 -60 260 -10 t340 -20 v190 h-600z" fill="#6c8a52"/><path d="M0 270 q150 -30 300 0 t300 -10 v100 h-600z" fill="#3f6f93"/>${tree(150)}${tree(452)}${ufo()}</g>
+<g clip-path="url(#elaClip)"><rect width="600" height="360" fill="#0b0c10"/><rect width="600" height="360" filter="url(#nz)" opacity=".5"/><g fill="none" stroke="#3a3f4a" stroke-width="2"><circle cx="110" cy="80" r="26"/><path d="M0 200 q120 -60 260 -10 t340 -20"/><path d="M0 270 q150 -30 300 0 t300 -10"/></g><g opacity=".35">${tree(150)}</g>${tree(452,1)}${ufo(1)}</g>
+<line id="elaLine" x1="0" x2="0" y1="0" y2="360" stroke="#ffd400" stroke-width="3"/><g id="elaMarks"></g></svg>`;
+let ela={left:5,found:[]};
+$('#elaSl').addEventListener('input',e=>{const v=+e.target.value;$('#elaPct').textContent=v;$('#elaRect').setAttribute('width',v*6);$('#elaLine').setAttribute('x1',v*6);$('#elaLine').setAttribute('x2',v*6)});
+$('#elaSvg').addEventListener('click',e=>{if(S.fb.ela||ela.left<=0)return;const sv=$('#elaSvg'),p=sv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(sv.getScreenCTM().inverse());
+  ela.left--;let hit=-1;TGT.forEach((t,i)=>{if(Math.hypot(q.x-t.x,q.y-t.y)<t.r)hit=i});
+  if(hit>=0&&!ela.found.includes(hit))ela.found.push(hit);
+  $('#elaMarks').insertAdjacentHTML('beforeend',`<circle cx="${q.x}" cy="${q.y}" r="14" fill="none" stroke="${hit>=0?'#3fc28c':'#ff5a4f'}" stroke-width="4"/>`);
+  $('#elaLeft').textContent=ela.left;$('#elaFound').textContent=ela.found.length;toast(hit>=0?'Влучно: тут сліди вставки':'Тут усе стиснуто рівномірно')});
+
+/* ---------- AUDIO ---------- */
+const DUR=10,SEG=[[0,3.2,.07,1,170],[3.35,6.4,.018,0,235],[6.4,10,.075,1,170]];
+const WORDS=[[.3,.9],[1,1.6],[1.8,2.5],[2.6,3.1],[3.5,4.2],[4.4,5],[5.2,6.2],[6.6,7.3],[7.5,8.4],[8.6,9.5]];
+const SPLICE=[3.25,6.4];let marks=[];
+$('#trans').innerHTML=['0,0–3,2 с: «Шановні учні, нагадую про…»','3,4–6,4 с: «…завтра уроків не буде…»','6,4–10 с: «…екскурсію до музею»'].map(t=>`<span class="chip">${t}</span>`).join('');
+let rs=7;const rnd=()=>(rs=(rs*16807)%2147483647)/2147483647;
+const N=900,env=[];for(let i=0;i<N;i++){const t=i/N*DUR;const sg=SEG.find(s=>t>=s[0]&&t<s[1]);let a=sg?sg[2]*(0.6+rnd()*0.8):0;const w=WORDS.find(w=>t>=w[0]&&t<w[1]);if(w){const k=Math.sin(Math.PI*(t-w[0])/(w[1]-w[0]));a+=k*(0.45+0.4*Math.abs(Math.sin(t*23)))*(0.7+rnd()*0.3)}env.push(Math.min(a,.98))}
+let head=-1;
+function drawWave(){const c=$('#wave'),x=c.getContext('2d'),W=c.width,H=c.height,mid=95;x.clearRect(0,0,W,H);
+  x.fillStyle='#0f1114';x.fillRect(0,0,W,H);
+  for(let i=0;i<N;i++){const px=i/N*W,a=env[i]*85;x.fillStyle='#7aa2ff';x.fillRect(px,mid-a,W/N+.4,a*2)}
+  x.fillStyle='#8b8f99';x.font='13px Golos Text';x.fillText('Хвиля',8,16);x.fillText('Фон (гул 50 Гц)',8,H-50);
+  SEG.forEach(s=>{const x0=s[0]/DUR*W,x1=s[1]/DUR*W;x.fillStyle=s[3]?'rgba(255,212,0,.85)':'rgba(255,212,0,.08)';x.fillRect(x0,H-38,x1-x0,6);x.fillStyle=`rgba(180,190,255,${s[2]*5})`;x.fillRect(x0,H-26,x1-x0,16)});
+  x.fillStyle='#8b8f99';for(let s=0;s<=DUR;s+=2){x.fillText(s+' с',s/DUR*W+3,H-2)}
+  marks.forEach(m=>{const px=m/DUR*W;x.strokeStyle='#ff5a4f';x.lineWidth=3;x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke()});
+  if(head>=0){const px=head/DUR*W;x.strokeStyle='#fff';x.lineWidth=2;x.beginPath();x.moveTo(px,0);x.lineTo(px,H);x.stroke()}}
+drawWave();
+$('#wave').addEventListener('click',e=>{if(S.fb.audio)return;const r=e.target.getBoundingClientRect();const t=(e.clientX-r.left)/r.width*DUR;if(marks.length>=3){toast('Максимум 3 мітки');return}marks.push(+t.toFixed(2));drawWave()});
+$('#clr').addEventListener('click',()=>{if(S.fb.audio)return;marks=[];drawWave()});
+let actx;
+$('#play').addEventListener('click',()=>{try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const sr=actx.sampleRate,buf=actx.createBuffer(1,sr*DUR,sr),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++){const t=i/sr,sg=SEG.find(s=>t>=s[0]&&t<s[1]);let v=0;if(sg){v+=(Math.random()*2-1)*sg[2]*.6;if(sg[3])v+=Math.sin(2*Math.PI*50*t)*.05;const w=WORDS.find(w=>t>=w[0]&&t<w[1]);if(w){const k=Math.sin(Math.PI*(t-w[0])/(w[1]-w[0]));const f=sg[4]*(1+.08*Math.sin(t*9));v+=k*.28*(Math.sin(2*Math.PI*f*t)+.5*Math.sin(4*Math.PI*f*t)+.25*Math.sin(6*Math.PI*f*t))*(.6+.4*Math.sin(2*Math.PI*5*t))}}d[i]=v}
+  const src=actx.createBufferSource();src.buffer=buf;src.connect(actx.destination);const t0=actx.currentTime;src.start();
+  const step=()=>{head=actx.currentTime-t0;if(head>DUR){head=-1;drawWave();return}drawWave();requestAnimationFrame(step)};step()}catch(err){toast('Браузер не дозволив звук. Аналізуй візуально.')}});
+
+/* ---------- VIDEO ---------- */
+const FR=[{s:'Друзі, привіт! Сьогодні у мене для вас сюрприз',m:0},{s:'я дарую 1000 гривень кожному підписнику',m:1},{s:'потрібно лише перейти за посиланням',m:2,bad:'halo'},{s:'і ввести дані своєї картки',m:1},{s:'це абсолютно безпечно, повірте мені',m:0,bad:'ear'},{s:'акція діє лише сьогодні до опівночі',m:2},{s:'поспішайте, кількість місць обмежена',m:1,bad:'double'},{s:'посилання в описі, до зустрічі!',m:0}];
+const BADN={halo:'розмитий «ореол» по контуру обличчя',ear:'зникла сережка, яка є на інших кадрах',double:'очі й рот «роздвоюються», маска зсунулась'};
+function face(f,big){const mo=[`<path d="M70 92 q10 5 20 0" stroke="#7a2e2e" stroke-width="3" fill="none"/>`,`<ellipse cx="80" cy="92" rx="9" ry="5" fill="#5a1f22"/>`,`<ellipse cx="80" cy="93" rx="7" ry="8" fill="#5a1f22"/>`][f.m];
+  const eyes=(dx,dy,op)=>`<g opacity="${op}" transform="translate(${dx} ${dy})"><ellipse cx="66" cy="66" rx="6" ry="4.5" fill="#fff"/><ellipse cx="94" cy="66" rx="6" ry="4.5" fill="#fff"/><circle cx="66" cy="66" r="2.8" fill="#2c2420"/><circle cx="94" cy="66" r="2.8" fill="#2c2420"/></g>`;
+  return `<svg viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg" ${big?'class="ph" style="border-radius:10px 10px 0 0"':''}><rect width="160" height="120" fill="#3a4a5c"/><rect x="104" y="12" width="40" height="52" fill="#56708a"/><rect x="0" y="96" width="160" height="24" fill="#2a3542"/>
+  <path d="M40 120 q40 -30 80 0z" fill="#d84f3f"/><rect x="72" y="88" width="16" height="16" fill="#d9a07f"/>
+  <ellipse cx="80" cy="70" rx="27" ry="33" fill="#e3b08e"/><path d="M107 62 a27 33 0 0 1 -14 38 a27 33 0 0 0 0 -60z" fill="#c48d6c" opacity=".7"/>
+  <path d="M52 62 q2 -36 30 -36 q28 0 26 36 q-6 -20 -28 -20 q-22 0 -28 20z" fill="#3a2a20"/>
+  ${f.bad!=='ear'?'<circle cx="53" cy="82" r="3" fill="#ffd400"/>':''}${f.bad==='halo'?'<ellipse cx="81" cy="70" rx="30" ry="36" fill="none" stroke="#ff9ad5" stroke-width="3" opacity=".7"/><ellipse cx="79" cy="70" rx="29" ry="35" fill="none" stroke="#9af0ff" stroke-width="2" opacity=".6"/>':''}
+  ${eyes(0,0,1)}${f.bad==='double'?eyes(4,3,.55):''}<path d="M78 72 l-3 10 h7" stroke="#b07a5c" stroke-width="2" fill="none"/>${mo}${f.bad==='double'?`<g opacity=".5" transform="translate(4 4)">${mo}</g>`:''}</svg>`}
+let vf=0;const flags=new Set();
+function drawVid(){$('#vidMain').innerHTML=face(FR[vf],1);$('#vidSub').textContent=FR[vf].s;$('#vidSl').value=vf;$('#frameLbl').textContent=`Кадр ${vf+1} з 8 · 00:0${vf}`;
+  $('#flagBtn').textContent=flags.has(vf)?'Зняти позначку з кадру':'Позначити кадр як підозрілий';
+  $('#frames').innerHTML=FR.map((f,i)=>`<button data-f="${i}" class="${i===vf?'cur':''} ${flags.has(i)?'flag':''}" aria-label="Кадр ${i+1}">${face(f)}</button>`).join('')}
+drawVid();
+$('#vidSl').addEventListener('input',e=>{vf=+e.target.value;drawVid()});
+$('#frames').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vf=+b.dataset.f;drawVid()});
+$('#flagBtn').addEventListener('click',()=>{if(S.fb.video)return;flags.has(vf)?flags.delete(vf):flags.add(vf);drawVid()});
+
+/* ---------- 5G ---------- */
+const G5=[['Радіохвилі 5G переносять коронавірус',1,'Віруси не можуть передаватися радіохвилями.'],['У 2020 році у Британії підпалювали вежі зв\'язку',0,'Це задокументовані події, зокрема в Бірмінгемі й Ліверпулі.'],['Підпали пошкодили обладнання, через яке працювали екстрені виклики',0,'Постраждав і зв\'язок швидкої допомоги.'],['Хештег #5GKills підтверджено науковими дослідженнями',1,'Хештеги поширювалися без жодних наукових підтверджень.'],['Передати вірус радіохвилями фізично неможливо',0,'Пояснення науковців та інженерів.'],['Уряд Британії визнав зв\'язок між 5G і COVID-19',1,'Навпаки, уряд назвав це конспірологією.']];
+$('#g5List').innerHTML='<h3>Факт чи фейк?</h3>'+G5.map((g,i)=>`<div class="head"><span>${g[0]}</span><span class="two" data-g="${i}"><button class="pick" data-v="0">Факт</button><button class="pick" data-v="1">Фейк</button></span></div>`).join('');
+const g5A={};$('#g5List').addEventListener('click',e=>{const b=e.target.closest('.pick');if(!b||S.fb.g5)return;const g=b.parentElement;g.querySelectorAll('.pick').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');g5A[g.dataset.g]=+b.dataset.v});
+
+/* ---------- CARD ---------- */
+const TOOLS={'TinEye':['пошук','завантаж','найдавн','дат','збіг'],'Переглядач метаданих EXIF':['метадан','дат','gps','камер','програм','координат'],'FotoForensics (ELA)':['стиск','ela','підсвіч','вставк','jpeg','ділянк'],'InVID-WeVerify':['кадр','відео','ключов','пошук','посилан'],'StopFake / фактчекінгові сайти':['перевір','джерел','фактчек','спростув','пошук']};
+$('#cTool').innerHTML=Object.keys(TOOLS).map(t=>`<option>${t}</option>`).join('');
+const THINT={'TinEye':'Сьогодні в Справі 1: шукав, де вперше з\'явилося фото акули.','Переглядач метаданих EXIF':'Сьогодні в Справі 2: читав дату, координати й програму у файлі фото.','FotoForensics (ELA)':'Сьогодні в Справі 3: шукав вставлені ділянки на фото «НЛО».','InVID-WeVerify':'Сьогодні в Справі 5: розкладав відео на кадри.','StopFake / фактчекінгові сайти':'Сьогодні в Справі 6: так спростовували фейк про 5G.'};
+const CF=['cTool','cWhat','cHow','cWhen','cSecret'];
+CF.forEach(id=>{if(S.card[id])$('#'+id).value=S.card[id]});
+function prev(){if(!TOOLS[$('#cTool').value])$('#cTool').selectedIndex=0;CF.forEach(id=>S.card[id]=$('#'+id).value);save();const c=S.card;$('#cToolHint').textContent=THINT[c.cTool]||'';
+  $('#cPrev').innerHTML=`<span class="stamp v" style="position:absolute;right:14px;top:14px">ІНСТРУМЕНТ</span><h3>${esc(c.cTool)}</h3><div class="lab">Що це?</div><p>${esc(c.cWhat)||'<span class="hint">…</span>'}</p><div class="lab">Як працює?</div><p>${esc(c.cHow)||'<span class="hint">…</span>'}</p><div class="lab">Яку інформацію ним перевірити?</div><p>${esc(c.cWhen)||'<span class="hint">…</span>'}</p><div class="secret"><strong>Секрет фахівця:</strong> ${esc(c.cSecret)||'…'}</div><p class="hint" style="margin-top:10px">Автор: ${esc(S.name)} ${esc(S.cls)}</p>`}
+$('#s-card').addEventListener('input',prev);prev();
+const cardText=()=>{const c=S.card;return `КАРТКА ІНСТРУМЕНТУ: ${c.cTool}\nЩо це? ${c.cWhat}\nЯк працює?\n${c.cHow}\nЯку інформацію ним перевірити? ${c.cWhen}\nСекрет фахівця: ${c.cSecret}`};
+async function copy(t){try{await navigator.clipboard.writeText(t);toast('Скопійовано')}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Скопійовано')}catch(_){toast('Виділи текст і скопіюй вручну')}a.remove()}}
+$('#cCopy').addEventListener('click',()=>copy(cardText()));
+
+/* ---------- CHECKS ---------- */
+function finish(id,pts,html){pts=Math.max(0,Math.min(MAX[id],Math.round(pts*10)/10));S.pts[id]=pts;
+  S.fb[id]=`<div class="fb"><div class="row" style="justify-content:space-between"><span class="pts">${pts} / ${MAX[id]}</span>${pts>=MAX[id]*.75?'<span class="stamp v">ПЕРЕВІРЕНО</span>':'<span class="stamp f">ПЕРЕГЛЯНЬ</span>'}</div>${html}<div class="row" style="margin-top:12px"><button class="btn y nextBtn">Далі →</button></div></div>`;
+  save();showFb(id);nav()}
+function showFb(id){const box=$('#fb-'+id);if(!box)return;box.innerHTML=S.fb[id];const b=$(`[data-check="${id}"]`);if(b)b.style.display='none';box.querySelector('.nextBtn').addEventListener('click',next)}
+const CHECK={
+ warm(){if(Object.keys(warmA).length<WARM.length)return 'Познач усі заголовки.';let r=0,li='';WARM.forEach((w,i)=>{const ok=warmA[i]===w[1];if(ok)r++;$$(`[data-w="${i}"] .pick`).forEach(b=>{if(+b.dataset.v===w[1])b.classList.add('good');else if(b.classList.contains('sel'))b.classList.add('bad')});li+=`<li>${ok?'✓':'✗'} ${w[2]}</li>`});finish('warm',r,`<ul>${li}</ul>`)},
+ rev(){if(!revDone)return 'Спочатку виконай пошук за зображенням.';if(['rev1','rev2','rev3'].some(k=>!getSel(k).length))return 'Дай відповідь на всі три питання.';let p=0;['rev1','rev2','rev3'].forEach(k=>{if(getSel(k)[0]===Q[k].a[0])p+=5;markOpts(k)});
+  finish('rev',p,'<ul><li>Сортування «Найдавніші спочатку» показує першу появу колажу: 2011 рік.</li><li>Окремо знайшлися фото вулиці без акули (2011) і фото акули з журналу (2005), тобто це фотомонтаж.</li><li>Старе фото з новим підписом і закликом «поширте» — типова схема фейку.</li></ul>')},
+ exif(){if(Object.keys(exA).length<EXIF.length)return 'Відкрий метадані й оціни кожен рядок.';let r=0,li='';EXIF.forEach((e,i)=>{const ok=exA[i]===e[2];if(ok)r++;$(`#ex${i}`).style.background=ok?'color-mix(in srgb,var(--ok) 12%,transparent)':'color-mix(in srgb,var(--fake) 14%,transparent)';if(e[2]||!ok)li+=`<li>${ok?'✓':'✗'} <b>${e[0]}</b>: ${e[3]}</li>`});
+  finish('exif',r/EXIF.length*15,`<ul>${li}</ul><p class="hint">Пам'ятай: соцмережі часто видаляють метадані, тож їхня відсутність не доводить ні правди, ні фейку.</p>`)},
+ ela(){if(!getSel('ela1').length)return 'Дай відповідь на питання про ELA.';let p=ela.found.length*5;if(getSel('ela1')[0]===0)p+=5;markOpts('ela1');ela.left=0;
+  $('#elaSl').value=100;$('#elaSl').dispatchEvent(new Event('input'));TGT.forEach(t=>$('#elaMarks').insertAdjacentHTML('beforeend',`<circle cx="${t.x}" cy="${t.y}" r="${t.r}" fill="none" stroke="#ffd400" stroke-width="3" stroke-dasharray="8 6"/>`));
+  finish('ela',p,`<ul>${TGT.map((t,i)=>`<li>${ela.found.includes(i)?'✓':'✗'} ${t.n}</li>`).join('')}<li>ELA підказує, де шукати, але не є доказом сам по собі: висновок роби разом з іншими перевірками.</li></ul>`)},
+ audio(){if(!marks.length)return 'Постав хоча б одну мітку на хвилі.';if(!getSel('aud1').length)return 'Обери ознаки монтажу.';const hit=SPLICE.filter(s=>marks.some(m=>Math.abs(m-s)<.45)).length;const extra=Math.max(0,marks.length-hit-1);let p=hit*4-extra*2+scoreMulti('aud1')*7;markOpts('aud1');
+  marks=[...marks];SPLICE.forEach(s=>{});drawWave();const c=$('#wave').getContext('2d'),W=$('#wave').width;SPLICE.forEach(s=>{c.strokeStyle='#3fc28c';c.setLineDash([6,5]);c.lineWidth=3;c.beginPath();c.moveTo(s/DUR*W,0);c.lineTo(s/DUR*W,240);c.stroke()});c.setLineDash([]);
+  finish('audio',p,`<ul><li>Склейка 1 ≈ 3,3 с: цифрова тиша, зникає гул 50 Гц, голос стає вищим (${SPLICE.filter(s=>marks.some(m=>Math.abs(m-s)<.45)).includes(3.25)?'знайдено':'пропущено'}).</li><li>Склейка 2 ≈ 6,4 с: фон і гул різко повертаються (${marks.some(m=>Math.abs(m-6.4)<.45)?'знайдено':'пропущено'}).</li><li>Фразу «завтра уроків не буде» вставили з іншого запису й змінили зміст повідомлення. Перевір через офіційний канал школи.</li></ul>`)},
+ video(){if(!getSel('vid1').length)return 'Дай відповідь на питання.';let r=0;FR.forEach((f,i)=>{if(!!f.bad===flags.has(i))r++});let p=r/8*10+(getSel('vid1')[0]===0?5:0);markOpts('vid1');
+  finish('video',p,`<ul>${FR.map((f,i)=>f.bad?`<li>${flags.has(i)?'✓':'✗'} Кадр ${i+1}: ${BADN[f.bad]}</li>`:(flags.has(i)?`<li>✗ Кадр ${i+1} без артефактів</li>`:'')).join('')}<li>Людина жодного разу не кліпає: ранні діпфейки часто цим видають себе.</li><li>Головне: блогер просить дані картки. Це шахрайство, хоч би яким справжнім виглядало відео.</li></ul>`)},
+ g5(){if(Object.keys(g5A).length<G5.length)return 'Розсортуй усі твердження.';if(getSel('g5a').length!==3)return 'Обери рівно три дії.';let r=0,li='';G5.forEach((g,i)=>{const ok=g5A[i]===g[1];if(ok)r++;$$(`[data-g="${i}"] .pick`).forEach(b=>{if(+b.dataset.v===g[1])b.classList.add('good');else if(b.classList.contains('sel'))b.classList.add('bad')});if(!ok)li+=`<li>✗ ${g[0]}: ${g[2]}</li>`});
+  const act=getSel('g5a').filter(v=>Q.g5a.a.includes(v)).length;markOpts('g5a');finish('g5',r+act*4/3,`<ul>${li||'<li>Усі твердження розсортовано правильно.</li>'}<li>Дії фахівця: знайти першоджерело, звернутися до фактчекерів і науковців, поскаржитися на платформі. Так і спростували фейк у 2020 році.</li></ul>`)},
+ card(){prev();const c=S.card;const len=[c.cWhat,c.cHow,c.cWhen,c.cSecret].map(s=>(s||'').trim().length);if(len.some(l=>l<8))return 'Заповни всі поля картки (хоча б кілька слів у кожному).';
+  let p=0,li='';[['Що це?',c.cWhat,25],['Як працює?',c.cHow,40],['Приклад з життя',c.cWhen,25],['Секрет фахівця',c.cSecret,20]].forEach(([n,t,m])=>{const g=t.trim().length>=m?2:1;p+=g;li+=`<li>${g===2?'✓':'±'} ${n}${g<2?': варто розписати детальніше':''}</li>`});
+  const steps=c.cHow.split('\n').filter(s=>s.trim()).length;const kw=TOOLS[c.cTool].filter(k=>(c.cHow+c.cWhat).toLowerCase().includes(k)).length;if(steps>=3)p+=1;else li+='<li>± Опиши принаймні 3 кроки, кожен з нового рядка</li>';if(kw>=2)p+=1;else li+='<li>± Додай ключові поняття інструмента (напр., '+TOOLS[c.cTool].slice(0,3).join(', ')+')</li>';
+  CF.forEach(id=>$('#'+id).disabled=true);finish('card',p,`<ul>${li}</ul>`)}
+};
+$$('[data-check]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.check;if(S.fb[id])return;const err=CHECK[id]();if(typeof err==='string')toast(err)}));
+Object.keys(MAX).forEach(id=>{if(S.fb[id])showFb(id)});
+if(S.fb.card)CF.forEach(id=>$('#'+id).disabled=true);
+
+/* ---------- FINAL ---------- */
+const CRIT=[['Розпізнає ознаки редагування фото',['rev','exif','ela'],'Тренуйся на справах 1–3: зворотний пошук, EXIF, ELA.'],['Аналізує аудіо та відео на маніпуляції',['audio','video'],'Звертай увагу на фон, склейки, кліпання, контури обличчя.'],['Критично оцінює медіатекст',['warm','g5'],'Шукай першоджерело і фактчекерів, перш ніж повірити.'],['Створює інформаційний продукт',['card'],'Опиши інструмент кроками і додай власну пораду.']];
+const lvl=p=>p>=.85?['Високий','h']:p>=.65?['Достатній','']:p>=.4?['Середній','']:['Початковий','l'];
+const grade=()=>Math.max(1,Math.round(total()/100*12));
+const code=()=>{const s=`${S.name}|${S.cls}|${Math.round(total()*10)}|${S.start}`;let h=5381;for(const ch of s)h=((h<<5)+h+ch.charCodeAt(0))>>>0;return 'DT-'+h.toString(36).toUpperCase().slice(0,6)};
+const RLAB=['Слабко','Частково','Так!'];
+$$('[data-r]').forEach(r=>{r.innerHTML=RLAB.map((t,i)=>`<button class="pick ${S.refl[r.dataset.r]===i?'sel':''}" data-v="${i}">${t}</button>`).join('');r.addEventListener('click',e=>{const b=e.target.closest('.pick');if(!b)return;r.querySelectorAll('.pick').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.refl[r.dataset.r]=+b.dataset.v;save();renderReport()})});
+$('#rText').value=S.refl.t||'';$('#rText').addEventListener('input',e=>{S.refl.t=e.target.value;save();renderReport()});
+$('#tMail').value=S.mail||'';$('#tMail').addEventListener('input',e=>{S.mail=e.target.value;save();renderReport()});
+function renderFinal(){const t=total(),g=grade(),dur=fmt(Math.floor(((S.end||Date.now())-S.start)/1000));
+  $('#finGrade').innerHTML=`${g}<small> / 12</small>`;$('#finPts').textContent=Math.round(t);$('#finBar').style.width=t+'%';$('#finTime').textContent=dur;
+  $('#finTitle').textContent=g>=10?'Справжній кібердетектив!':g>=7?'Гарне розслідування!':g>=4?'Розслідування завершено, є що підтягнути':'Розслідування завершено, варто повторити';
+  $('#finCode').textContent='Код перевірки: '+code();
+  $('#finTable tbody').innerHTML=CRIT.map(([n,ids,tip])=>{const p=ids.reduce((a,i)=>a+(S.pts[i]||0),0),m=ids.reduce((a,i)=>a+MAX[i],0),[l,c]=lvl(p/m);return `<tr><td>${n}</td><td>${ids.map(i=>STAGES.find(s=>s[0]===i)[1]).join(', ')}</td><td>${Math.round(p*10)/10} / ${m}</td><td class="lvl ${c}">${l}</td><td>${p/m>=.85?'Чудово, так тримати.':tip}</td></tr>`}).join('');
+  renderReport()}
+function reportText(){const t=total();return `ПРАКТИЧНА РОБОТА 3. Аналіз медіатекстів: виявлення фактів редагування фото, аудіо, відео
+Учень/учениця: ${S.name}, клас ${S.cls}${S.team?', команда «'+S.team+'»':''}
+Інструктаж з БЖД: пройдено
+Дата: ${new Date(S.start||Date.now()).toLocaleDateString('uk-UA')} · Час роботи: ${fmt(Math.floor(((S.end||Date.now())-S.start)/1000))}
+
+РЕЗУЛЬТАТИ
+${STAGES.slice(1,9).map(([id,n])=>`• ${n}: ${S.pts[id]??0} / ${MAX[id]}`).join('\n')}
+Разом: ${Math.round(t)} / 100 → ОЦІНКА: ${grade()} / 12
+
+ЛИСТ ОЦІНЮВАННЯ
+${CRIT.map(([n,ids])=>{const p=ids.reduce((a,i)=>a+(S.pts[i]||0),0),m=ids.reduce((a,i)=>a+MAX[i],0);return `• ${n}: ${lvl(p/m)[0]} (${Math.round(p*10)/10}/${m})`}).join('\n')}
+
+${cardText()}
+
+САМОРЕФЛЕКСІЯ
+Зрозуміло: ${RLAB[S.refl.r1]??'—'} · Цікаво: ${RLAB[S.refl.r2]??'—'} · Корисно: ${RLAB[S.refl.r3]??'—'}
+Що я перевірятиму: ${S.refl.t||'—'}
+
+Код перевірки: ${code()}`}
+function renderReport(){const t=reportText();$('#report').textContent=t;$('#mail').href=`mailto:${encodeURIComponent(S.mail||'')}?subject=${encodeURIComponent('ПР3 Цифровий детектив — '+S.name+' '+S.cls)}&body=${encodeURIComponent(t)}`}
+$('#repCopy').addEventListener('click',()=>copy(reportText()));
+let rc=0;$('#reset').addEventListener('click',()=>{if(++rc<2){toast('Натисни ще раз, щоб стерти прогрес');setTimeout(()=>rc=0,2500);return}try{localStorage.removeItem('pr3det')}catch(e){}location.reload()});
+
+nav();
+}
+</script>
+</body>
+</html>
