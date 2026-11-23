@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажер: перетворення графіків</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: жвавий, але зібраний урок; говоримо з класом, а не читаємо слайд
+   IDEA: зошит у клітинку, де синя ручка — початковий графік, червона — перетворений
+   PICTURE: живі координатні площини, які учні рухають самі
+   COLOUR and TYPE: білий папір, синя клітинка, синя і червона «ручки», жовтий маркер; Manrope + Caveat для «відкриттів»
+   LAYOUT: розділи уроку зверху вниз, у кожному час і позначка «обов’язково / якщо встигнемо» */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0f141b);--ink:light-dark(#142033,#e9eef6);--muted:light-dark(#5a6678,#9aa7b8);
+--grid:light-dark(#e1ebf7,#1d2734);--axis:light-dark(#142033,#c9d4e3);--blue:light-dark(#1f5fd1,#78a8ff);
+--red:light-dark(#d2342b,#ff7468);--hl:light-dark(#ffe066,#f2c94c);--card:light-dark(#f3f7fc,#161d27);
+--line:light-dark(#d4e0ef,#283445);--ok:light-dark(#1d7a45,#5fd38f);--okbg:light-dark(#e3f5ea,#14301f);--nobg:light-dark(#fde8e6,#3a1b19)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+html{scroll-padding-top:72px;scroll-behavior:smooth}
+.band{padding:clamp(28px,4vw,60px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.paper{background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+.tint{background:var(--card)}
+h1{font-size:clamp(34px,5vw,52px);line-height:1.05;margin:.2em 0 .25em;text-wrap:balance;font-weight:800}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.1;margin:0;text-wrap:balance;font-weight:800}
+h3{font-size:20px;margin:0 0 8px}
+p{margin:.4em 0;max-width:68ch}
+.meta{color:var(--muted);font-weight:600}
+.hand{font-family:Caveat,cursive;font-size:26px;line-height:1.2}
+.nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px max(5vw,16px)}
+.nav a{flex:none;color:var(--ink);text-decoration:none;font-weight:700;font-size:15px;padding:10px 14px;border-radius:10px}
+.nav a:hover,.nav a:focus-visible{background:var(--card)}
+.head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:18px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding:4px 12px;border-radius:99px;border:1.5px solid var(--line);white-space:nowrap}
+.chip.must{border-color:var(--blue);color:var(--blue)}
+.chip.opt{border-color:var(--muted);color:var(--muted);border-style:dashed}
+.tip{font-size:15px;color:var(--muted);border-left:3px solid var(--hl);padding:4px 0 4px 12px;margin:6px 0 18px;max-width:80ch}
+.tip b{color:var(--ink)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);align-items:center}
+.plan{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:6px}
+.plan li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:6px 0;font-weight:600}
+.plan span{color:var(--muted);white-space:nowrap}
+.fig{position:relative;min-height:340px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);overflow:hidden}
+.fig>canvas{position:absolute;inset:0;width:100%;height:100%}
+.fig.tall{min-height:440px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;margin-top:8px;color:var(--muted)}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid var(--blue);vertical-align:middle;margin-right:6px}
+.legend i.r{border-color:var(--red)}.legend i.d{border-top-style:dashed}
+button{font:inherit;font-weight:700;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;min-height:44px;padding:8px 16px;cursor:pointer}
+button:hover{border-color:var(--blue)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+button.pri{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card{background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:clamp(16px,2.4vw,26px)}
+/* розминка */
+.yn{max-width:860px}
+.stmt{font-size:clamp(22px,2.8vw,30px);font-weight:700;line-height:1.25;min-height:3.8em;margin:10px 0 16px}
+.yn .big button{font-size:20px;min-width:130px;min-height:56px}
+.dots{display:flex;gap:6px;flex-wrap:wrap}
+.dots b{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.dots b.ok{background:var(--ok)}.dots b.no{background:var(--red)}.dots b.cur{outline:2px solid var(--ink)}
+.fb{margin-top:14px;padding:12px 16px;border-radius:12px;font-weight:600;display:none}
+.fb.show{display:block}.fb.ok{background:var(--okbg)}.fb.no{background:var(--nobg)}
+/* лабораторія */
+.lab{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(16px,3vw,32px);align-items:start}
+.formula{font-size:clamp(28px,3.6vw,40px);font-weight:800;color:var(--red);margin:4px 0 2px;white-space:nowrap;overflow-x:auto}
+.ctl{display:grid;gap:14px;margin-top:14px}
+.ctl label{font-weight:700;font-size:15px;display:flex;justify-content:space-between;gap:10px}
+.ctl label output{color:var(--red);white-space:nowrap}
+input[type=range]{width:100%;height:44px;accent-color:var(--red)}
+.missions{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.missions li{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg)}
+.missions li.cur{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 18%,transparent)}
+.missions li.lock{opacity:.5}
+.missions li .t{font-weight:700}
+.missions li .disc{display:none;margin-top:6px}
+.missions li.done .disc{display:block}
+.missions li.done .t::before{content:"✓ ";color:var(--ok)}
+.disc .hand{color:var(--blue)}
+mark{background:var(--hl);color:#142033;padding:0 3px;border-radius:3px}
+/* вправи */
+.ex{display:grid;gap:clamp(16px,2.5vw,28px)}
+.exgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,2.5vw,28px);align-items:start}
+.q{font-size:clamp(26px,3.4vw,36px);font-weight:800;margin:6px 0 14px;white-space:nowrap;overflow-x:auto}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opts button{text-align:left;font-size:17px;min-height:56px}
+.opts button.right{background:var(--okbg);border-color:var(--ok)}
+.opts button.wrong{background:var(--nobg);border-color:var(--red)}
+.score{font-weight:700;color:var(--muted);white-space:nowrap}
+.pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px);gap:6px}
+.pad button{padding:0;font-size:22px}
+.vin{display:flex;align-items:center;gap:6px;font-size:28px;font-weight:800}
+.vin input{width:76px;font:inherit;font-size:24px;text-align:center;border:1.5px solid var(--line);border-radius:10px;padding:6px;background:var(--bg);color:var(--ink)}
+/* підсумок */
+table{border-collapse:collapse;width:100%;font-size:16px}
+th,td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+th{font-size:14px;color:var(--muted)}
+td:first-child{font-weight:800;white-space:nowrap}
+.scroll{overflow-x:auto}
+details{border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--bg)}
+details+details{margin-top:8px}
+summary{cursor:pointer;font-weight:700}
+.starters{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.starters div{border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px;font-family:Caveat,cursive;font-size:26px;line-height:1.2}
+.self button.on{background:var(--hl);color:#142033;border-color:var(--hl)}
+@media(max-width:900px){.hero,.lab,.exgrid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){table{font-size:14px}.opts{grid-template-columns:minmax(0,1fr)}.fig{min-height:300px}.fig.tall{min-height:340px}
+.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;font-weight:400;color:var(--muted)}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+.xc{background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:clamp(16px,2.6vw,30px);margin-bottom:22px}
+.xg{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(16px,3vw,34px);align-items:start}
+.xn{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--bg);font-weight:800;flex:none}
+.rule{background:color-mix(in srgb,var(--hl) 28%,var(--bg));border-radius:12px;padding:12px 16px;margin:14px 0 8px;font-size:18px;line-height:1.5}
+.xf{font-size:clamp(24px,3vw,32px)}
+.xnote{font-weight:700;color:var(--red);min-height:1.5em;margin-top:6px}
+.xb button{font-size:16px}
+button.ghost{border-style:dashed;color:var(--muted)}
+.qz{border-top:1.5px dashed var(--line);margin-top:20px;padding-top:14px}
+.qz button.right{background:var(--okbg);border-color:var(--ok)}
+.qz button.wrong{background:var(--nobg);border-color:var(--red)}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.links a{display:block;text-decoration:none;color:var(--ink);border:1.5px solid var(--line);border-radius:16px;padding:18px 20px;background:var(--bg)}
+.links a:hover{border-color:var(--blue)}
+.links a b{display:block;font-size:20px;margin-bottom:4px;color:var(--blue)}
+.cta{display:inline-flex;align-items:center;min-height:48px;padding:10px 20px;border-radius:12px;background:var(--blue);color:var(--bg);font-weight:800;text-decoration:none}
+@media(max-width:900px){.xg{grid-template-columns:minmax(0,1fr)}}
+[hidden]{display:none!important}
+.hintbox{margin-top:14px;padding:14px 18px;border-radius:12px;background:color-mix(in srgb,var(--hl) 28%,var(--bg));border:1.5px dashed var(--hl);font-size:17px;line-height:1.55}
+.hintbox::before{content:"Підказка";display:block;font-family:Caveat,cursive;font-size:26px;line-height:1;margin-bottom:6px;color:var(--ink)}
+button.hb{background:var(--hl);border-color:var(--hl);color:#142033}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band paper">
+ <div class="wrap">
+  <div class="meta">Алгебра · Найпростіші перетворення графіків функцій</div>
+  <h1>Тренажер: закріплюємо перетворення графіків</h1>
+  <p>Чотири рівні, 22 бали. Завдання щоразу нові, тож тренажер можна проходити кілька разів. Якщо засумніваєшся, натисни «Підказка»: вона не дає відповіді, але нагадує, як міркувати. Наприкінці сторінки побачиш свій результат.</p>
+  <div class="row" style="margin-top:14px;gap:14px">
+   <label class="row" style="gap:8px;font-weight:700">Твоє ім’я: <input id="nm" autocomplete="off" style="font:inherit;font-size:17px;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px;width:220px"></label>
+  </div>
+ </div>
+</header>
+<nav class="nav" aria-label="Рівні">
+ <a href="#l1">1. Куди поїде графік?</a><a href="#l2">2. Впізнай графік</a><a href="#l3">3. Влучи в ціль</a><a href="#l4">4. Вершина</a><a href="#res">Мій результат</a>
+</nav>
+
+<section class="band" id="l1">
+ <div class="wrap ex">
+  <div class="head"><h2>Рівень 1. Куди поїде графік?</h2><span class="chip" id="l1C"></span></div>
+  <div class="card play">
+   <p class="meta" style="margin:0">Яке перетворення графіка базової функції треба виконати?</p>
+   <div class="q" id="l1Q"></div><div class="opts" id="l1O"></div><div class="fb" id="l1F"></div>
+   <div class="hintbox" id="l1HB" hidden></div><div class="row" style="margin-top:14px"><button class="hb" id="l1H">Підказка</button><button class="pri" id="l1N" hidden>Далі →</button></div>
+  </div>
+  <div class="card done" hidden></div>
+ </div>
+</section>
+
+<section class="band tint" id="l2">
+ <div class="wrap ex">
+  <div class="head"><h2>Рівень 2. Впізнай графік</h2><span class="chip" id="l2C"></span></div>
+  <div class="exgrid play">
+   <div><div class="fig" id="l2Fig"></div><div class="legend"><span><i class="r"></i>чий це графік?</span><span><i class="d"></i>базовий графік</span></div></div>
+   <div class="card"><p class="meta" style="margin:0 0 12px">Обери формулу червоного графіка</p><div class="opts" id="l2O"></div><div class="fb" id="l2F"></div>
+    <div class="hintbox" id="l2HB" hidden></div><div class="row" style="margin-top:14px"><button class="hb" id="l2H">Підказка</button><button class="pri" id="l2N" hidden>Далі →</button></div></div>
+  </div>
+  <div class="card done" hidden></div>
+ </div>
+</section>
+
+<section class="band" id="l3">
+ <div class="wrap ex">
+  <div class="head"><h2>Рівень 3. Влучи в ціль</h2><span class="chip" id="l3C"></span></div>
+  <div class="exgrid play">
+   <div><div class="fig" id="l3Fig"></div><div class="legend"><span><i class="r d"></i>ціль</span><span><i></i>твоя парабола</span></div></div>
+   <div class="card">
+    <p class="meta" style="margin-top:0">Перемісти синю параболу на червону ціль. Без зайвих ходів отримаєш 1 бал, із зайвими — 0,5 бала. Працюють і стрілки на клавіатурі.</p>
+    <div class="q" id="l3Me" style="color:var(--blue)">y = x²</div>
+    <div class="row" style="gap:18px;align-items:flex-start">
+     <div class="pad"><span></span><button data-d="up" aria-label="Вгору">↑</button><span></span><button data-d="left" aria-label="Вліво">←</button><button data-d="down" aria-label="Вниз">↓</button><button data-d="right" aria-label="Вправо">→</button></div>
+     <div class="row" style="flex-direction:column;align-items:stretch"><button data-d="flip">Відобразити ↕</button><button id="l3R">Спочатку</button></div>
+    </div>
+    <p class="score" id="l3M" style="margin-top:12px">Ходів: 0</p>
+    <div class="fb" id="l3F"></div>
+    <div class="hintbox" id="l3HB" hidden></div><div class="row" style="margin-top:14px"><button class="hb" id="l3H">Підказка</button><button class="pri" id="l3N" hidden>Далі →</button></div>
+   </div>
+  </div>
+  <div class="card done" hidden></div>
+ </div>
+</section>
+
+<section class="band tint" id="l4">
+ <div class="wrap ex">
+  <div class="head"><h2>Рівень 4. Вершина параболи</h2><span class="chip" id="l4C"></span></div>
+  <div class="card play" style="max-width:860px">
+   <p class="meta" style="margin:0">Запиши координати вершини. Зараховується перша спроба.</p>
+   <div class="q" id="l4Q"></div>
+   <form class="row" id="l4Form" style="gap:14px">
+    <span class="vin">(<input id="l4x" inputmode="numeric" aria-label="Абсциса вершини" autocomplete="off">;<input id="l4y" inputmode="numeric" aria-label="Ордината вершини" autocomplete="off">)</span>
+    <button class="pri" type="submit" id="l4S">Перевірити</button><button type="button" id="l4N" hidden>Далі →</button><button type="button" class="hb" id="l4H">Підказка</button>
+   </form>
+   <div class="hintbox" id="l4HB" hidden></div>
+   <div class="fb" id="l4F"></div>
+  </div>
+  <div class="card done" hidden></div>
+ </div>
+</section>
+
+<section class="band paper" id="res">
+ <div class="wrap">
+  <div class="card" style="max-width:860px">
+   <h2 id="rT">Мій результат</h2>
+   <p class="meta" id="rName"></p>
+   <div class="q" id="rTot" style="color:var(--red)">0 з 22</div>
+   <div id="rRows"></div>
+   <p id="rMsg" style="font-weight:700;margin-top:14px"></p>
+   <p class="meta" style="font-size:15px">Покажи цей екран учителю або зроби скріншот.</p>
+   <div class="row" style="margin-top:10px"><button id="again">Пройти все знову</button></div>
+  </div>
+ </div>
+</section>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const M='−';
+const num=v=>(v<0?M:'')+String(Math.abs(v)).replace('.',',');
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const probe=document.createElement('i');probe.style.display='none';document.body.appendChild(probe);
+const css=n=>{probe.style.color=`var(${n})`;return getComputedStyle(probe).color};
+
+/* ---------- координатна площина ---------- */
+const plots=[];
+function Plot(el,R){
+ const c=document.createElement('canvas');el.appendChild(c);const ctx=c.getContext('2d');
+ let last={curves:[],pts:[]};
+ function draw(curves,pts){
+  if(curves)last={curves,pts:pts||[]};
+  const W=el.clientWidth,H=el.clientHeight;if(!W||!H)return;
+  const d=window.devicePixelRatio||1;c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+  const u=Math.min(W,H)/(2*R),cx=W/2,cy=H/2;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle=css('--grid');ctx.lineWidth=1;ctx.beginPath();
+  for(let i=Math.ceil(-cx/u);i<=Math.floor((W-cx)/u);i++){const x=Math.round(cx+i*u)+.5;ctx.moveTo(x,0);ctx.lineTo(x,H)}
+  for(let i=Math.ceil(-cy/u);i<=Math.floor((H-cy)/u);i++){const y=Math.round(cy+i*u)+.5;ctx.moveTo(0,y);ctx.lineTo(W,y)}
+  ctx.stroke();
+  const ax=css('--axis');ctx.strokeStyle=ax;ctx.fillStyle=ax;ctx.lineWidth=1.5;ctx.beginPath();
+  ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.moveTo(cx,H);ctx.lineTo(cx,0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W,cy);ctx.lineTo(W-9,cy-4);ctx.lineTo(W-9,cy+4);ctx.fill();
+  ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx-4,9);ctx.lineTo(cx+4,9);ctx.fill();
+  ctx.font='600 13px Manrope, sans-serif';ctx.fillText('x',W-14,cy-8);ctx.fillText('y',cx+8,14);
+  ctx.fillStyle=css('--muted');ctx.font='12px Manrope, sans-serif';
+  const st=u<26?2:1;
+  ctx.textAlign='center';
+  for(let i=Math.ceil(-cx/u);i<=Math.floor((W-cx)/u);i++){if(i&&i%st===0&&Math.abs(cx+i*u-W)>16)ctx.fillText(num(i),cx+i*u,cy+15)}
+  ctx.textAlign='right';
+  for(let i=Math.ceil(-cy/u);i<=Math.floor((H-cy)/u);i++){if(i&&i%st===0&&cy-i*u>18)ctx.fillText(num(i),cx-6,cy-i*u+4)}
+  ctx.fillText('0',cx-6,cy+15);ctx.textAlign='left';
+  for(const cv of last.curves){
+   ctx.strokeStyle=cv.color;ctx.lineWidth=cv.w||3;ctx.setLineDash(cv.dash||[]);ctx.lineJoin='round';ctx.beginPath();
+   let pen=false,py=0;
+   for(let px=-1;px<=W+1;px+=.5){
+    const y=cv.f((px-cx)/u);
+    if(!isFinite(y)){pen=false;continue}
+    const sy=cy-y*u;
+    if(sy<-4*H||sy>5*H){pen=false;continue}
+    if(pen&&Math.abs(sy-py)>1.5*H)pen=false;
+    if(!pen){ctx.moveTo(px,sy);pen=true}else ctx.lineTo(px,sy);py=sy;
+   }
+   ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  for(const p of last.pts){ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(cx+p.x*u,cy-p.y*u,6,0,7);ctx.fill();
+   if(p.label){ctx.font='700 14px Manrope, sans-serif';ctx.fillText(p.label,cx+p.x*u+9,cy-p.y*u-9)}}
+ }
+ const ro=new ResizeObserver(()=>draw());ro.observe(el);
+ const o={draw};plots.push(o);return o;
+}
+const mo=new MutationObserver(()=>plots.forEach(p=>p.draw()));mo.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>plots.forEach(p=>p.draw()));
+document.fonts?.ready.then(()=>plots.forEach(p=>p.draw()));
+
+/* ---------- функції та формули ---------- */
+const B={
+ x2:{n:'x²',f:x=>x*x},
+ sqrt:{n:'√x',f:x=>x>=0?Math.sqrt(x):NaN},
+ abs:{n:'|x|',f:x=>Math.abs(x)},
+ x3:{n:'x³',f:x=>x**3},
+ lin:{n:'x',f:x=>x}
+};
+const S0={base:'x2',m:0,n:0,k:1,neg:false,abs:false};
+const mk=s=>x=>{let v=B[s.base].f(x-s.m)*s.k;if(s.neg)v=-v;v+=s.n;return s.abs?Math.abs(v):v};
+function fmt(s){
+ const m=s.m,inner=m===0?'x':m>0?`x ${M} ${m}`:`x + ${-m}`;
+ let core;
+ if(s.base==='x2')core=m===0?'x²':`(${inner})²`;
+ else if(s.base==='x3')core=m===0?'x³':`(${inner})³`;
+ else if(s.base==='sqrt')core=m===0?'√x':`√(${inner})`;
+ else if(s.base==='abs')core=`|${inner}|`;
+ else core=m!==0&&(s.k!==1||s.neg)?`(${inner})`:inner;
+ const e=(s.neg?M:'')+(s.k===1?'':num(s.k))+core;
+ const nn=s.n>0?` + ${s.n}`:s.n<0?` ${M} ${-s.n}`:'';
+ return 'y = '+(s.abs?`|${e}${nn}|`:e+nn);
+}
+
+/* ---------- тренажер ---------- */
+const LV={l1:{n:8,name:'Куди поїде графік?'},l2:{n:6,name:'Впізнай графік'},l3:{n:3,name:'Влучи в ціль'},l4:{n:5,name:'Вершина параболи'}};
+const R={};const reset=id=>{R[id]={i:0,pts:0,h:0}};Object.keys(LV).forEach(reset);
+const MAX=Object.values(LV).reduce((s,l)=>s+l.n,0);
+const fmtP=v=>num(Math.round(v*2)/2);
+function counter(id){const r=R[id],l=LV[id];$('#'+id+'C').textContent=r.i<l.n?`завдання ${r.i+1} з ${l.n} · бали: ${fmtP(r.pts)}`:`бали: ${fmtP(r.pts)} з ${l.n}`}
+function results(){
+ const tot=Object.values(R).reduce((s,r)=>s+r.pts,0),done=Object.keys(LV).every(k=>R[k].i>=LV[k].n);
+ $('#rTot').textContent=`${fmtP(tot)} з ${MAX}`;
+ $('#rName').textContent=$('#nm').value.trim()?'Учень: '+$('#nm').value.trim():'';
+ $('#rRows').innerHTML=Object.entries(LV).map(([k,l])=>{const r=R[k],w=Math.round(r.pts/l.n*100);
+  return `<div style="margin:10px 0"><div class="row" style="justify-content:space-between"><b>${l.name}</b><span class="score">${fmtP(r.pts)} з ${l.n}${r.i>=l.n?' ✓':` · виконано ${r.i} з ${l.n}`}${r.h?` · підказок: ${r.h}`:''}</span></div>
+  <div style="height:10px;border-radius:6px;background:var(--line);overflow:hidden"><div style="height:100%;width:${w}%;background:var(--ok)"></div></div></div>`}).join('');
+ const p=tot/MAX;
+ $('#rMsg').textContent=!done?'Пройди всі чотири рівні, щоб отримати підсумок.':p>=.9?'Чудово! Ти впевнено володієш перетвореннями графіків.':p>=.7?'Добре! Подивись, у якому рівні були помилки, і повтори це правило.':'Не засмучуйся! Пройди тренажер ще раз і частіше відкривай підказки — так правила швидше запам’ятаються.';
+}
+function finish(id,extra){const sec=$('#'+id),d=sec.querySelector('.done');sec.querySelector('.play').hidden=true;d.hidden=false;
+ const r=R[id],l=LV[id];d.innerHTML=`<h3>Рівень пройдено!</h3><p class="q" style="color:var(--ok)">${fmtP(r.pts)} з ${l.n}</p><p>${extra||''}</p><div class="row"><button class="again">Пройти рівень ще раз</button></div>`;
+ d.querySelector('.again').onclick=()=>{reset(id);d.hidden=true;sec.querySelector('.play').hidden=false;START[id]();results()};
+ counter(id);results()}
+function choose(box,fb,next,ok,text,id){box.dataset.lock='1';const r=R[id];if(ok)r.pts++;
+ fb.className='fb show '+(ok?'ok':'no');fb.textContent=(ok?'Правильно! ':'Не зовсім. ')+text;next.hidden=false;counter(id);results()}
+
+const HINT={};
+function setHint(id,html){HINT[id]={html,used:false};const hb=$('#'+id+'HB');hb.hidden=true;hb.innerHTML='';$('#'+id+'H').disabled=false}
+document.querySelectorAll('.hb').forEach(b=>b.addEventListener('click',()=>{const id=b.id.slice(0,2),h=HINT[id];if(!h)return;
+ const hb=$('#'+id+'HB');hb.innerHTML=h.html;hb.hidden=false;b.disabled=true;if(!h.used){h.used=true;R[id].h++;results()}}));
+const hideHintBtn=id=>{$('#'+id+'H').disabled=true};
+/* рівень 1 */
+function gen1(){
+ const base=pick(['x2','sqrt','abs','x3']),a=rnd(1,4),t=pick(['up','down','right','left','right','left','neg','k']);
+ const s={...S0,base};let right,opts;const un=a===1?' одиницю':' одиниці';
+ if(t==='up'){s.n=a;right=0}else if(t==='down'){s.n=-a;right=1}else if(t==='right'){s.m=a;right=2}else if(t==='left'){s.m=-a;right=3}
+ if(t==='neg'){s.neg=true;opts=['симетрія відносно осі x','симетрія відносно осі y','вниз на 1 одиницю','стиск до осі x у 2 рази'];right=0}
+ else if(t==='k'){s.k=pick([2,3]);opts=[`розтяг від осі x у ${s.k} рази`,`стиск до осі x у ${s.k} рази`,`вгору на ${s.k} одиниці`,`вправо на ${s.k} одиниці`];right=0}
+ else opts=['вгору на ','вниз на ','вправо на ','вліво на '].map(w=>w+a+un);
+ const hint={up:'Число додається до всієї функції — графік іде вгору.',down:'Число віднімається від усієї функції — графік іде вниз.',right:'Мінус у дужках біля x: рух уздовж осі x «навпаки» — вправо.',left:'Плюс у дужках біля x: рух уздовж осі x «навпаки» — вліво.',neg:'Мінус перед функцією змінює знак кожного y: дзеркало відносно осі x.',k:'Множник більший за 1 збільшує кожен y — розтяг від осі x.'}[t];
+ const tip={up:'<b>Де стоїть число?</b> Поза функцією, у кінці формули — значить, графік рухається <b>вздовж осі y</b>. Тут знак «чесний»: <mark>+ угору</mark>, <mark>− униз</mark>.',
+  down:'<b>Де стоїть число?</b> Поза функцією, у кінці формули — значить, графік рухається <b>вздовж осі y</b>. Тут знак «чесний»: <mark>+ угору</mark>, <mark>− униз</mark>.',
+  right:'<b>Де стоїть число?</b> Усередині, поруч з x — значить, рух <b>вздовж осі x</b>, і знак <mark>навпаки</mark>. Перевір: розв’яжи «вираз біля x = 0», наприклад x − 3 = 0 → x = 3. Туди й переїде графік.',
+  left:'<b>Де стоїть число?</b> Усередині, поруч з x — значить, рух <b>вздовж осі x</b>, і знак <mark>навпаки</mark>. Перевір: розв’яжи «вираз біля x = 0», наприклад x + 3 = 0 → x = −3. Туди й переїде графік.',
+  neg:'<b>Мінус перед усією функцією</b> змінює знак кожного y: точка (x; y) стає (x; −y). Яка вісь тут працює як дзеркало?',
+  k:'<b>Множник перед функцією</b> множить кожен y. Якщо k &gt; 1, точки віддаляються від осі x — графік <mark>розтягується</mark>; якщо 0 &lt; k &lt; 1 — <mark>стискається</mark>.'}[t];
+ return {q:`y = ${B[base].n}  →  ${fmt(s)}`,opts:shuffle(opts.map((o,i)=>({o,ok:i===right}))),hint,tip};
+}
+function L1(){const r=R.l1;counter('l1');if(r.i>=LV.l1.n)return finish('l1');
+ const g=gen1(),O=$('#l1O');setHint('l1',g.tip);$('#l1Q').textContent=g.q;$('#l1F').className='fb';$('#l1N').hidden=true;O.dataset.lock='0';
+ O.innerHTML=g.opts.map((x,i)=>`<button data-ok="${x.ok?1:0}">${i+1}. ${x.o}</button>`).join('');
+ O.onclick=e=>{const b=e.target.closest('button');if(!b||O.dataset.lock==='1')return;const ok=b.dataset.ok==='1';
+  b.classList.add(ok?'right':'wrong');O.querySelector('[data-ok="1"]').classList.add('right');choose(O,$('#l1F'),$('#l1N'),ok,g.hint,'l1');hideHintBtn('l1')}}
+$('#l1N').onclick=()=>{R.l1.i++;L1()};
+
+/* рівень 2 */
+const p2=Plot($('#l2Fig'),6);
+function L2(){const r=R.l2;counter('l2');if(r.i>=LV.l2.n)return finish('l2');
+ const base=pick(['x2','x2','abs','sqrt','x3']);let m,n;do{m=rnd(-3,3);n=rnd(-3,3)}while(m===0||n===0||m===n||m===-n);
+ const s={...S0,base,m,n,neg:base!=='sqrt'&&Math.random()<.25};
+ const seen=new Set([fmt(s)]),opts=[{t:fmt(s),ok:1}];
+ for(const v of shuffle([{...s,m:-m},{...s,n:-n},{...s,m:-m,n:-n},{...s,m:n,n:m},{...s,neg:!s.neg}])){const t=fmt(v);if(!seen.has(t)&&opts.length<4){seen.add(t);opts.push({t,ok:0})}}
+ shuffle(opts);p2.draw([{f:B[base].f,color:css('--blue'),dash:[5,6],w:1.5},{f:mk(s),color:css('--red'),w:3.5}],[{x:m,y:n,color:css('--red')}]);
+ const opName=base==='sqrt'?'точку, з якої починається графік':base==='x3'?'центр симетрії графіка':base==='abs'?'«куточок» графіка':'вершину параболи';
+ setHint('l2',`Знайди <b>${opName}</b> (червона крапка) і прочитай її координати (m; n). У правильній формулі буде <mark>(x − m)</mark> і <mark>+ n</mark> у кінці. Пам’ятай: у дужках знак навпаки — точка праворуч від осі y дає «x − …».`+(s.neg?' І зверни увагу: графік перевернутий — перед функцією має стояти мінус.':''));
+ const O=$('#l2O');O.dataset.lock='0';$('#l2F').className='fb';$('#l2N').hidden=true;
+ O.innerHTML=opts.map((o,i)=>`<button data-ok="${o.ok}">${i+1}. ${o.t}</button>`).join('');
+ const kind=base==='sqrt'?'Графік починається в точці':base==='x3'?'Центр симетрії графіка — у точці':base==='abs'?'«Куточок» графіка — у точці':'Вершина параболи — у точці';
+ O.onclick=e=>{const b=e.target.closest('button');if(!b||O.dataset.lock==='1')return;const ok=b.dataset.ok==='1';
+  b.classList.add(ok?'right':'wrong');O.querySelector('[data-ok="1"]').classList.add('right');
+  choose(O,$('#l2F'),$('#l2N'),ok,`${kind} (${num(m)}; ${num(n)}).`+(s.neg?' Графік перевернуто, бо перед функцією стоїть мінус.':''),'l2');hideHintBtn('l2')}}
+$('#l2N').onclick=()=>{R.l2.i++;L2()};
+
+/* рівень 3 */
+const p3=Plot($('#l3Fig'),6);let T,P,mv=0,won=false;
+function L3(){counter('l3');if(R.l3.i>=LV.l3.n)return finish('l3','Без зайвих ходів — 1 бал за ціль, із зайвими — 0,5 бала.');
+ let m,n;do{m=rnd(-3,3);n=rnd(-3,3)}while(m===0&&n===0);T={...S0,m,n,neg:Math.random()<.3};l3Reset()}
+function l3Reset(){P={...S0};mv=0;won=false;setHint('l3',`Подивись на вершину цілі: на скільки клітинок вона <b>праворуч або ліворуч</b> і <b>вище або нижче</b> від точки (0; 0)? Порахуй клітинки і зроби стільки ж ходів.`+(T.neg?' Вітки цілі напрямлені вниз — тому <mark>спершу натисни «Відобразити»</mark>, а потім рухай: так не буде зайвих ходів.':''));$('#l3F').className='fb';$('#l3N').hidden=true;l3Draw()}
+function l3Draw(){p3.draw([{f:mk(T),color:css('--red'),dash:[9,7],w:5},{f:mk(P),color:css('--blue'),w:3}],[{x:P.m,y:P.n,color:css('--blue')}]);
+ $('#l3Me').textContent=fmt(P);$('#l3M').textContent=`Ходів: ${mv}`;
+ if(!won&&P.m===T.m&&P.n===T.n&&P.neg===T.neg){won=true;const min=Math.abs(T.m)+Math.abs(T.n)+(T.neg?1:0),perfect=mv===min;
+  R.l3.pts+=perfect?1:.5;const f=$('#l3F');f.className='fb show ok';
+  f.textContent=(perfect?'Влучно, без жодного зайвого ходу! ':`Влучив за ${mv} ходів (можна було за ${min}). `)+`Ціль: ${fmt(T)}, вершина (${num(T.m)}; ${num(T.n)}).`;
+  $('#l3N').hidden=false;hideHintBtn('l3');counter('l3');results()}}
+function l3Move(d){if(won)return;if(d==='up')P.n++;if(d==='down')P.n--;if(d==='left')P.m--;if(d==='right')P.m++;if(d==='flip'){P.neg=!P.neg;P.n=-P.n}
+ P.m=Math.max(-5,Math.min(5,P.m));P.n=Math.max(-5,Math.min(5,P.n));mv++;l3Draw()}
+document.querySelectorAll('#l3 [data-d]').forEach(b=>b.addEventListener('click',()=>l3Move(b.dataset.d)));
+document.addEventListener('keydown',e=>{const r=$('#l3').getBoundingClientRect();if(r.top>innerHeight*.6||r.bottom<innerHeight*.3)return;
+ if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+ const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'}[e.key];if(k){e.preventDefault();l3Move(k)}});
+$('#l3R').onclick=()=>{if(!won)l3Reset()};$('#l3N').onclick=()=>{R.l3.i++;L3()};
+
+/* рівень 4 */
+let V,tried=false;
+function L4(){counter('l4');if(R.l4.i>=LV.l4.n)return finish('l4');
+ let a,b;do{a=rnd(-5,5);b=rnd(-5,5)}while(a===0&&b===0);V={...S0,m:a,n:b,neg:Math.random()<.35};tried=false;
+ setHint('l4','Для y = (x − m)² + n вершина в точці <b>(m; n)</b>. <b>Абсциса:</b> прирівняй вираз у дужках до нуля, наприклад x + 2 = 0 → x = −2. <b>Ордината:</b> число, яке додається чи віднімається в кінці. '+(V.neg?'Мінус перед дужкою на вершину не впливає — він лише перевертає вітки вниз.':'Якщо дужок немає, абсциса вершини дорівнює 0.'));
+ $('#l4Q').textContent=fmt(V);$('#l4x').value='';$('#l4y').value='';$('#l4F').className='fb';$('#l4N').hidden=true;$('#l4S').disabled=false}
+const parse=v=>{const t=v.trim().replace(/[−–—]/g,'-').replace(',','.');return t===''?NaN:Number(t)};
+$('#l4Form').addEventListener('submit',e=>{e.preventDefault();if(tried)return;const x=parse($('#l4x').value),y=parse($('#l4y').value),f=$('#l4F');
+ if(isNaN(x)||isNaN(y)){f.className='fb show no';f.textContent='Введи обидві координати.';return}
+ tried=true;$('#l4S').disabled=true;const ok=x===V.m&&y===V.n;if(ok)R.l4.pts++;
+ f.className='fb show '+(ok?'ok':'no');
+ f.textContent=ok?`Правильно! Вершина (${num(V.m)}; ${num(V.n)}), вітки ${V.neg?'вниз':'вгору'}.`:(x===-V.m?'Перевір знак абсциси: у дужках — навпаки. ':'')+`Правильна відповідь: (${num(V.m)}; ${num(V.n)}), вітки ${V.neg?'вниз':'вгору'}.`;
+ $('#l4N').hidden=false;hideHintBtn('l4');counter('l4');results()});
+$('#l4N').onclick=()=>{R.l4.i++;L4()};
+
+const START={l1:L1,l2:L2,l3:L3,l4:L4};
+$('#again').onclick=()=>{Object.keys(LV).forEach(k=>{reset(k);const s=$('#'+k);s.querySelector('.done').hidden=true;s.querySelector('.play').hidden=false;START[k]()});results();location.hash='#l1'};
+$('#nm').addEventListener('input',results);
+L1();L2();L3();L4();results();
+
+}
+</script>
+</body>
+</html>
