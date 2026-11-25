@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Перетворення графіків функцій</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: friendly, clear lesson for 9th graders, self-paced
+   IDEA: a sheet of graph paper / exercise book with coloured curves
+   PICTURE: big coloured parabolas on a navy grid in the hero; graphs on every task
+   COLOUR and TYPE: navy grid band, white paper cards, mint/coral/sun/violet accents; Rubik + Golos Text
+   LAYOUT: hero band, sticky section links, one column of sections, 2x2 task grids that stack on phones */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0f1828);--paper:light-dark(#ffffff,#16233a);--ink:light-dark(#1b2a41,#e7edf6);--muted:light-dark(#5b6b82,#9fb0c8);
+--line:light-dark(#e3e9f2,#26385a);--grid:light-dark(#eef2f8,#1a2840);--field:light-dark(#f4f7fb,#0f1a2c);
+--mint:#0f9e8f;--coral:#f05a4a;--sun:#e39612;--vio:#6f55f2;--blue:#3b82f6;--pink:#e0408a;
+--ok:light-dark(#15803d,#4ade80);--okbg:light-dark(#e8f8ef,#123a26);--bad:light-dark(#d01c3f,#fb7185);--badbg:light-dark(#fdecef,#3d1520);
+--sheet:light-dark(#fff6dc,#2e2610);--sheetink:light-dark(#8a5a00,#f5c66b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.55 "Golos Text",system-ui,sans-serif;overflow-x:clip;
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+h1,h2,h3{font-family:Rubik,system-ui,sans-serif;line-height:1.08;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4vw,40px)}h3{font-size:20px}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}.wrap{max-width:1180px;margin:0 auto}
+.hero{background:#1b2a41;color:#fff;background-image:linear-gradient(#24365480 1px,transparent 1px),linear-gradient(90deg,#24365480 1px,transparent 1px);background-size:28px 28px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero h1{font-size:clamp(36px,6vw,58px)}.hero p{color:#c9d4e5;font-size:19px;margin:14px 0 0}
+.pill{display:inline-block;background:var(--mint);color:#fff;font-weight:600;border-radius:99px;padding:6px 16px;margin-bottom:18px}
+.hero img{width:100%;max-width:460px;justify-self:center}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav .scroll{display:flex;gap:6px;padding:10px max(5vw,16px);overflow-x:auto;max-width:1240px;margin:0 auto}
+nav a{flex:none;color:var(--ink);text-decoration:none;font-weight:600;padding:8px 14px;border-radius:99px;font-size:15px}
+nav a:hover,nav a:focus-visible{background:var(--line)}
+.lead{color:var(--muted);margin:10px 0 22px;max-width:70ch}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px #1b2a4114;padding:18px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.gimg{background:#fff;border-radius:10px}
+button{font:600 16px "Golos Text",sans-serif;min-height:44px;border-radius:12px;border:0;cursor:pointer;padding:8px 16px}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.mood{display:flex;gap:14px;align-items:center;text-align:left;background:var(--paper);color:var(--ink);border:2px solid var(--line);width:100%;padding:12px}
+.mood img{width:96px;height:96px;flex:none}.mood b{display:block;font-family:Rubik,system-ui,sans-serif;font-size:19px}.mood small{color:var(--muted);font-weight:400;font-size:15px}
+.mood.on{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.msg{margin-top:14px;padding:14px 18px;border-radius:12px;color:#fff;font-weight:600;font-size:18px;display:none}
+.row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px;align-items:center}
+.num{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 18px Rubik,system-ui,sans-serif;background:var(--c,var(--mint))}
+.vote{display:flex;gap:8px;flex-wrap:wrap}.vote button{background:var(--field);color:var(--ink);border:1px solid var(--line)}
+.fb{grid-column:2/-1;display:none;padding:10px 14px;border-radius:10px;font-weight:600}
+.fb.ok{display:block;background:var(--okbg);color:var(--ok)}.fb.bad{display:block;background:var(--badbg);color:var(--bad)}
+.stack>*+*{margin-top:12px}
+.score{display:inline-block;margin-top:16px;font:700 20px Rubik,system-ui,sans-serif;padding:10px 18px;border-radius:12px;background:var(--paper);border:1px solid var(--line)}
+.q h3{margin-bottom:12px}.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.opt{background:var(--paper);color:var(--ink);border:2px solid var(--line);text-align:left;font-weight:400}
+.opt i{font-style:normal;font-weight:700;color:var(--vio);margin-right:8px}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.task{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;margin-top:22px}
+.sheet{background:var(--sheet);border:1px solid #f0d48a55;border-radius:16px;padding:18px;align-self:start;position:sticky;top:70px}
+.sheet h3{color:var(--sheetink);margin-bottom:8px}.sheet ul{padding-left:20px;margin:8px 0}.sheet li{margin:4px 0}
+.tip{font-style:italic;color:var(--sheetink);background:var(--paper);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+.item header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.item header b{font:700 19px Rubik,system-ui,sans-serif}.item header b span{color:var(--coral)}
+.chk{background:var(--mint);color:#fff;flex:none}
+textarea{width:100%;min-height:96px;font:16px "Golos Text",sans-serif;padding:10px;border-radius:10px;border:1.5px dashed var(--line);background:var(--field);color:var(--ink);resize:vertical}
+.ans{display:none;margin-top:10px;background:var(--okbg);border:1.5px solid var(--ok);border-radius:10px;padding:10px 12px;align-items:center;gap:12px}
+.ans.show{display:flex}.ans img{width:110px;height:110px;flex:none}.ans small{display:block;color:var(--ok);font-weight:600}
+.ans strong{font-size:18px}
+.t4{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
+.t5{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:16px;align-items:start}
+.gridbox{position:relative}.gridbox img{width:100%;display:block}.gridbox .ov{position:absolute;inset:0;opacity:0;transition:opacity .5s}
+.gridbox.show .ov{opacity:1}
+details{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+details summary{cursor:pointer;font-weight:600;min-height:28px}details p{margin:10px 0 0;color:var(--ok);font-weight:600}
+.hw li{margin:8px 0;font-size:18px}
+.starts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.starts label{display:block;font-weight:600;color:#fff;background:var(--c);border-radius:12px 12px 0 0;padding:8px 12px}
+.starts textarea{border-radius:0 0 12px 12px;min-height:70px}
+.quote{margin-top:20px;background:#1b2a41;color:#fff;border-radius:14px;padding:18px;text-align:center;font:700 italic 20px Rubik,system-ui,sans-serif}
+footer{text-align:center;color:var(--muted);font-size:14px;padding:24px}
+@media(max-width:900px){.task{grid-template-columns:minmax(0,1fr)}.sheet{position:static}.opts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.g3{grid-template-columns:minmax(0,1fr)}.g2,.t4,.t5,.starts{grid-template-columns:minmax(0,1fr)}
+.hero .wrap{grid-template-columns:minmax(0,1fr)}.hero img{max-width:280px}.row{grid-template-columns:40px minmax(0,1fr)}.vote{grid-column:2}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+</style>
+</head>
+<body>
+<header class="band hero"><div class="wrap">
+  <div><span class="pill">Алгебра · Урок № 30</span>
+  <h1>Перетворення графіків функцій</h1>
+  <p>Розв’язування типових вправ і задач. Проходь розділи по черзі: спершу думай сам, потім перевіряй.</p></div>
+  <img src="img/title.png" alt="Кілька кольорових парабол і графік модуля на координатній сітці">
+</div></header>
+<nav><div class="scroll">
+  <a href="#mood">Криголам</a><a href="#believe">Вірю — не вірю</a><a href="#test">Тест</a><a href="#practice">Практикум</a><a href="#summary">Підсумок</a><a href="#homework">Домашнє</a><a href="#reflection">Рефлексія</a>
+</div></nav>
+
+<main>
+<section class="band" id="mood"><div class="wrap">
+  <h2>Який ти сьогодні графік функції?</h2>
+  <p class="lead">Обери графік, який найкраще описує твій настрій на початку уроку.</p>
+  <div class="g3" id="moodGrid"></div>
+  <div class="msg" id="moodMsg" role="status"></div>
+</div></section>
+
+<section class="band" id="believe"><div class="wrap">
+  <h2>Вірю — не вірю</h2>
+  <p class="lead">Прочитай твердження й обери відповідь. Одразу побачиш, чи має рацію.</p>
+  <div class="stack" id="belList"></div>
+  <div class="score" id="belScore">Правильно: 0 з 8</div>
+</div></section>
+
+<section class="band" id="test"><div class="wrap">
+  <h2>Тест: обери правильну відповідь</h2>
+  <p class="lead">Перша спроба в кожному запитанні зараховується в результат.</p>
+  <div class="stack" id="testList"></div>
+  <div class="score" id="testScore">Результат: 0 з 6</div>
+</div></section>
+
+<section class="band" id="practice"><div class="wrap">
+  <h2>Практикум: типові завдання</h2>
+  <p class="lead">Розв’яжи в зошиті або запиши розв’язання в поле. Звір зі шпаргалкою, а потім натисни «Перевірити».</p>
+  <div id="tasks"></div>
+</div></section>
+
+<section class="band" id="summary"><div class="wrap">
+  <h2>Підсумок: перевір себе</h2>
+  <p class="lead">Спробуй відповісти вголос, а потім відкрий відповідь.</p>
+  <div class="g2" id="sumList"></div>
+</div></section>
+
+<section class="band" id="homework"><div class="wrap">
+  <h2>Домашнє завдання</h2>
+  <div class="card hw" style="margin-top:18px"><ul>
+    <li>Опрацювати теоретичний матеріал з теми (с. 91–100).</li>
+    <li>Виконати завдання № 10.8, 10.10.</li>
+    <li style="color:var(--muted)">За бажанням: придумай свій «графік настрою» і запиши його формулу.</li>
+  </ul></div>
+</div></section>
+
+<section class="band" id="reflection"><div class="wrap">
+  <h2>Рефлексія: який ти графік зараз?</h2>
+  <p class="lead">Порівняй із настроєм на початку уроку і продовж речення. Записи зберігаються лише в цьому браузері.</p>
+  <div class="g3" id="moodGrid2"></div>
+  <div class="starts" id="starts"></div>
+  <div class="quote">Помилка — це не кінець, а підказка, куди рухатися далі!</div>
+</div></section>
+</main>
+<footer>Алгебра · Перетворення графіків функцій</footer>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+const moods=[
+ ["Усмішка","y = x²","Настрій чудовий, усе вдається","Тримай цю усмішку весь урок!","#0f9e8f"],
+ ["Сумна дуга","y = −x²","Трохи невесело, потрібна підтримка","Ми поруч — разом усе вийде!","#6f55f2"],
+ ["Лише вгору","y = kx, k > 0","Енергійний, готовий до нового","Спрямуй енергію в задачі!","#f05a4a"],
+ ["Пряма лінія","y = c","Спокійний і врівноважений","Спокій — суперсила математика","#e39612"],
+ ["Хвиля","y = sin x","Настрій то вгору, то вниз","Ловимо хвилю й піднімаємось!","#3b82f6"],
+ ["Дві вітки","y = 1/x","Думки розбігаються в різні боки","Зберемо думки крок за кроком","#e0408a"]];
+function moodGrid(el,key,msgEl){
+  el.innerHTML=moods.map((m,i)=>`<button class="mood" style="--c:${m[4]}" data-i="${i}" aria-pressed="false">
+    <img class="gimg" src="img/ice${i+1}.png" alt=""><span><b style="color:${m[4]}">${i+1}. ${m[0]}</b><small>${m[1]} · ${m[2]}</small></span></button>`).join('');
+  const pick=i=>{el.querySelectorAll('.mood').forEach(b=>{const on=+b.dataset.i===i;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+    if(msgEl){msgEl.style.display='block';msgEl.style.background=moods[i][4];msgEl.textContent=moods[i][3]}store.set(key,i)};
+  el.addEventListener('click',e=>{const b=e.target.closest('.mood');if(b)pick(+b.dataset.i)});
+  const s=store.get(key);if(s!==null)pick(+s);
+}
+moodGrid($('moodGrid'),'mood-start',$('moodMsg'));
+moodGrid($('moodGrid2'),'mood-end',null);
+
+const bel=[
+ ["Щоб побудувати графік y = f(x) + 3, треба графік y = f(x) перенести на 3 одиниці вгору.",1,"+n — перенесення вгору."],
+ ["Графік y = (x − 2)² отримують з параболи y = x² перенесенням на 2 одиниці вліво.",0,"x − 2 — це перенесення на 2 одиниці вправо."],
+ ["Графіки функцій y = f(x) і y = −f(x) симетричні відносно осі y.",0,"Вони симетричні відносно осі x."],
+ ["Графік y = 3f(x) — це розтяг графіка y = f(x) від осі x у 3 рази.",1,"k = 3 > 1 — розтяг у 3 рази."],
+ ["Графік y = ½f(x) — це стиск графіка y = f(x) до осі x у 2 рази.",1,"0 < k < 1 — стиск у 1/k = 2 рази."],
+ ["Щоб побудувати y = |f(x)|, частину графіка під віссю x відображають симетрично відносно осі x.",1,"Решта графіка не змінюється."],
+ ["Вершина параболи y = (x + 1)² − 4 — точка (1; −4).",0,"Вершина — точка (−1; −4)."],
+ ["Графік функції y = x² − 5 перетинає вісь y у точці (0; −5).",1,"При x = 0 маємо y = −5."]];
+let belOk=0;
+$('belList').innerHTML=bel.map((b,i)=>`<div class="card row" data-i="${i}"><span class="num">${i+1}</span><span>${b[0]}</span>
+  <span class="vote"><button data-v="1">Вірю</button><button data-v="0">Не вірю</button></span><div class="fb" role="status"></div></div>`).join('');
+$('belList').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;const row=btn.closest('.row');if(row.dataset.done)return;
+  const b=bel[+row.dataset.i],right=+btn.dataset.v===b[1];row.dataset.done=1;if(right)belOk++;
+  const fb=row.querySelector('.fb');fb.className='fb '+(right?'ok':'bad');
+  fb.textContent=(right?'Правильно! ':'Не зовсім. ')+(b[1]?'Це правда: ':'Це неправда: ')+b[2];
+  row.querySelectorAll('.vote button').forEach(x=>x.disabled=true);$('belScore').textContent=`Правильно: ${belOk} з 8`});
+
+const L=["А","Б","В","Г"];
+const test=[
+ ["Графік y = x² + 4 отримують з параболи y = x² перенесенням…",["на 4 вгору","на 4 вниз","на 4 вліво","на 4 вправо"],0],
+ ["Парабола y = x², перенесена на 3 одиниці вправо, задається формулою…",["y = x² + 3","y = (x + 3)²","y = (x − 3)²","y = x² − 3"],2],
+ ["Графіки y = f(x) і y = −f(x) симетричні відносно…",["осі y","осі x","початку координат","прямої y = x"],1],
+ ["Вершина параболи y = (x − 2)² + 5 — це точка…",["(2; 5)","(−2; 5)","(5; 2)","(2; −5)"],0],
+ ["Графік y = 4x² отримують з параболи y = x²…",["стиском до осі x у 4 рази","розтягом від осі x у 4 рази","перенесенням на 4 вгору","симетрією відносно осі x"],1],
+ ["Яка з точок належить графіку функції y = |x − 3|?",["(0; −3)","(1; 2)","(5; −2)","(−3; 0)"],1]];
+let testOk=0;
+$('testList').innerHTML=test.map((q,i)=>`<div class="card q" data-i="${i}"><h3>${i+1}. ${q[0]}</h3><div class="opts">
+  ${q[1].map((o,m)=>`<button class="opt" data-m="${m}"><i>${L[m]}</i>${o}</button>`).join('')}</div></div>`).join('');
+$('testList').addEventListener('click',e=>{const btn=e.target.closest('.opt');if(!btn)return;const card=btn.closest('.q'),q=test[+card.dataset.i],m=+btn.dataset.m;
+  const right=m===q[2];btn.classList.add(right?'ok':'bad');btn.setAttribute('aria-label',(right?'Правильно: ':'Неправильно: ')+btn.textContent);
+  if(!card.dataset.done){card.dataset.done=1;if(right)testOk++;$('testScore').textContent=`Результат: ${testOk} з 6`}});
+
+const tasks=[
+ {t:"Запишіть рівняння параболи, яку отримали з параболи y = x² перенесенням:",
+  h:"Перенесення графіка y = f(x)",r:["y = f(x) + n — на n угору","y = f(x) − n — на n униз","y = f(x − m) — на m вправо","y = f(x + m) — на m вліво"],tip:"У дужках — «навпаки»: мінус → вправо, плюс → вліво.",
+  i:[["на 3 одиниці вгору","y = x² + 3"],["на 4 одиниці вниз","y = x² − 4"],["на 2 одиниці вліво","y = (x + 2)²"],["на 5 одиниць вправо","y = (x − 5)²"]]},
+ {t:"Опишіть, як отримати графік функції з графіка y = |x|, і побудуйте його схематично:",
+  h:"Графік y = k·f(x)",r:["k > 1 — розтяг від осі x у k разів","0 < k < 1 — стиск до осі x у 1/k разів","y = −f(x) — симетрія відносно осі x"],tip:"Від’ємний множник: розтяг або стиск, а потім симетрія відносно осі x.",
+  i:[["y = 3|x|","Розтяг від осі x у 3 рази","t2_1"],["y = −4|x|","Розтяг у 4 рази і симетрія відносно осі x","t2_2"],["y = ½|x|","Стиск до осі x у 2 рази","t2_3"],["y = −|x|","Симетрія відносно осі x","t2_4"]],note:"Пунктиром показано графік y = |x|."},
+ {t:"Знайдіть координати вершини параболи та опишіть, як її отримати з параболи y = x²:",
+  h:"Парабола y = (x − m)² + n",r:["вершина — точка (m; n)","m > 0 — вправо, m < 0 — вліво","n > 0 — угору, n < 0 — униз"],tip:"Приклад: y = (x + 5)² − 1, тобто m = −5, n = −1, вершина (−5; −1).",
+  i:[["y = (x + 1)² − 4","Вершина (−1; −4): на 1 вліво, на 4 вниз"],["y = (x − 3)² + 2","Вершина (3; 2): на 3 вправо, на 2 вгору"],["y = (x + 2)² + 1","Вершина (−2; 1): на 2 вліво, на 1 вгору"],["y = (x − 4)² − 3","Вершина (4; −3): на 4 вправо, на 3 вниз"]]},
+ {t:"Який із графіків A, B, C, D відповідає функції?",fig:"t4",
+  h:"Парабола y = ax²",r:["a > 0 — вітки вгору","a < 0 — вітки вниз","|a| > 1 — «вужча» за y = x²","|a| < 1 — «ширша» за y = x²"],
+  i:[["y = −2x²","D — вітки вниз, вужча за y = x²"],["y = ½x²","B — вітки вгору, ширша за y = x²"],["y = −½x²","C — вітки вниз, ширша за y = x²"],["y = 2x²","A — вітки вгору, вужча за y = x²"]]},
+ {t:"Побудуйте графік функції y = (x + 1)² − 4. За графіком знайдіть:",grid:1,
+  h:"Як читати графік",r:["нулі — де графік перетинає вісь x","E(y) — від вершини до +∞ (вітки вгору)","y < 0 — де графік нижче осі x","зростає — праворуч від вершини"],tip:"Будуємо так: y = x² → на 1 вліво → на 4 вниз.",
+  i:[["нулі функції","x = −3;  x = 1"],["область значень","E(y) = [−4; +∞)"],["значення x, за яких y < 0","x ∈ (−3; 1)"],["проміжок зростання","[−1; +∞)"]]},
+ {t:"Побудуйте схематично графік функції. Знайдіть точку, у якій він торкається осі x:",
+  h:"Графік y = |f(x)|",r:["будуємо графік y = f(x)","частину під віссю x відображаємо симетрично відносно осі x","частина над віссю x не змінюється"],tip:"Графік торкається осі x там, де f(x) = 0.",
+  i:[["y = |x − 3|","(3; 0)","t6_1"],["y = |2x + 4|","(−2; 0)","t6_2"],["y = |0,5x − 2|","(4; 0)","t6_3"],["y = |x + 5|","(−5; 0)","t6_4"]],note:"Пунктиром показано частину графіка y = f(x), яку відобразили."}];
+const item=(n,k,it,short)=>`<div class="card item"><header><b><span>${k+1})</span> ${it[0]}</b><button class="chk" data-a="${n}-${k}" aria-expanded="false">Перевірити</button></header>
+  ${short?'':`<textarea aria-label="Розв’язання пункту ${k+1}" placeholder="Поле для розв’язку" data-s="t${n}-${k}"></textarea>`}
+  <div class="ans" id="a${n}-${k}">${it[2]?`<img class="gimg" src="img/${it[2]}.png" alt="Ескіз графіка ${it[0]}">`:''}<span><small>Відповідь</small><strong>${it[1]}</strong></span></div></div>`;
+$('tasks').innerHTML=tasks.map((t,n)=>`<article class="task" id="task-${n+1}">
+  <aside class="sheet"><h3>Шпаргалка</h3><b>${t.h}</b><ul>${t.r.map(x=>`<li>${x}</li>`).join('')}</ul>${t.tip?`<div class="tip">${t.tip}</div>`:''}</aside>
+  <div><h3 style="font-size:26px">Завдання ${n+1}</h3><p class="lead" style="margin:6px 0 14px">${t.t}${t.note?' '+t.note:''}</p>
+  ${t.fig?`<div class="t4"><img class="gimg card" style="padding:8px;width:100%" src="img/t4.png" alt="Чотири параболи A, B, C, D з вершиною в початку координат"><div class="stack">${t.i.map((it,k)=>item(n,k,it,1)).join('')}</div></div>`
+  :t.grid?`<div class="t5"><div><div class="gridbox card" id="gb" style="padding:6px;background:#fff"><img src="img/t5_grid.png" alt="Координатна сітка"><img class="ov" src="img/t5_ans.png" alt="Графік y = (x + 1)² − 4 з вершиною (−1; −4) і нулями −3 та 1"></div>
+     <button class="chk" id="gbBtn" style="margin-top:10px;width:100%" aria-expanded="false">Показати графік</button></div><div class="stack">${t.i.map((it,k)=>item(n,k,it,1)).join('')}</div></div>`
+  :`<div class="g2">${t.i.map((it,k)=>item(n,k,it,0)).join('')}</div>`}</div></article>`).join('');
+$('tasks').addEventListener('click',e=>{const b=e.target.closest('.chk');if(!b)return;
+  if(b.id==='gbBtn'){const on=$('gb').classList.toggle('show');b.textContent=on?'Сховати графік':'Показати графік';b.setAttribute('aria-expanded',on);return}
+  const a=$('a'+b.dataset.a),on=a.classList.toggle('show');b.textContent=on?'Сховати':'Перевірити';b.setAttribute('aria-expanded',on)});
+document.querySelectorAll('textarea[data-s]').forEach(t=>{const v=store.get(t.dataset.s);if(v)t.value=v;t.addEventListener('input',()=>store.set(t.dataset.s,t.value))});
+
+const sum=[["Як побудувати графік y = f(x) + n і y = f(x) − n, де n > 0?","Перенести y = f(x) на n одиниць угору (+n) або вниз (−n)."],
+ ["Як побудувати графік y = f(x − m) і y = f(x + m), де m > 0?","Перенести y = f(x) на m одиниць вправо (x − m) або вліво (x + m)."],
+ ["Відносно якої осі симетричні графіки y = f(x) і y = −f(x)?","Відносно осі x."],
+ ["Як побудувати графік y = kf(x), де k > 0, k ≠ 1?","k > 1 — розтяг від осі x у k разів; 0 < k < 1 — стиск до осі x у 1/k разів."],
+ ["Як побудувати графік функції y = |f(x)|?","Частину графіка y = f(x) під віссю x відобразити симетрично відносно осі x."],
+ ["Яка точка є вершиною параболи y = (x − m)² + n?","Точка (m; n)."]];
+$('sumList').innerHTML=sum.map((s,i)=>`<details><summary>${i+1}. ${s[0]}</summary><p>${s[1]}</p></details>`).join('');
+
+const starts=[["Сьогодні я зрозумів(ла)…","#0f9e8f"],["Найкраще вийшло…","#e39612"],["Змусило подумати…","#6f55f2"],["Краще прокачати…","#f05a4a"]];
+$('starts').innerHTML=starts.map((s,i)=>`<div style="--c:${s[1]}"><label for="st${i}">${s[0]}</label><textarea id="st${i}" data-s="refl${i}"></textarea></div>`).join('');
+document.querySelectorAll('#starts textarea').forEach(t=>{const v=store.get(t.dataset.s);if(v)t.value=v;t.addEventListener('input',()=>store.set(t.dataset.s,t.value))});
+}
+</script>
+</body>
+</html>
