@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Медіа. Мультимедіа — урок 16</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..700&family=Unbounded:wght@400..800&display=swap">
+<style>
+/*
+VOICE: бадьорий шкільний урок — яскраво, чітко, великі цілі для дошки.
+IDEA: презентація поводиться як медіаплеєр: внизу шкала відтворення з розділами, кожен симулятор — «пристрій».
+PICTURE: на кожному слайді працює сама річ — плеєр, диктофон, камера, провідник.
+COLOUR and TYPE: теплий папір, чорнило, червоний «REC», синій сигнал, жовте сонце; Unbounded + Golos Text.
+LAYOUT: горизонтальна стрічка слайдів, верхня смуга уроку, нижня шкала-плеєр.
+*/
+:root{color-scheme:light dark;
+--bg:light-dark(#FFF7EC,#12112A);--bg2:light-dark(#FFEFD9,#1C1A3C);--card:light-dark(#FFFFFF,#221F48);
+--ink:light-dark(#1D1A39,#F4F0FF);--soft:light-dark(#575273,#BDB6DE);--line:light-dark(#E8DCCB,#35316A);
+--red:#FF3D57;--blue:light-dark(#2F55F0,#7C95FF);--sun:#FFC23D;--mint:light-dark(#0E9F7E,#3DDCB5);--plum:light-dark(#7A3BD1,#B691FF);
+--redt:light-dark(#D7193A,#FF7086);--shadow:0 1px 0 light-dark(#00000010,#00000040),0 10px 30px -12px light-dark(#5a3a0040,#00000090)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:clamp(17px,1.45vw,22px)/1.5 'Golos Text',system-ui,'Segoe UI',Roboto,Arial,sans-serif;overflow:hidden}
+h1,h2,h3{font-family:Unbounded,'Golos Text',system-ui,sans-serif;line-height:1.08;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(34px,5.2vw,76px);font-weight:800}
+h2{font-size:clamp(26px,3.1vw,46px);font-weight:700;margin-bottom:.55em}
+h3{font-size:clamp(18px,1.6vw,24px);font-weight:600}
+p{margin:0 0 .7em}
+.lead{font-size:clamp(19px,1.8vw,28px);line-height:1.4;max-width:46ch}
+.muted{color:var(--soft)}
+b.r{color:var(--redt)}b.bl{color:var(--blue)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:10px}
+a{color:var(--blue)}
+
+/* ---- deck ---- */
+#deck{position:fixed;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+#deck::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;padding:76px max(4vw,16px) 104px;display:flex}
+.wrap{width:100%;max-width:1280px;margin:auto;display:flex;flex-direction:column}
+.slide.alt{background:var(--bg2)}
+.slide.dark{background:#1D1A39;color:#F4F0FF;--soft:#C9C2EA;--card:#2A2656;--line:#45407E;--blue:#8FA4FF}
+.eyebrow{display:inline-flex;align-self:flex-start;gap:.5em;align-items:center;font-weight:700;font-size:.8em;padding:.3em .8em;border-radius:99px;background:var(--card);box-shadow:var(--shadow);margin-bottom:1em}
+.eyebrow i{width:.65em;height:.65em;border-radius:50%;background:var(--red)}
+.eyebrow.sim i{background:var(--mint)}
+.eyebrow.dic i{background:var(--sun)}
+
+/* top & bottom bars */
+#top{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;gap:14px;padding:0 max(4vw,16px);z-index:5;pointer-events:none;font-size:15px}
+#top .tag{font-family:Unbounded,sans-serif;font-weight:700;font-size:14px}
+#top .date{color:var(--soft)}
+#top .sp{flex:1}
+#top .cnt{font-variant-numeric:tabular-nums;color:var(--soft);white-space:nowrap}
+#bar{position:fixed;left:0;right:0;bottom:0;height:84px;display:flex;align-items:center;gap:12px;padding:0 max(4vw,16px);z-index:5;background:linear-gradient(to top,var(--bg) 55%,transparent)}
+.rb{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--card);box-shadow:var(--shadow);flex:none}
+.rb svg{width:22px;height:22px}
+.rb.main{background:var(--ink);color:var(--bg)}
+#track{flex:1;height:44px;display:flex;align-items:center;gap:3px;position:relative}
+#track button{flex:1;height:10px;border-radius:5px;background:var(--line);transition:background .2s,height .2s;padding:0}
+#track button.done{background:var(--red)}
+#track button.on{background:var(--red);height:18px}
+#track button:hover{height:18px}
+#tip{position:absolute;bottom:40px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:14px;padding:4px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+@media(max-width:600px){#track{display:none}#bar{justify-content:space-between}#top .date{display:none}.slide{padding-top:64px}}
+
+/* common blocks */
+.grid{display:grid;gap:clamp(12px,1.6vw,22px)}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(18px,3vw,48px);align-items:center}
+@media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}
+@media(max-width:560px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:22px;padding:clamp(16px,1.6vw,24px);box-shadow:var(--shadow)}
+.card h3{margin-bottom:.35em}
+.pill{display:inline-block;padding:.35em .9em;border-radius:99px;background:var(--card);box-shadow:var(--shadow);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:.5em;padding:.6em 1.1em;min-height:48px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-weight:600}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn.red{background:var(--red);color:#fff}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.note{font-size:.82em;color:var(--soft)}
+.big-def{font-family:Unbounded,sans-serif;font-weight:500;font-size:clamp(22px,2.6vw,40px);line-height:1.3;max-width:30ch}
+.big-def em{font-style:normal;color:var(--redt);font-weight:700}
+.ok{color:var(--mint)!important}.bad{color:var(--redt)!important}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s 2}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+@keyframes rise{from{transform:translateY(18px);opacity:0}}
+.slide.cur .wrap>*{animation:rise .5s both}
+.slide.cur .wrap>*:nth-child(2){animation-delay:.06s}.slide.cur .wrap>*:nth-child(3){animation-delay:.12s}.slide.cur .wrap>*:nth-child(4){animation-delay:.18s}
+
+/* cover */
+.cover{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:4vw;align-items:center}
+.cover .num{font-family:Unbounded;font-weight:800;font-size:clamp(18px,1.6vw,24px);color:var(--redt);margin-bottom:.8em}
+.cover h1 span{display:block;font-size:.42em;font-weight:600;color:var(--soft);margin-top:.6em;line-height:1.25}
+.cover svg{width:100%;height:auto}
+@media(max-width:900px){.cover{grid-template-columns:1fr}.cover svg{max-height:34vh}}
+.eq rect{transform-origin:bottom;transform-box:fill-box;animation:eq 1.2s ease-in-out infinite alternate}
+@keyframes eq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+
+/* rules */
+.rule{display:flex;gap:14px;align-items:flex-start}
+.rule svg{flex:none;width:52px;height:52px}
+
+/* flip cards */
+.flip{perspective:900px;min-height:150px}
+.flip button{position:relative;width:100%;height:100%;min-height:150px;transform-style:preserve-3d;transition:transform .5s}
+.flip.on button{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;backface-visibility:hidden;background:var(--card);box-shadow:var(--shadow);padding:12px;text-align:center}
+.flip .f svg{width:56px;height:56px}
+.flip .b{transform:rotateY(180deg);font-weight:700}
+.flip .b.in{background:#DDE5FF;color:#1B2C80}.flip .b.out{background:#FFE0E5;color:#8A1027}.flip .b.both{background:#FFF0C7;color:#6A4A00}
+
+/* sorter */
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:60px;margin-bottom:16px}
+.chip{padding:.5em 1em;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-weight:600;min-height:48px;transition:transform .15s,background .15s}
+.chip.sel{background:var(--ink);color:var(--bg);transform:translateY(-3px)}
+.chip.placed{animation:pop .3s both;cursor:default}
+.bins{display:grid;gap:14px}
+.bin{border:2px dashed var(--line);border-radius:20px;padding:14px;min-height:130px;text-align:left;display:flex;flex-direction:column;gap:8px;transition:border-color .2s,background .2s;background:transparent}
+.bin.armed{border-color:var(--blue);background:light-dark(#2F55F00d,#7C95FF14)}
+.bin h3{display:flex;align-items:center;gap:.5em}
+.bin h3 i{width:14px;height:14px;border-radius:4px;flex:none}
+.bin .in{display:flex;flex-wrap:wrap;gap:6px}
+.bin .in span{font-size:.8em;padding:.25em .7em;border-radius:10px;background:var(--card);animation:pop .3s both}
+.score{font-weight:700}
+
+/* poll */
+.poll{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:minmax(110px,.8fr) minmax(0,2fr) auto;gap:12px;align-items:center;background:var(--card);border-radius:16px;padding:8px 12px;box-shadow:var(--shadow)}
+.pbar{display:flex;height:26px;border-radius:8px;overflow:hidden;background:var(--line)}
+.pbar i{display:block;height:100%;transition:width .3s}
+.pbtns{display:flex;gap:6px}
+.pbtns button{min-width:48px;height:44px;border-radius:12px;font-weight:700;font-size:.8em;padding:0 10px;color:#fff}
+@media(max-width:700px){.prow{grid-template-columns:1fr}}
+
+/* stage (multimedia builder) */
+.stage{position:relative;aspect-ratio:16/9;border-radius:22px;overflow:hidden;background:var(--line);box-shadow:var(--shadow)}
+.stage>*{position:absolute;inset:0;width:100%;height:100%}
+.stage .empty{display:grid;place-items:center;color:var(--soft);text-align:center;padding:20px}
+.stage .cap{inset:auto 0 0 0;height:auto;padding:18px 22px;font-family:Unbounded;font-weight:700;font-size:clamp(18px,2vw,30px);color:#fff;background:linear-gradient(transparent,#0008)}
+.stage .snd{inset:14px 14px auto auto;width:auto;height:auto;display:flex;gap:4px;align-items:flex-end;background:#0007;padding:10px 12px;border-radius:12px}
+.stage .snd i{width:6px;background:#fff;border-radius:3px;animation:eq .5s ease-in-out infinite alternate}
+.stage .vid{inset:14px auto auto 14px;width:auto;height:auto;color:#fff;background:#0007;padding:6px 12px;border-radius:10px;font-weight:700;font-size:.8em;display:flex;gap:8px;align-items:center}
+.stage .vid i{width:10px;height:10px;border-radius:50%;background:var(--red);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.toggles{display:grid;gap:10px}
+.tg{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left;min-height:56px;font-weight:600}
+.tg .sw{width:46px;height:26px;border-radius:13px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.tg .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px #0003}
+.tg[aria-pressed=true] .sw{background:var(--mint)}
+.tg[aria-pressed=true] .sw::after{transform:translateX(20px)}
+.verdict{font-family:Unbounded;font-weight:700;font-size:clamp(17px,1.5vw,22px);padding:14px 16px;border-radius:16px;background:var(--card);box-shadow:var(--shadow)}
+
+/* word equation */
+.weq{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-family:Unbounded;font-weight:700;font-size:clamp(20px,2.6vw,40px)}
+.weq .w{background:var(--card);box-shadow:var(--shadow);border-radius:18px;padding:.4em .7em;line-height:1.1}
+.weq .w small{display:block;font-family:'Golos Text';font-weight:500;font-size:.42em;color:var(--soft);margin-top:.3em}
+.weq .res{background:var(--red);color:#fff}
+.weq .res small{color:#fff}
+
+/* sound chain */
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;align-items:stretch}
+.node{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;position:relative}
+.node svg{width:84px;height:84px}
+.link{position:relative;height:6px;align-self:center;margin:0 -2px;z-index:1}
+.wire{height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,var(--line) 0 10px,transparent 10px 18px)}
+.wire.live{background:repeating-linear-gradient(90deg,var(--red) 0 10px,transparent 10px 18px);background-size:36px 6px;animation:flow .6s linear infinite}
+@keyframes flow{to{background-position:36px 0}}
+.chainrow{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr 40px 1fr;align-items:center}
+@media(max-width:900px){.chainrow{grid-template-columns:1fr;gap:8px}.chainrow .link{width:6px;height:28px;justify-self:center}.chainrow .wire{height:28px;width:6px;background:repeating-linear-gradient(180deg,var(--line) 0 8px,transparent 8px 14px)}.chainrow .wire.live{background:repeating-linear-gradient(180deg,var(--red) 0 8px,transparent 8px 14px)}}
+.seg{display:inline-flex;background:var(--bg2);border-radius:12px;padding:4px;gap:4px}
+.seg button{padding:.35em .8em;border-radius:9px;min-height:40px;font-weight:600;font-size:.85em}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.status{font-weight:700;padding:12px 16px;border-radius:14px;margin-top:16px}
+.status.good{background:light-dark(#D8F6EC,#123D33);color:light-dark(#075C48,#7FF0D2)}
+.status.warn{background:light-dark(#FFE3E8,#4A1522);color:light-dark(#9B1230,#FFB3C0)}
+input[type=range]{width:100%;accent-color:var(--red);height:32px}
+.cone{transition:transform .06s}
+
+/* table */
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+th,td{padding:12px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-family:Unbounded;font-weight:600;font-size:.82em;background:var(--ink);color:var(--bg)}
+td small{color:var(--soft);display:block}
+tr:last-child td{border-bottom:0}
+
+/* player */
+.player{background:#17153A;color:#F4F0FF;border-radius:26px;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:16px;box-shadow:var(--shadow)}
+.player .vis{position:relative;min-height:300px;border-radius:18px;overflow:hidden;background:#0C0B22}
+.player .vis canvas{position:absolute;inset:0;width:100%;height:100%}
+.player .side{display:flex;flex-direction:column;gap:8px}
+.player .tl{display:flex;flex-direction:column;gap:6px}
+.player .tl button{text-align:left;padding:10px 12px;border-radius:12px;background:#ffffff10;min-height:48px;font-size:.85em}
+.player .tl button[aria-pressed=true]{background:var(--red);color:#fff}
+.player .seg{background:#ffffff14}
+.player .seg button[aria-pressed=true]{background:#F4F0FF;color:#17153A}
+.pctrl{grid-column:1/-1;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pctrl .rb{background:#ffffff18;color:#fff;box-shadow:none}
+.pctrl .rb.main{background:var(--red)}
+.ptime{font-variant-numeric:tabular-nums;font-size:.85em;color:#C9C2EA}
+.pprog{flex:1;min-width:120px;height:8px;border-radius:4px;background:#ffffff22;overflow:hidden}
+.pprog i{display:block;height:100%;width:0;background:var(--red)}
+.vol{display:flex;gap:8px;align-items:center;width:160px}
+@media(max-width:800px){.player{grid-template-columns:1fr}.player .tl{flex-direction:row;flex-wrap:wrap}}
+
+/* recorder */
+.rec{background:var(--card);border-radius:26px;padding:18px;box-shadow:var(--shadow);display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px}
+.rec .wv{position:relative;height:220px;border-radius:16px;background:var(--bg2);overflow:hidden}
+.rec .wv canvas{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.rec .time{font-family:Unbounded;font-weight:700;font-size:clamp(28px,3vw,44px);font-variant-numeric:tabular-nums;text-align:center}
+.recbtn{width:84px;height:84px;border-radius:50%;background:var(--red);display:grid;place-items:center;box-shadow:0 0 0 6px light-dark(#FF3D5722,#FF3D5744)}
+.recbtn i{width:30px;height:30px;border-radius:50%;background:#fff;transition:border-radius .2s,width .2s,height .2s}
+.recbtn.on i{width:26px;height:26px;border-radius:6px}
+.reclist{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:auto}
+.reclist button{display:flex;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--bg2);min-height:44px;font-size:.85em}
+.reclist button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.marks{display:flex;flex-wrap:wrap;gap:6px}
+.marks button{font-size:.8em;padding:6px 10px;border-radius:10px;background:var(--sun);color:#3A2800;font-weight:700;min-height:40px}
+@media(max-width:800px){.rec{grid-template-columns:1fr}}
+
+/* camera */
+.cam{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:14px;background:#151419;border-radius:28px;padding:14px;color:#fff}
+.vf{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:#000}
+.vf canvas{width:100%;height:100%;display:block}
+.vf .hud{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#0009;padding:4px 12px;border-radius:10px;font-weight:700;font-variant-numeric:tabular-nums;display:none;gap:8px;align-items:center;font-size:.85em}
+.vf .hud i{width:10px;height:10px;border-radius:50%;background:var(--red);animation:blink 1s steps(2) infinite}
+.vf .hud.paused i{animation:none;background:var(--sun)}
+.vf .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.vf .flash.go{animation:fl .35s ease-out}
+@keyframes fl{from{opacity:.9}to{opacity:0}}
+.camside{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.shut{width:78px;height:78px;border-radius:50%;border:5px solid #fff;display:grid;place-items:center}
+.shut i{width:56px;height:56px;border-radius:50%;background:#fff;transition:all .2s}
+.shut.vid i{background:var(--red)}
+.shut.on i{width:30px;height:30px;border-radius:8px}
+.camside .rb{background:#ffffff1c;color:#fff;box-shadow:none}
+.cammodes{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.cammodes button,.filt button{padding:6px 12px;border-radius:10px;font-weight:700;font-size:.8em;min-height:40px;color:#ddd}
+.cammodes button[aria-pressed=true]{color:var(--sun)}
+.filt{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.filt button[aria-pressed=true]{background:#ffffff22;color:#fff}
+.gal{display:flex;gap:8px;overflow-x:auto;padding-top:10px;min-height:70px}
+.gal figure{margin:0;position:relative;flex:none}
+.gal img{width:96px;height:60px;object-fit:cover;border-radius:8px;display:block}
+.gal figcaption{position:absolute;bottom:3px;right:4px;font-size:12px;background:#000a;color:#fff;padding:1px 5px;border-radius:5px}
+.f-bw{filter:grayscale(1)}.f-sep{filter:sepia(.85)}.f-viv{filter:saturate(1.8) contrast(1.1)}
+@media(max-width:700px){.cam{grid-template-columns:1fr}.camside{flex-direction:row}}
+
+/* eye gym */
+.gym{position:relative;height:min(52vh,460px);border-radius:26px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.gym .dot{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFD978,var(--sun) 45%,#E89B00);box-shadow:0 6px 18px #E89B0066;left:50%;top:50%}
+.gym .say{position:absolute;inset:auto 0 18px 0;text-align:center;font-weight:700}
+
+/* explorer */
+.xsim{display:grid;grid-template-columns:240px minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media(max-width:1100px){.xsim{grid-template-columns:200px minmax(0,1fr)}.xsim .steps{grid-column:1/-1}}
+@media(max-width:640px){.xsim{grid-template-columns:1fr}}
+.phone{background:#1b1b22;border-radius:34px;padding:10px;color:#fff;box-shadow:var(--shadow);position:relative}
+.phone .scr{background:linear-gradient(160deg,#3A4BD8,#B2328F);border-radius:26px;min-height:330px;padding:16px 12px;display:flex;flex-direction:column;gap:8px;font-size:.8em}
+.phone .scr .clock{font-family:Unbounded;font-size:2.2em;font-weight:700;text-align:center;margin-top:20px}
+.phone .sheet{background:#fff;color:#1D1A39;border-radius:18px;padding:12px;margin-top:auto;display:flex;flex-direction:column;gap:6px}
+.phone .sheet button{text-align:left;padding:10px;border-radius:10px;background:#F1EEF8;min-height:44px;font-weight:600}
+.cable{display:flex;justify-content:center;margin-top:10px}
+.win{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;min-height:400px;display:flex;flex-direction:column}
+.win .tb{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.8em}
+.win .tb .crumbs{flex:1;background:var(--bg2);padding:8px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win .tb button{min-width:40px;min-height:40px;border-radius:10px;background:var(--bg2)}
+.win .body{display:grid;grid-template-columns:150px minmax(0,1fr);flex:1}
+.win .nav{border-right:1px solid var(--line);padding:8px;display:flex;flex-direction:column;gap:4px;font-size:.78em}
+.win .nav button{text-align:left;padding:8px;border-radius:8px;min-height:40px}
+.win .nav button.hl{background:var(--sun);color:#3A2800;font-weight:700;animation:pop .3s}
+.win .files{padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;align-content:start}
+.win .files button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;font-size:.75em;text-align:center;word-break:break-word;min-height:44px}
+.win .files button:hover{background:var(--bg2)}
+.win .files button.sel{background:light-dark(#DDE5FF,#2B3577)}
+.win .files svg{width:50px;height:50px}
+.win .act{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);flex-wrap:wrap;align-items:center;font-size:.85em}
+.win .act .btn{min-height:42px;padding:.4em .9em}
+.prog{height:8px;border-radius:4px;background:var(--line);flex:1;min-width:80px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--mint);transition:width .1s}
+@media(max-width:640px){.win .body{grid-template-columns:1fr}.win .nav{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line)}}
+.steps{display:flex;flex-direction:column;gap:8px;counter-reset:st}
+.steps li{list-style:none;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:.85em;counter-increment:st}
+.steps li::before{content:counter(st);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:700;font-size:.9em}
+.steps li.done::before{content:"✓";background:var(--mint);color:#fff}
+.steps ol{margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+
+/* order */
+.order{display:flex;flex-direction:column;gap:8px;max-width:820px}
+.oitem{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;padding:8px 10px 8px 16px;box-shadow:var(--shadow);transition:background .2s}
+.oitem span{flex:1}
+.oitem button{width:44px;height:44px;border-radius:12px;background:var(--bg2);display:grid;place-items:center}
+.oitem.right{background:light-dark(#D8F6EC,#123D33)}.oitem.wrong{background:light-dark(#FFE3E8,#4A1522)}
+
+/* quiz */
+.qopts{display:grid;gap:10px}
+.qopts button{text-align:left;padding:14px 18px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);min-height:56px;font-weight:600;border:2px solid transparent}
+.qopts button.right{border-color:var(--mint);background:light-dark(#D8F6EC,#123D33)}
+.qopts button.wrong{border-color:var(--red);background:light-dark(#FFE3E8,#4A1522)}
+.qbar{display:flex;gap:6px;margin-bottom:16px}
+.qbar i{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.qbar i.r{background:var(--mint)}.qbar i.w{background:var(--red)}.qbar i.c{background:var(--ink)}
+
+/* reveal cards */
+.reveal{text-align:left;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.reveal .ans{display:none;color:var(--soft);font-size:.9em;border-top:1px solid var(--line);padding-top:8px}
+.reveal.on .ans{display:block;animation:rise .3s both}
+.reveal .hint{font-size:.8em;color:var(--blue);font-weight:700;margin-top:auto}
+.reveal.on .hint{display:none}
+
+/* tree */
+.treebox{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:center}
+.treebox svg{width:100%;max-height:58vh}
+.leafbtn{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);font-weight:700;min-height:60px;width:100%;text-align:left}
+.leafbtn svg{width:36px;height:36px;flex:none}
+.leafbtn b{margin-left:auto;font-variant-numeric:tabular-nums;font-size:1.2em}
+@keyframes drop{from{transform:translateY(-120px) rotate(-40deg);opacity:0}}
+.lf{animation:drop .7s cubic-bezier(.2,.7,.3,1) both;transform-box:fill-box;transform-origin:center}
+@media(max-width:800px){.treebox{grid-template-columns:1fr}}
+
+.qr{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;align-items:center}
+.qr img{width:150px;height:150px;border-radius:12px;background:#fff;padding:8px;image-rendering:pixelated}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+a.btn{text-decoration:none}
+body.ondark #top{color:#F4F0FF}body.ondark #top .date,body.ondark #top .cnt{color:#C9C2EA}
+body.ondark #bar{background:linear-gradient(to top,#1D1A39 55%,transparent)}
+body.ondark #track button:not(.done):not(.on){background:#45407E}
+@media(min-width:1000px){.poll{grid-template-columns:repeat(2,minmax(0,1fr))}.prow{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) auto}}
+.cam{width:100%;max-width:max(520px,calc((100dvh - 360px)*1.6 + 150px));align-self:center}
+.big-def{max-width:34ch}
+.win{min-height:340px}.phone .scr{min-height:290px}
+body.ondark .rb.main{background:#FFC23D;color:#1D1A39}
+.cam{max-width:max(480px,calc((100dvh - 430px)*1.6 + 150px))}
+.mmsplit{align-items:start;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr)}
+@media(max-width:900px){.mmsplit{grid-template-columns:1fr}}
+#top .tag{white-space:nowrap}
+@media(max-width:600px){table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 12px;padding-inline-start:9em}.stack td::before{content:attr(data-l);float:inline-start;width:8.5em;margin-inline-start:-8.5em;font-weight:700}}
+
+</style></head><body>
+<header id="top"><span class="tag">Інформатика · Урок 16</span><span class="date" id="today"></span><span class="sp"></span><span class="cnt" id="cnt"></span></header>
+
+<main id="deck">
+
+<!-- 1 cover -->
+<section class="slide" data-t="Початок"><div class="wrap"><div class="cover">
+ <div>
+  <div class="num">Урок №16</div>
+  <h1>Медіа. Мультимедіа.<span>Програми для створення та відтворення простих аудіо- та відеоданих</span></h1>
+  <p class="muted" style="margin-top:1.4em">Гортай стрілками ← → або кнопками внизу. Слайди з позначкою <b class="ok">«Симулятор»</b> можна натискати.</p>
+ </div>
+ <svg viewBox="0 0 420 360" aria-label="Плеєр, нотка і еквалайзер">
+  <rect x="20" y="40" width="380" height="250" rx="34" fill="#1D1A39"/>
+  <rect x="44" y="64" width="332" height="170" rx="18" fill="#2F55F0"/>
+  <circle cx="300" cy="110" r="26" fill="#FFC23D"/>
+  <path d="M44 234 L140 140 L200 196 L250 152 L376 234Z" fill="#1FC7A3"/>
+  <path d="M44 234 L110 186 L170 234Z" fill="#0E9F7E"/>
+  <circle cx="210" cy="149" r="40" fill="#FF3D57"/><path d="M198 129 L230 149 L198 169Z" fill="#fff"/>
+  <rect x="44" y="252" width="332" height="12" rx="6" fill="#45407E"/><rect x="44" y="252" width="150" height="12" rx="6" fill="#FF3D57"/>
+  <g class="eq" fill="#FF3D57">
+   <rect x="60" y="300" width="22" height="50" rx="6" style="animation-delay:-.1s"/><rect x="92" y="300" width="22" height="50" rx="6" style="animation-delay:-.5s"/>
+   <rect x="124" y="300" width="22" height="50" rx="6" style="animation-delay:-.3s" fill="#FFC23D"/><rect x="156" y="300" width="22" height="50" rx="6" style="animation-delay:-.8s" fill="#2F55F0"/>
+   <rect x="188" y="300" width="22" height="50" rx="6" style="animation-delay:-.2s"/><rect x="220" y="300" width="22" height="50" rx="6" style="animation-delay:-.6s" fill="#1FC7A3"/>
+  </g>
+  <g fill="#FFC23D" transform="translate(320 300)"><rect x="18" y="-60" width="7" height="60"/><ellipse cx="10" cy="2" rx="16" ry="12"/><path d="M25 -60 q30 10 20 40 q-4 -20 -20 -22z"/></g>
+ </svg>
+</div></div></section>
+
+<!-- 2 rules -->
+<section class="slide alt" data-t="Правила"><div class="wrap">
+ <span class="eyebrow"><i></i>Безпека</span>
+ <h2>Правила поведінки в кабінеті інформатики</h2>
+ <div class="grid g3" id="rules"></div>
+</div></section>
+
+<!-- 3 goals -->
+<section class="slide" data-t="Мета уроку"><div class="wrap">
+ <span class="eyebrow"><i></i>Мета уроку</span>
+ <h2>Сьогодні на уроці ми з вами</h2>
+ <div class="grid g3">
+  <div class="card"><h3>З’ясуємо</h3><p>значення понять «медіа», «мультимедіа», «об’єкти мультимедіа».</p></div>
+  <div class="card"><h3>Розглянемо</h3><p>вбудовані програми Windows 11 і смартфона для запису та відтворення звуку й відео.</p></div>
+  <div class="card"><h3>Створимо</h3><p>власні мультимедійні продукти — спершу в симуляторах, потім у справжніх програмах.</p></div>
+ </div>
+</div></section>
+
+<!-- 4 recall flip -->
+<section class="slide alt" data-t="Пригадайте"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Пригадайте</span>
+ <h2>Якими є пристрої для роботи зі звуком та відео?</h2>
+ <p class="muted">Спершу вгадай: пристрій <b class="bl">вводить</b> дані в комп’ютер чи <b class="r">виводить</b> їх? Натисни на картку, щоб перевірити.</p>
+ <div class="grid g4" id="flips"></div>
+</div></section>
+
+<!-- 5 media around -->
+<section class="slide" data-t="Міркуємо"><div class="wrap"><div class="split">
+ <div>
+  <span class="eyebrow"><i></i>Міркуємо</span>
+  <h2>Повідомлення всюди</h2>
+  <p class="lead">Щодня ми отримуємо сотні повідомлень: від друзів, із ЗМІ, з інтернету. Інформацію несуть не лише газети й телебачення, а й текстові повідомлення, логотипи на одязі, застосунки на смартфоні і навіть упаковка продуктів.</p>
+  <p class="muted">Обговоріть: що об’єднує всі ці джерела? Які дані в них можна розпізнати — текст, звук, зображення?</p>
+ </div>
+ <div class="grid g2" id="around"></div>
+</div></div></section>
+
+<!-- 6 dict media -->
+<section class="slide dark" data-t="Медіа"><div class="wrap">
+ <span class="eyebrow dic" style="color:#1D1A39;background:#FFC23D"><i style="background:#1D1A39"></i>Словничок</span>
+ <p class="big-def"><em>Медіа</em> (англ. media, від лат. medium — посередник) — тип комунікації, що передбачає засоби передавання, зберігання та відтворення інформації, призначені для її поширення серед широкої аудиторії.</p>
+</div></section>
+
+<!-- 7 sorter media -->
+<section class="slide alt" data-t="Види медіа"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Сортувальник</span>
+ <h2>Розклади медіа по групах</h2>
+ <p class="muted">Натисни на картку, а потім — на групу, до якої вона належить. <span class="score" id="ms-score"></span></p>
+ <div class="pool" id="ms-pool"></div>
+ <div class="bins grid g4" id="ms-bins"></div>
+ <div class="row" style="margin-top:14px"><button class="btn" id="ms-reset">Почати знову</button></div>
+</div></section>
+
+<!-- 8 poll -->
+<section class="slide" data-t="Голосування"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Голосування класу</span>
+ <h2>Які медіа зникнуть, а які розвиватимуться?</h2>
+ <p class="muted">Учитель натискає кнопку за кожен голос. Обґрунтуйте свої припущення.</p>
+ <div class="poll" id="poll"></div>
+ <div class="row" style="margin-top:12px"><span class="pill" style="background:#8A8399;color:#fff">зникне</span><span class="pill" style="background:#2F55F0;color:#fff">залишиться</span><span class="pill" style="background:#FF3D57;color:#fff">зростатиме</span><span class="sp" style="flex:1"></span><button class="btn" id="poll-reset">Скинути</button></div>
+</div></section>
+
+<!-- 9 dict multimedia -->
+<section class="slide dark" data-t="Мультимедіа"><div class="wrap">
+ <span class="eyebrow dic" style="color:#1D1A39;background:#FFC23D"><i style="background:#1D1A39"></i>Словничок</span>
+ <p class="big-def"><em>Мультимедіа</em> — поєднання різних форм подання повідомлень: тексту, звуку, графіки, анімації та відео.</p>
+ <p class="big-def" style="margin-top:1em;font-size:clamp(19px,2vw,30px)"><em>Об’єкти мультимедіа</em> — текст, рухомі й нерухомі зображення, аудіо- та відеооб’єкти.</p>
+</div></section>
+
+<!-- 10 builder -->
+<section class="slide alt" data-t="Конструктор"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Конструктор мультимедіа</span>
+ <h2>Збери мультимедійний продукт</h2>
+ <div class="split mmsplit">
+  <div class="stage" id="stage"><div class="empty">Увімкни хоча б одну форму подання праворуч</div></div>
+  <div><div class="toggles" id="mm-tg"></div><div class="verdict" id="mm-v" style="margin-top:12px">Обрано форм: 0</div></div>
+ </div>
+</div></section>
+
+<!-- 11 interesting -->
+<section class="slide" data-t="Це цікаво"><div class="wrap">
+ <span class="eyebrow"><i style="background:var(--plum)"></i>Це цікаво</span>
+ <h2>Звідки взялося слово?</h2>
+ <div class="weq"><div class="w">multum<small>лат. «багато»</small></div><span>+</span><div class="w">medium<small>лат. «середовище, посередник»</small></div><span>=</span><div class="w res">мультимедіа<small>багато середовищ разом</small></div></div>
+ <p class="lead" style="margin-top:1.2em">Уперше термін «мультимедіа» з’явився у 1965 р. для опису театралізованих шоу. Наприклад, Exploding Plastic Inevitable поєднувало живу рок-музику, кіно та експериментальні світлові ефекти.</p>
+</div></section>
+
+<!-- 12 files & processing -->
+<section class="slide alt" data-t="Опрацювання"><div class="wrap"><div class="split">
+ <div>
+  <span class="eyebrow"><i></i>Вивчаємо</span>
+  <h2>Як живуть об’єкти мультимедіа</h2>
+  <p class="lead">Опрацювання мультимедійних об’єктів — це їх <b>створення</b> і (або) <b>зміна</b>: редагування чи форматування.</p>
+  <p>Об’єкти мультимедіа зберігаються у <b>файлах</b>. Щоб створювати та відтворювати такі файли, потрібні відповідні <b>пристрої</b> і <b>програми</b>. Характерна особливість мультимедіа — <b>гіперпосилання</b>, що з’єднують об’єкти між собою.</p>
+ </div>
+ <div class="grid g2">
+  <div class="card"><h3>Створити</h3><p class="muted">записати звук, зняти відео, намалювати</p></div>
+  <div class="card"><h3>Редагувати</h3><p class="muted">обрізати, склеїти, прибрати шум</p></div>
+  <div class="card"><h3>Форматувати</h3><p class="muted">змінити розмір, якість, формат файлу</p></div>
+  <div class="card"><h3>Поєднати</h3><p class="muted">з’єднати об’єкти гіперпосиланнями</p></div>
+ </div>
+</div></div></section>
+
+<!-- 13 sound chain -->
+<section class="slide" data-t="Звідки звук"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Звуковий тракт</span>
+ <h2>Звідки береться звук у комп’ютері?</h2>
+ <p class="muted">Звук, який ми чуємо, — результат роботи <b>звукової карти</b> та <b>акустичної системи</b>. Вимикай і вмикай ланки й послухай, що зміниться.</p>
+ <div class="chainrow" id="chain">
+  <div class="node"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M18 6h32l14 14v54H18z" stroke-width="3" style="fill:var(--bg2);stroke:var(--ink)"/><path d="M50 6v14h14" fill="none" stroke-width="3" style="stroke:var(--ink)"/><path d="M36 58V32l16-4v24" fill="none" stroke-width="4" style="stroke:var(--red)"/><circle cx="32" cy="58" r="5" style="fill:var(--red)"/><circle cx="48" cy="54" r="5" style="fill:var(--red)"/></svg><h3>Файл music.mp3</h3><button class="btn red" id="ch-play">▶ Відтворити</button></div>
+  <div class="link"><div class="wire" id="w1"></div></div>
+  <div class="node"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="6" y="20" width="68" height="36" rx="4" fill="#1FC7A3"/><rect x="14" y="28" width="22" height="20" rx="2" fill="#0E6F58"/><rect x="42" y="28" width="8" height="8" fill="#FFC23D"/><rect x="54" y="28" width="8" height="8" fill="#FFC23D"/><path d="M10 56v10M18 56v10M26 56v10M34 56v10M42 56v10" stroke="#C9A227" stroke-width="4"/></svg><h3>Звукова карта</h3><div class="seg" data-k="card"><button aria-pressed="true" data-v="1">Увімк.</button><button aria-pressed="false" data-v="0">Вимк.</button></div></div>
+  <div class="link"><div class="wire" id="w2"></div></div>
+  <div class="node"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M8 40h30" stroke-width="6" stroke-linecap="round" style="stroke:var(--ink)"/><rect x="36" y="32" width="20" height="16" rx="3" style="fill:var(--blue)"/><path d="M56 40h12" stroke="#B9B9C6" stroke-width="5"/><circle cx="72" cy="40" r="4" fill="#B9B9C6"/></svg><h3>Кабель / роз’єм</h3><div class="seg" data-k="plug"><button aria-pressed="true" data-v="1">Під’єднано</button><button aria-pressed="false" data-v="0">Висмикнуто</button></div></div>
+  <div class="link"><div class="wire" id="w3"></div></div>
+  <div class="node"><svg viewBox="0 0 80 80" id="spk" aria-hidden="true"></svg><h3 id="outname">Колонки</h3><div class="seg" data-k="out"><button aria-pressed="true" data-v="spk">Колонки</button><button aria-pressed="false" data-v="hp">Навушники</button></div></div>
+ </div>
+ <div class="row" style="margin-top:16px;max-width:520px"><span>Гучність</span><input type="range" id="ch-vol" min="0" max="100" value="70" aria-label="Гучність"></div>
+ <div class="status good" id="ch-status">Натисни «Відтворити».</div>
+</div></section>
+
+<!-- 14 storage -->
+<section class="slide alt" data-t="Носії й порти"><div class="wrap">
+ <span class="eyebrow"><i></i>Вивчаємо</span>
+ <h2>Як фото й відео потрапляють у комп’ютер</h2>
+ <p class="muted">Фото і відео з камер та телефонів зберігаються на картах пам’яті, флешках чи у внутрішній пам’яті. На комп’ютер їх переносять кабелем через USB, кардрідером або через хмару.</p>
+ <div class="grid g4" id="storage"></div>
+</div></section>
+
+<!-- 15 formats sorter -->
+<section class="slide" data-t="Формати"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Формати файлів</span>
+ <h2>Аудіо чи відео? Розпізнай за розширенням</h2>
+ <p class="muted">Файли з мультимедійними даними мають різні розширення. Натисни на розширення, потім — на правильну полицю. <span class="score" id="fs-score"></span></p>
+ <div class="pool" id="fs-pool"></div>
+ <div class="bins grid g2" id="fs-bins"></div>
+ <div class="row" style="margin-top:14px"><button class="btn" id="fs-reset">Почати знову</button></div>
+</div></section>
+
+<!-- 16 dict player + table -->
+<section class="slide alt" data-t="Медіаплеєри"><div class="wrap">
+ <span class="eyebrow dic"><i></i>Словничок</span>
+ <p class="big-def" style="margin-bottom:.9em"><em>Мультимедійні програвачі</em>, або медіаплеєри, — програми для відтворення мультимедійних даних.</p>
+ <table class="stack">
+  <thead><tr><th>Windows 11</th><th>macOS</th><th>Linux</th><th>Android / iOS</th></tr></thead>
+  <tbody>
+   <tr><td>Медіапрогравач<small>вбудований, замінив Groove</small></td><td>Музика<small>колишній iTunes</small></td><td>VLC</td><td>Галерея / Фото</td></tr>
+   <tr><td>Програвач Windows Media<small>класична версія</small></td><td>QuickTime Player</td><td>Відео (Totem)</td><td>YouTube Music, Spotify</td></tr>
+   <tr><td>VLC<small>встановлюється окремо</small></td><td>VLC</td><td>mpv, Celluloid</td><td>VLC</td></tr>
+  </tbody>
+ </table>
+ <p class="note" style="margin-top:10px">VLC безкоштовний і працює на всіх системах, тому його часто встановлюють додатково.</p>
+</div></section>
+
+<!-- 17 player sim -->
+<section class="slide" data-t="Медіаплеєр"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Медіаплеєр</span>
+ <h2>Зорові образи: музика, яку видно</h2>
+ <p class="muted">Плеєр під час відтворення звуку може показувати зорові образи. Обери трек і образ — малюнок реагує на музику.</p>
+ <div class="player">
+  <div class="vis"><canvas id="pl-cv"></canvas></div>
+  <div class="side">
+   <div class="tl" id="pl-tracks"></div>
+   <div style="font-size:.8em;color:#C9C2EA;margin-top:6px">Зоровий образ</div>
+   <div class="seg" id="pl-mode" style="flex-wrap:wrap"></div>
+  </div>
+  <div class="pctrl">
+   <button class="rb" id="pl-prev" aria-label="Попередній трек"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z" fill="currentColor"/></svg></button>
+   <button class="rb main" id="pl-play" aria-label="Відтворити"><svg viewBox="0 0 24 24" id="pl-ico"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
+   <button class="rb" id="pl-next" aria-label="Наступний трек"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z" fill="currentColor"/></svg></button>
+   <span class="ptime" id="pl-t">0:00</span><div class="pprog"><i id="pl-bar"></i></div><span class="ptime" id="pl-d">0:00</span>
+   <div class="vol"><span class="ptime">Гучн.</span><input type="range" id="pl-vol" min="0" max="100" value="70" aria-label="Гучність"></div>
+  </div>
+ </div>
+</div></section>
+
+<!-- 18 online audio & podcast -->
+<section class="slide alt" data-t="Подкаст"><div class="wrap">
+ <span class="eyebrow"><i></i>Вивчаємо</span>
+ <h2>Аудіо онлайн і подкасти</h2>
+ <p class="lead">Багато сайтів і застосунків дають змогу слухати пісні, аудіокниги та радіо онлайн. На вебсторінці для цього є вбудований плеєр із кнопками відтворення, паузи та гучності.</p>
+ <div class="weq" style="margin:.6em 0 1em"><div class="w">iPod<small>портативний програвач</small></div><span>+</span><div class="w">broadcast<small>англ. «трансляція»</small></div><span>=</span><div class="w res">подкаст</div></div>
+ <p><b>Подкаст</b> — окремий аудіо- чи відеофайл або серія таких файлів, що публікуються за однією адресою в інтернеті та регулярно оновлюються. Сьогодні подкасти слухають у Spotify, Apple Podcasts, YouTube тощо.</p>
+</div></section>
+
+<!-- 19 recorder -->
+<section class="slide" data-t="Звукозапис"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Звукозапис (колишній «Диктофон»)</span>
+ <h2>Запиши звук і постав маркери</h2>
+ <p class="muted">У Windows 11 звук записують у програмі <b>Звукозапис</b>, потрібен мікрофон. Під час запису став <b>маркери</b>, щоб потім швидко перейти до потрібного фрагмента. Тут мікрофон імітується.</p>
+ <div class="rec">
+  <div><div class="wv"><canvas id="rc-cv"></canvas></div><div class="marks" id="rc-marks" style="margin-top:10px"></div></div>
+  <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+   <div class="time" id="rc-time">00:00</div>
+   <div class="row" style="justify-content:center">
+    <button class="rb" id="rc-mark" aria-label="Додати маркер" disabled title="Маркер"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h11l-3 4 3 4H6" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+    <button class="recbtn" id="rc-rec" aria-label="Почати запис"><i></i></button>
+    <button class="rb" id="rc-play" aria-label="Відтворити запис" disabled><svg viewBox="0 0 24 24" id="rc-pico"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
+   </div>
+   <div class="note" id="rc-hint">1. Натисни червону кнопку</div>
+   <div class="reclist" id="rc-list" style="width:100%"></div>
+  </div>
+ </div>
+</div></section>
+
+<!-- 20 camera -->
+<section class="slide alt" data-t="Камера"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Камера</span>
+ <h2>Зніми фото або відео</h2>
+ <p class="muted">Програма <b>Камера</b> працює з вебкамерою. Обери режим, натисни кнопку зйомки, під час відео можна <b>призупинити</b> і <b>завершити</b> запис. Тут камера імітується.</p>
+ <div class="cam">
+  <div>
+   <div class="vf"><canvas id="cm-cv" width="800" height="500"></canvas><div class="hud" id="cm-hud"><i></i><span id="cm-t">00:00</span></div><div class="flash" id="cm-fl"></div></div>
+   <div class="filt" id="cm-filt" style="margin-top:10px"></div>
+   <div class="gal" id="cm-gal"></div>
+  </div>
+  <div class="camside">
+   <button class="rb" id="cm-pause" aria-label="Призупинити" style="visibility:hidden"><svg viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/></svg></button>
+   <button class="shut" id="cm-shut" aria-label="Зйомка"><i></i></button>
+   <div class="cammodes" id="cm-modes"><button aria-pressed="true" data-m="photo">Фото</button><button aria-pressed="false" data-m="video">Відео</button></div>
+  </div>
+ </div>
+</div></section>
+
+<!-- 21 eye gym -->
+<section class="slide" data-t="Гімнастика"><div class="wrap">
+ <span class="eyebrow"><i style="background:var(--sun)"></i>Перерва · Гімнастика для очей</span>
+ <h2>Стеж за сонечком лише очима</h2>
+ <div class="row" id="gym-btns" style="margin-bottom:14px"></div>
+ <div class="gym" id="gym"><div class="dot" id="gym-dot"></div><div class="say" id="gym-say">Голова нерухома. Обери вправу.</div></div>
+</div></section>
+
+<!-- 22 phone -->
+<section class="slide alt" data-t="Телефон"><div class="wrap"><div class="split">
+ <div>
+  <span class="eyebrow"><i></i>Вивчаємо</span>
+  <h2>Запис на смартфоні</h2>
+  <p class="lead">Записувати звук і знімати відео можна і на телефоні — у стандартних застосунках <b>Камера</b> та <b>Диктофон</b>. Інструменти там подібні до програм на комп’ютері.</p>
+  <p>Щоб змонтувати відео, у Windows 11 є вбудований редактор <b>Clipchamp</b>: обрізати, склеїти фрагменти, додати музику й підписи.</p>
+ </div>
+ <div class="grid g2">
+  <div class="card"><h3>Кабель USB</h3><p class="muted">на телефоні обери режим «Передача файлів»</p></div>
+  <div class="card"><h3>Хмара</h3><p class="muted">Google Фото, OneDrive, iCloud</p></div>
+  <div class="card"><h3>Бездротово</h3><p class="muted">Phone Link, Quick Share, AirDrop</p></div>
+  <div class="card"><h3>Карта пам’яті</h3><p class="muted">вийняти та вставити в кардрідер</p></div>
+ </div>
+</div></div></section>
+
+<!-- 23 explorer sim -->
+<section class="slide" data-t="Перенесення відео"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Провідник</span>
+ <h2>Збережи відео з телефона на комп’ютер</h2>
+ <div class="xsim" id="xsim">
+  <div><div class="phone"><div class="scr" id="ph-scr"></div></div><div class="cable"><button class="btn pri" id="ph-cable">Під’єднати кабель USB</button></div></div>
+  <div class="win"><div class="tb"><button id="x-back" aria-label="Назад">←</button><div class="crumbs" id="x-crumbs"></div></div><div class="body"><div class="nav" id="x-nav"></div><div class="files" id="x-files"></div></div><div class="act" id="x-act"></div></div>
+  <div class="steps"><ol id="x-steps"></ol><button class="btn" id="x-reset" style="margin-top:6px">Почати знову</button></div>
+ </div>
+</div></section>
+
+<!-- 24 order -->
+<section class="slide alt" data-t="Порядок дій"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Працюємо разом</span>
+ <h2>Розстав дії в правильному порядку</h2>
+ <p class="muted">Як зберегти на комп’ютер відео, зняте телефоном? Переміщуй кроки стрілками. Обговоріть: чи немає тут зайвої дії?</p>
+ <div class="order" id="order"></div>
+ <div class="row" style="margin-top:14px"><button class="btn pri" id="ord-check">Перевірити</button><button class="btn" id="ord-mix">Перемішати</button><span id="ord-msg" style="font-weight:700"></span></div>
+</div></section>
+
+<!-- 25 learningapps -->
+<section class="slide" data-t="Завдання"><div class="wrap">
+ <span class="eyebrow"><i></i>Перевір себе</span>
+ <h2>Інтерактивні завдання</h2>
+ <p class="muted">Натисни кнопку або наведи камеру смартфона на QR-код.</p>
+ <div class="grid g2">
+  <div class="card qr"><img src="data:image/png;base64,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" alt="QR-код до першого завдання"><div><h3>Завдання 1</h3><p class="muted">LearningApps</p><a class="btn pri" href="https://learningapps.org/view1240250" target="_blank" rel="noopener">Відкрити завдання</a></div></div>
+  <div class="card qr"><img src="data:image/png;base64,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" alt="QR-код до другого завдання"><div><h3>Завдання 2</h3><p class="muted">LearningApps</p><a class="btn pri" href="https://learningapps.org/watch?v=pe12zwfqk22" target="_blank" rel="noopener">Відкрити завдання</a></div></div>
+ </div>
+</div></section>
+
+<!-- 26 quiz -->
+<section class="slide alt" data-t="Вікторина"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Симулятор · Бліц-вікторина</span>
+ <div class="qbar" id="qz-bar"></div>
+ <h2 id="qz-q"></h2>
+ <div class="qopts" id="qz-o"></div>
+ <div class="row" style="margin-top:14px"><span id="qz-msg" style="font-weight:700;flex:1"></span><button class="btn pri" id="qz-next" disabled>Далі</button></div>
+</div></section>
+
+<!-- 27 summary -->
+<section class="slide" data-t="Підсумок"><div class="wrap">
+ <span class="eyebrow"><i></i>Підсумок</span>
+ <h2>Перевіримо, що запам’ятали</h2>
+ <div class="grid g2" id="sum"></div>
+</div></section>
+
+<!-- 28 homework -->
+<section class="slide dark" data-t="Домашнє завдання"><div class="wrap">
+ <span class="eyebrow dic" style="color:#1D1A39;background:#FFC23D"><i style="background:#1D1A39"></i>Домашнє завдання</span>
+ <p class="big-def">Опрацювати в підручнику с. 84–94 або цю презентацію, вивчити поняття.</p>
+ <p class="lead" style="margin-top:1em;color:#C9C2EA">За бажанням: запиши 30-секундний «подкаст» про своє хобі в програмі Звукозапис або на телефоні.</p>
+</div></section>
+
+<!-- 29 reflection -->
+<section class="slide alt" data-t="Рефлексія"><div class="wrap">
+ <span class="eyebrow sim"><i></i>Рефлексія · Дерево зростання</span>
+ <h2>Як тобі урок? Почепи свій листочок</h2>
+ <div class="treebox">
+  <svg viewBox="0 0 600 440" id="tree" aria-label="Дерево з листочками класу">
+   <path d="M282 440 C288 360 280 320 262 280 L292 272 C300 300 306 250 300 230 L318 232 C318 280 322 330 330 440Z" fill="#8A5A34"/>
+   <path d="M300 300 C270 260 220 250 190 240 M306 270 C340 240 380 236 410 222" stroke="#8A5A34" stroke-width="14" fill="none" stroke-linecap="round"/>
+   <ellipse cx="300" cy="170" rx="250" ry="150" style="fill:light-dark(#E7F3DA,#1E3424)"/>
+   <g id="leaves"></g>
+  </svg>
+  <div style="display:flex;flex-direction:column;gap:10px" id="leafbtns"></div>
+ </div>
+</div></section>
+
+</main>
+
+<nav id="bar" aria-label="Навігація слайдами">
+ <button class="rb" id="prev" aria-label="Попередній слайд"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+ <div id="track"><span id="tip"></span></div>
+ <button class="rb main" id="next" aria-label="Наступний слайд"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+ <button class="rb" id="fs" aria-label="На весь екран"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+</nav>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=s=>{s=Math.max(0,Math.floor(s));return String(s/60|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const DPR=()=>Math.min(window.devicePixelRatio||1,2);
+function fit(cv){const r=cv.getBoundingClientRect(),d=DPR();const w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}return [w,h,d]}
+
+/* ========== AUDIO ========== */
+const A={ctx:null,master:null,an:null,noise:null};
+function audio(){
+ if(!A.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+  try{A.ctx=new C()}catch(e){return null}
+  A.master=A.ctx.createGain();A.an=A.ctx.createAnalyser();A.an.fftSize=512;A.an.smoothingTimeConstant=.78;
+  A.master.connect(A.an);A.an.connect(A.ctx.destination);
+  const b=A.ctx.createBuffer(1,A.ctx.sampleRate*.2,A.ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;A.noise=b}
+ if(A.ctx.state==='suspended')A.ctx.resume().catch(()=>{});
+ return A.ctx}
+const NOTE={C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11};
+const midi=t=>{if(t==='.')return null;const m=t.match(/^([A-G]#?)(\d)$/);return 12*(+m[2]+1)+NOTE[m[1]]};
+const pat=s=>s.trim().split(/\s+/).map(midi);
+const mtof=m=>440*2**((m-69)/12);
+function tone(out,t,m,d,type,vol){const c=A.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=mtof(m);
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.012);g.gain.exponentialRampToValueAtTime(.0008,t+d);o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.05)}
+function hat(out,t,vol){const c=A.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=A.noise;f.type='highpass';f.frequency.value=7000;
+ g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f);f.connect(g);g.connect(out);s.start(t);s.stop(t+.06)}
+function kick(out,t){const c=A.ctx,o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.15);
+ g.gain.setValueAtTime(.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(out);o.start(t);o.stop(t+.3)}
+const SONGS=[
+ {name:'Ранковий ритм',bpm:112,wave:'triangle',drums:1,
+  mel:pat('E5 . G5 . A5 . G5 E5 . D5 . C5 D5 . E5 . G5 . A5 . C6 . A5 G5 . E5 . D5 C5 . . .'),
+  bass:pat('C3 . . . C3 . G2 . A2 . . . A2 . E2 . F2 . . . F2 . C3 . G2 . . . G2 . G2 .')},
+ {name:'Космічна подорож',bpm:92,wave:'sine',drums:0,
+  mel:pat('A4 . C5 . E5 . . . D5 . C5 . B4 . . . A4 . C5 . E5 . G5 . F5 . E5 . D5 . . .'),
+  bass:pat('A2 . . . . . . . F2 . . . . . . . D2 . . . . . . . E2 . . . . . . .')},
+ {name:'Дощик',bpm:128,wave:'square',drums:1,
+  mel:pat('C5 C5 . G4 . C5 . E5 D5 . C5 . G4 . . . A4 A4 . E4 . A4 . C5 B4 . G4 . . . . .'),
+  bass:pat('C3 . C3 . C3 . C3 . G2 . G2 . G2 . G2 . A2 . A2 . A2 . A2 . G2 . G2 . B2 . B2 .')}];
+class Seq{
+ constructor(song){this.song=song;this.vol=.8;this.step=0;this.timer=null;this.out=null}
+ get playing(){return !!this.timer}
+ start(dest){const c=audio();if(!c)return false;if(this.timer)return true;
+  this.out=c.createGain();this.out.gain.value=this.vol;this.out.connect(dest||A.master);
+  this.next=c.currentTime+.06;this.timer=setInterval(()=>this.tick(),25);return true}
+ tick(){const c=A.ctx,s=this.song,dt=60/s.bpm/4;
+  while(this.next<c.currentTime+.12){const i=this.step%s.mel.length,m=s.mel[i],b=s.bass[i];
+   if(m!=null)tone(this.out,this.next,m,dt*(s.wave==='square'?1.2:2.2),s.wave,s.wave==='square'?.07:.17);
+   if(b!=null)tone(this.out,this.next,b,dt*3.2,'sine',.3);
+   if(s.drums){if(i%8===0)kick(this.out,this.next);if(i%2===0)hat(this.out,this.next,i%4?.03:.06)}
+   this.next+=dt;this.step++}}
+ stop(){clearInterval(this.timer);this.timer=null;if(this.out){const g=this.out;try{g.gain.setTargetAtTime(0,A.ctx.currentTime,.03)}catch(e){}setTimeout(()=>g.disconnect(),400)}this.out=null}
+ setVol(v){this.vol=v;if(this.out)this.out.gain.setTargetAtTime(v,A.ctx.currentTime,.04)}
+ secs(){return this.step*60/this.song.bpm/4}
+ loopSecs(){return this.song.mel.length*60/this.song.bpm/4}
+}
+const level=()=>{if(!A.an)return 0;const d=new Uint8Array(A.an.fftSize);A.an.getByteTimeDomainData(d);let s=0;for(const v of d){const x=(v-128)/128;s+=x*x}return Math.sqrt(s/d.length)};
+
+/* ========== DECK ========== */
+const deck=$('#deck'),slides=$$('.slide'),N=slides.length,track=$('#track'),tip=$('#tip');
+let cur=-1;const stoppers=[],starters={};
+slides.forEach((s,i)=>{const b=document.createElement('button');b.setAttribute('aria-label',`Слайд ${i+1}: ${s.dataset.t}`);
+ b.onclick=()=>go(i);b.onmouseenter=()=>{tip.textContent=`${i+1}. ${s.dataset.t}`;tip.style.left=(b.offsetLeft+b.offsetWidth/2)+'px';tip.style.opacity=1};
+ b.onmouseleave=()=>tip.style.opacity=0;track.appendChild(b)});
+const tbtn=$$('#track button');
+function go(i){i=Math.max(0,Math.min(N-1,i));deck.scrollTo({left:i*deck.clientWidth,behavior:'smooth'})}
+function setCur(i){if(i===cur)return;stoppers.forEach(f=>{try{f()}catch(e){}});cur=i;
+ slides.forEach((s,k)=>s.classList.toggle('cur',k===i));document.body.classList.toggle('ondark',slides[i].classList.contains('dark'));tbtn.forEach((b,k)=>{b.classList.toggle('on',k===i);b.classList.toggle('done',k<i)});
+ $('#cnt').textContent=`${i+1} / ${N} · ${slides[i].dataset.t}`;slides[i].scrollTop=0;const f=starters[i];if(f)f()}
+let raf=0;deck.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>setCur(Math.round(deck.scrollLeft/deck.clientWidth)))});
+window.addEventListener('resize',()=>{deck.scrollTo({left:cur*deck.clientWidth})});
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;
+ if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(cur+1)}
+ else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(cur-1)}
+ else if(e.key==='Home')go(0);else if(e.key==='End')go(N-1)});
+$('#fs').onclick=()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+const idx=t=>slides.findIndex(s=>s.dataset.t===t);
+try{$('#today').textContent='Сьогодні '+new Date().toLocaleDateString('uk-UA',{day:'numeric',month:'long',year:'numeric'})}catch(e){}
+
+/* ========== RULES ========== */
+const IC={
+ walk:'<circle cx="26" cy="9" r="5"/><path d="M26 16v14l-7 14M26 30l8 14M18 24h16"/>',
+ plug:'<path d="M18 6v10M34 6v10M12 16h28v8a14 14 0 0 1-28 0zM26 38v10"/>',
+ hand:'<path d="M16 28V12a3 3 0 0 1 6 0v12M22 22V8a3 3 0 0 1 6 0v14M28 22V10a3 3 0 0 1 6 0v14M34 24v-8a3 3 0 0 1 6 0v14c0 10-6 16-14 16s-12-4-14-10l-4-8a3 3 0 0 1 5-3l3 4"/>',
+ eye:'<path d="M4 26s8-14 22-14 22 14 22 14-8 14-22 14S4 26 4 26z"/><circle cx="26" cy="26" r="6"/>',
+ cup:'<path d="M10 14h26v14a12 12 0 0 1-12 12h-2a12 12 0 0 1-12-12zM36 18h4a5 5 0 0 1 0 10h-4M6 46h34"/><path d="M4 4l44 44" stroke="#FF3D57"/>',
+ warn:'<path d="M26 6l22 40H4z"/><path d="M26 20v12M26 38v2"/>'};
+const icon=(k,c)=>`<svg viewBox="0 0 52 52" aria-hidden="true" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
+$('#rules').innerHTML=[
+ ['walk','#2F55F0','Заходь спокійно','Без поспіху, займай лише своє місце.'],
+ ['plug','#FF3D57','Не торкайся дротів','Розетки, кабелі й задні панелі — тільки для вчителя.'],
+ ['hand','#0E9F7E','Працюй з дозволу','Вмикай комп’ютер і програми лише за вказівкою вчителя.'],
+ ['eye','#7A3BD1','Бережи зір','Відстань до екрана — 50–70 см, роби перерви для очей.'],
+ ['cup','#E89B00','Без їжі й напоїв','Крихти та рідина шкодять клавіатурі й техніці.'],
+ ['warn','#D7193A','Помітив несправність?','Нічого не лагодь сам — одразу скажи вчителю.']
+].map(([k,c,h,p])=>`<div class="card rule">${icon(k,c)}<div><h3>${h}</h3><p class="muted" style="margin:0">${p}</p></div></div>`).join('');
+
+/* ========== FLIP CARDS ========== */
+const DEV={
+ mic:'<rect x="22" y="6" width="20" height="32" rx="10" fill="#2F55F0"/><path d="M14 30a18 18 0 0 0 36 0M32 48v10M22 58h20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>',
+ cam:'<circle cx="32" cy="28" r="20" fill="#1D1A39"/><circle cx="32" cy="28" r="9" fill="#2F55F0"/><circle cx="35" cy="25" r="3" fill="#fff"/><path d="M20 50l-6 8h36l-6-8" fill="#575273"/>',
+ spk:'<rect x="14" y="6" width="36" height="52" rx="8" fill="#1D1A39"/><circle cx="32" cy="38" r="12" fill="#FF3D57"/><circle cx="32" cy="38" r="4" fill="#1D1A39"/><circle cx="32" cy="18" r="5" fill="#FF3D57"/>',
+ hp:'<path d="M10 40V32a22 22 0 0 1 44 0v8" stroke="#1D1A39" stroke-width="5" fill="none"/><rect x="6" y="36" width="14" height="22" rx="6" fill="#FF3D57"/><rect x="44" y="36" width="14" height="22" rx="6" fill="#FF3D57"/>',
+ mon:'<rect x="4" y="8" width="56" height="36" rx="4" fill="#1D1A39"/><rect x="9" y="13" width="46" height="26" fill="#1FC7A3"/><path d="M26 44l-4 12h20l-4-12" fill="#575273"/>',
+ head:'<path d="M10 36V30a22 22 0 0 1 44 0v6" stroke="#1D1A39" stroke-width="5" fill="none"/><rect x="6" y="32" width="14" height="20" rx="6" fill="#FFC23D"/><rect x="44" y="32" width="14" height="20" rx="6" fill="#FFC23D"/><path d="M14 52q4 8 16 8" stroke="#1D1A39" stroke-width="3" fill="none"/><circle cx="31" cy="60" r="3" fill="#2F55F0"/>',
+ phone:'<rect x="16" y="2" width="32" height="60" rx="7" fill="#1D1A39"/><rect x="20" y="9" width="24" height="44" rx="2" fill="#7A3BD1"/><circle cx="32" cy="57" r="2.5" fill="#fff"/>',
+ proj:'<rect x="4" y="22" width="56" height="24" rx="6" fill="#575273"/><circle cx="20" cy="34" r="8" fill="#FFC23D"/><path d="M28 34h26" stroke="#fff" stroke-width="3"/>'};
+$('#flips').innerHTML=[
+ ['mic','Мікрофон','in','Введення: записує звук'],['cam','Вебкамера','in','Введення: знімає відео'],
+ ['spk','Колонки','out','Виведення: відтворюють звук'],['hp','Навушники','out','Виведення: звук лише для тебе'],
+ ['mon','Монітор','out','Виведення: показує відео'],['proj','Проєктор','out','Виведення: зображення на екран'],
+ ['head','Гарнітура','both','І введення, і виведення: навушники + мікрофон'],['phone','Смартфон','both','І те, і інше: має камеру, мікрофон, динамік і екран']
+].map(([k,n,c,a])=>`<div class="flip"><button aria-label="${n}: показати відповідь"><span class="f"><svg viewBox="0 0 64 64" aria-hidden="true">${DEV[k]}</svg><b>${n}</b></span><span class="b ${c}">${a}</span></button></div>`).join('');
+$$('#flips .flip').forEach(f=>f.querySelector('button').onclick=()=>f.classList.toggle('on'));
+
+/* media around */
+$('#around').innerHTML=[['Газети й журнали','#FFC23D'],['Телебачення','#2F55F0'],['Радіо','#FF3D57'],['Інтернет','#1FC7A3'],['Месенджери','#7A3BD1'],['Логотипи на одязі','#E89B00'],['Застосунки','#0E9F7E'],['Упаковка продуктів','#D7193A']]
+ .map(([n,c],i)=>`<div class="card" style="display:flex;gap:10px;align-items:center;padding:14px 16px"><i style="width:14px;height:14px;border-radius:50%;background:${c};flex:none"></i><b>${n}</b></div>`).join('');
+
+/* ========== SORTER ========== */
+function sorter(p,bins,items){
+ const pool=$(p+'-pool'),bx=$(p+'-bins'),sc=$(p+'-score');let sel=null,ok=0,tries=0;
+ function draw(){sel=null;ok=0;tries=0;
+  pool.innerHTML=shuffle(items).map(([t,b])=>`<button class="chip" data-b="${b}">${esc(t)}</button>`).join('');
+  bx.innerHTML=bins.map(([k,n,c,d])=>`<button class="bin" data-k="${k}"><h3><i style="background:${c}"></i>${n}</h3>${d?`<span class="note">${d}</span>`:''}<span class="in"></span></button>`).join('');
+  sc.textContent=`Правильно: 0 з ${items.length}`;
+  pool.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{pool.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));if(sel===ch){sel=null;arm(0);return}sel=ch;ch.classList.add('sel');arm(1)});
+  bx.querySelectorAll('.bin').forEach(bn=>bn.onclick=()=>{if(!sel)return;tries++;
+   if(sel.dataset.b===bn.dataset.k){const s=document.createElement('span');s.textContent=sel.textContent;bn.querySelector('.in').appendChild(s);sel.remove();sel=null;ok++;arm(0)}
+   else{const s=sel;s.classList.remove('shake');void s.offsetWidth;s.classList.add('shake');bn.classList.remove('shake');void bn.offsetWidth;bn.classList.add('shake')}
+   sc.textContent=ok===items.length?`Готово! Усі ${ok} на місці, спроб: ${tries}.`:`Правильно: ${ok} з ${items.length}`;sc.className='score'+(ok===items.length?' ok':'')})}
+ function arm(on){bx.querySelectorAll('.bin').forEach(b=>b.classList.toggle('armed',!!on))}
+ $(p+'-reset').onclick=draw;draw()}
+sorter('#ms',[['print','Друковані','#FFC23D','на папері'],['bc','Медіатрансляції','#2F55F0','передаються для багатьох'],['dig','Цифрові','#1FC7A3','пристрої з екраном'],['disp','Дисплейні','#FF3D57','бачимо на вулиці й речах']],
+ [['Газета','print'],['Журнал','print'],['Книжка','print'],['Комікс','print'],['Телебачення','bc'],['Радіо','bc'],['Кінофільм','bc'],['Смартфон','dig'],['Планшет','dig'],['Комп’ютер','dig'],['Ігрова консоль','dig'],['Білборд','disp'],['Етикетка','disp'],['Логотип','disp'],['Реклама на дирижаблі','disp']]);
+sorter('#fs',[['a','Аудіо','#FF3D57','лише звук'],['v','Відео','#2F55F0','зображення, що рухається, і звук']],
+ [['.mp3','a'],['.wav','a'],['.wma','a'],['.aif','a'],['.mid','a'],['.flac','a'],['.m4a','a'],['.mp4','v'],['.avi','v'],['.wmv','v'],['.mpg','v'],['.mov','v'],['.mkv','v'],['.webm','v']]);
+
+/* ========== POLL ========== */
+const PL=['Паперові газети','Радіо','Телебачення','Кінотеатри','Подкасти','Соцмережі','Білборди','VR та AR'];
+const PC=['#8A8399','#2F55F0','#FF3D57'],PN=['зникне','залишиться','зростатиме'];
+let votes=PL.map(()=>[0,0,0]);
+function poll(){ $('#poll').innerHTML=PL.map((n,i)=>{const v=votes[i],t=v[0]+v[1]+v[2];
+ return `<div class="prow"><b>${n}</b><div class="pbar" role="img" aria-label="${PN.map((x,k)=>x+' '+v[k]).join(', ')}">${v.map((x,k)=>`<i style="width:${t?x/t*100:0}%;background:${PC[k]}"></i>`).join('')}</div><div class="pbtns">${v.map((x,k)=>`<button data-i="${i}" data-k="${k}" style="background:${PC[k]}" aria-label="${n}: ${PN[k]}">${x}</button>`).join('')}</div></div>`}).join('');
+ $$('#poll .pbtns button').forEach(b=>b.onclick=()=>{votes[b.dataset.i][b.dataset.k]++;poll()})}
+$('#poll-reset').onclick=()=>{votes=PL.map(()=>[0,0,0]);poll()};poll();
+
+/* ========== MULTIMEDIA BUILDER ========== */
+const MM=[['text','Текст'],['img','Зображення'],['snd','Звук'],['anim','Анімація'],['vid','Відео']];
+const mmOn={};const mmSeq=new Seq(SONGS[1]);mmSeq.vol=.5;
+$('#mm-tg').innerHTML=MM.map(([k,n])=>`<button class="tg" data-k="${k}" aria-pressed="false"><span class="sw"></span>${n}</button>`).join('');
+let mmRaf=0,mmT0=0;
+function mmScene(){return `<svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9E6B"/><stop offset="1" stop-color="#FFD6A0"/></linearGradient></defs>
+ <rect width="640" height="360" fill="url(#sk)"/><circle id="mm-sun" cx="470" cy="120" r="44" fill="#FFF3C4"/>
+ <g id="mm-cl" fill="#fff" opacity=".85"><ellipse cx="140" cy="80" rx="60" ry="18"/><ellipse cx="180" cy="70" rx="40" ry="16"/></g>
+ <path d="M0 260 L120 150 L210 230 L320 120 L450 240 L540 170 L640 250 V360 H0Z" fill="#6B4FA0"/>
+ <path d="M0 300 L160 210 L300 290 L420 220 L640 300 V360 H0Z" fill="#3C2E73"/>
+ <g fill="#1D1A39"><path d="M80 360 l20-70 20 70z"/><path d="M520 360 l16-56 16 56z"/><path d="M560 360 l22-80 22 80z"/></g></svg>`}
+function mmDraw(){const st=$('#stage');const on=MM.filter(([k])=>mmOn[k]).length;
+ let h='';
+ if(mmOn.img||mmOn.anim||mmOn.vid)h+=mmScene();
+ if(mmOn.vid)h+='<canvas id="mm-cv"></canvas><div class="vid"><i></i><span id="mm-tc">00:00</span></div>';
+ if(mmOn.text)h+='<div class="cap">Карпати восени'+(on===1?'<div style="font-family:Golos Text;font-weight:400;font-size:.6em;opacity:.9">Лише текст — це звичайне повідомлення</div>':'')+'</div>';
+ if(mmOn.snd)h+='<div class="snd" aria-label="Звучить музика">'+[12,22,16,26,10].map((x,i)=>`<i style="height:${x}px;animation-delay:-${i*.13}s"></i>`).join('')+'</div>';
+ if(!h)h='<div class="empty">Увімкни хоча б одну форму подання праворуч</div>';
+ if(mmOn.text&&!(mmOn.img||mmOn.anim||mmOn.vid))h='<div class="empty" style="background:#1D1A39"></div>'+h;
+ st.innerHTML=h;
+ const v=$('#mm-v');v.textContent=on===0?'Обрано форм: 0':on===1?'Одна форма — це ще не мультимедіа. Додай іншу!':`Мультимедіа! Поєднано форм: ${on}`;v.className='verdict'+(on>1?' ok':'');
+ if(mmOn.snd){if(!mmSeq.playing)mmSeq.start()}else mmSeq.stop();
+ cancelAnimationFrame(mmRaf);if(mmOn.anim||mmOn.vid){mmT0=performance.now();mmLoop()}}
+function mmLoop(){const t=(performance.now()-mmT0)/1000;
+ if(mmOn.anim){const s=$('#mm-sun'),c=$('#mm-cl');if(s){s.setAttribute('cy',120+Math.sin(t*.5)*30);s.setAttribute('cx',470-Math.sin(t*.3)*40)}if(c)c.setAttribute('transform',`translate(${(t*30)%800-150} 0)`)}
+ if(mmOn.vid){const cv=$('#mm-cv');if(cv){const[w,h]=fit(cv),x=cv.getContext('2d');x.clearRect(0,0,w,h);
+  for(let i=0;i<3;i++){const bx=((t*90+i*160)%(w/DPR()+200)-100)*DPR(),by=(90+i*30+Math.sin(t*3+i)*14)*DPR(),f=Math.sin(t*10+i)*8*DPR();
+   x.strokeStyle='#1D1A39';x.lineWidth=3*DPR();x.beginPath();x.moveTo(bx-14*DPR(),by-f);x.quadraticCurveTo(bx-6*DPR(),by-4*DPR(),bx,by);x.quadraticCurveTo(bx+6*DPR(),by-4*DPR(),bx+14*DPR(),by-f);x.stroke()}}
+  const tc=$('#mm-tc');if(tc)tc.textContent=fmt(t)}
+ mmRaf=requestAnimationFrame(mmLoop)}
+$$('#mm-tg .tg').forEach(b=>b.onclick=()=>{const k=b.dataset.k;mmOn[k]=!mmOn[k];b.setAttribute('aria-pressed',mmOn[k]);mmDraw()});
+stoppers.push(()=>{if(mmOn.snd){mmOn.snd=false;$('#mm-tg [data-k=snd]').setAttribute('aria-pressed','false');mmDraw()}mmSeq.stop();cancelAnimationFrame(mmRaf)});
+starters[idx('Конструктор')]=()=>{if(mmOn.anim||mmOn.vid){mmT0=performance.now();mmLoop()}};
+
+/* ========== SOUND CHAIN ========== */
+const ch={card:'1',plug:'1',out:'spk',vol:.7,seq:new Seq(SONGS[0]),bus:null,lp:null};
+function chBus(){if(ch.bus||!audio())return;ch.lp=A.ctx.createBiquadFilter();ch.lp.type='lowpass';ch.lp.frequency.value=20000;ch.bus=A.ctx.createGain();ch.lp.connect(ch.bus);ch.bus.connect(A.master)}
+function chApply(){const live=ch.card==='1'&&ch.plug==='1';const pl=ch.seq.playing;
+ $('#w1').classList.toggle('live',pl);$('#w2').classList.toggle('live',pl&&ch.card==='1');$('#w3').classList.toggle('live',pl&&live);
+ $('#outname').textContent=ch.out==='spk'?'Колонки':'Навушники';
+ $('#spk').innerHTML=ch.out==='spk'?'<rect x="16" y="6" width="48" height="68" rx="10" fill="#1D1A39"/><g class="cone" id="cone" style="transform-origin:40px 48px"><circle cx="40" cy="48" r="17" fill="#FF3D57"/><circle cx="40" cy="48" r="6" fill="#1D1A39"/></g><circle cx="40" cy="20" r="7" fill="#FF3D57"/>'
+  :'<path d="M12 46V38a28 28 0 0 1 56 0v8" stroke="currentColor" stroke-width="6" fill="none"/><g class="cone" id="cone" style="transform-origin:40px 56px"><rect x="6" y="40" width="18" height="30" rx="8" fill="#FF3D57"/><rect x="56" y="40" width="18" height="30" rx="8" fill="#FF3D57"/></g>';
+ if(ch.bus){const t=A.ctx.currentTime;ch.bus.gain.setTargetAtTime(live?ch.vol*(ch.out==='hp'?.45:1):0,t,.04);ch.lp.frequency.setTargetAtTime(ch.out==='hp'?900:20000,t,.04)}
+ const st=$('#ch-status');let m,g=true;
+ if(!pl)m='Натисни «Відтворити».';
+ else if(ch.card!=='1'){m='Тиша: звукова карта вимкнена — цифровий файл ніхто не перетворює на звуковий сигнал.';g=false}
+ else if(ch.plug!=='1'){m='Тиша: кабель висмикнуто — сигнал не доходить до акустичної системи.';g=false}
+ else if(ch.vol===0){m='Тиша: гучність на нулі.';g=false}
+ else m=ch.out==='spk'?'Звучить! Файл → звукова карта → кабель → колонки. Чує весь клас.':'Звучить у навушниках — так музику чує сусід, а тобі звук іде прямо у вуха.';
+ st.textContent=m;st.className='status '+(g?'good':'warn');
+ $('#ch-play').textContent=pl?'■ Зупинити':'▶ Відтворити'}
+$$('#chain .seg').forEach(sg=>sg.querySelectorAll('button').forEach(b=>b.onclick=()=>{sg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));ch[sg.dataset.k]=b.dataset.v;chApply()}));
+$('#ch-play').onclick=()=>{if(ch.seq.playing)ch.seq.stop();else{chBus();if(ch.bus)ch.seq.start(ch.lp)}chApply();chLoop()};
+$('#ch-vol').oninput=e=>{ch.vol=e.target.value/100;chApply()};
+let chRaf=0;function chLoop(){cancelAnimationFrame(chRaf);if(!ch.seq.playing)return;const c=$('#cone');if(c){const l=(ch.card==='1'&&ch.plug==='1')?level():0;c.style.transform=`scale(${1+Math.min(.35,l*2.2)})`}chRaf=requestAnimationFrame(chLoop)}
+stoppers.push(()=>{ch.seq.stop();cancelAnimationFrame(chRaf);chApply()});chApply();
+
+/* storage cards */
+const ST={
+ sd:'<path d="M14 4h28l10 10v42H14z" fill="#1D1A39"/><path d="M20 4v10M26 4v10M32 4v10M38 4v10" stroke="#FFC23D" stroke-width="3"/><rect x="20" y="30" width="26" height="14" rx="3" fill="#FF3D57"/>',
+ usb:'<rect x="22" y="2" width="20" height="16" rx="2" fill="#B9B9C6"/><rect x="26" y="7" width="4" height="4" fill="#575273"/><rect x="34" y="7" width="4" height="4" fill="#575273"/><rect x="16" y="18" width="32" height="40" rx="8" fill="#1FC7A3"/>',
+ rd:'<rect x="6" y="20" width="52" height="26" rx="6" fill="#1D1A39"/><rect x="14" y="10" width="20" height="14" fill="#FF3D57"/><path d="M58 33h4" stroke="#B9B9C6" stroke-width="6"/><circle cx="48" cy="33" r="3" fill="#1FC7A3"/>',
+ port:'<rect x="4" y="14" width="56" height="36" rx="6" fill="#575273"/><rect x="10" y="24" width="22" height="12" rx="1" fill="#1D1A39"/><rect x="13" y="27" width="16" height="4" fill="#2F55F0"/><rect x="38" y="26" width="16" height="8" rx="4" fill="#1D1A39"/>'};
+$('#storage').innerHTML=[
+ ['sd','Карта пам’яті','microSD у телефоні чи фотоапараті. Зберігає фото, відео, музику.'],
+ ['usb','Флешка','Переносна пам’ять, вставляється в USB-порт.'],
+ ['rd','Кардрідер','англ. card reader — «зчитувач карток»: пристрій для роботи з картами пам’яті.'],
+ ['port','Порти USB-A і USB-C','USB — універсальна послідовна шина для під’єднання пристроїв. USB-C — новий двосторонній роз’єм.']
+].map(([k,h,p])=>`<div class="card"><svg viewBox="0 0 64 60" width="72" height="68" aria-hidden="true">${ST[k]}</svg><h3>${h}</h3><p class="muted" style="margin:0">${p}</p></div>`).join('');
+
+/* ========== PLAYER ========== */
+const pl={i:0,mode:'bars',seq:null,vol:.7,parts:[]};
+const MODES=[['bars','Смуги'],['wave','Хвиля'],['storm','Вогняна буря'],['ring','Коло']];
+$('#pl-tracks').innerHTML=SONGS.map((s,i)=>`<button data-i="${i}" aria-pressed="${i===0}">${i+1}. ${s.name}</button>`).join('');
+$('#pl-mode').innerHTML=MODES.map(([k,n])=>`<button data-m="${k}" aria-pressed="${k==='bars'}">${n}</button>`).join('');
+const PLEN=6;
+function plDur(){return SONGS[pl.i].mel.length*60/SONGS[pl.i].bpm/4*PLEN}
+function plIcon(on){$('#pl-ico').innerHTML=on?'<path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/>':'<path d="M7 4l13 8-13 8z" fill="currentColor"/>';$('#pl-play').setAttribute('aria-label',on?'Пауза':'Відтворити')}
+function plSel(i,play){const was=pl.seq&&pl.seq.playing;if(pl.seq)pl.seq.stop();pl.i=(i+SONGS.length)%SONGS.length;pl.seq=new Seq(SONGS[pl.i]);pl.seq.vol=pl.vol;
+ $$('#pl-tracks button').forEach((b,k)=>b.setAttribute('aria-pressed',k===pl.i));$('#pl-d').textContent=fmt(plDur()).replace(/^0/,'');$('#pl-t').textContent='0:00';$('#pl-bar').style.width='0';
+ if(play||was){pl.seq.start();plIcon(true);plLoop()}else plIcon(false)}
+$$('#pl-tracks button').forEach(b=>b.onclick=()=>plSel(+b.dataset.i,true));
+$$('#pl-mode button').forEach(b=>b.onclick=()=>{pl.mode=b.dataset.m;$$('#pl-mode button').forEach(x=>x.setAttribute('aria-pressed',x===b));pl.parts=[]});
+$('#pl-play').onclick=()=>{if(pl.seq.playing){pl.seq.stop();plIcon(false)}else{if(pl.seq.secs()>=plDur())plSel(pl.i,false);pl.seq.start();plIcon(true);plLoop()}};
+$('#pl-prev').onclick=()=>plSel(pl.i-1,true);$('#pl-next').onclick=()=>plSel(pl.i+1,true);
+$('#pl-vol').oninput=e=>{pl.vol=e.target.value/100;pl.seq.setVol(pl.vol)};
+let plRaf=0;
+function plLoop(){cancelAnimationFrame(plRaf);plDraw();
+ if(pl.seq.playing){const s=pl.seq.secs();$('#pl-t').textContent=fmt(s).replace(/^0/,'');$('#pl-bar').style.width=Math.min(100,s/plDur()*100)+'%';if(s>=plDur()){plSel(pl.i+1,true);return}}
+ if(pl.seq.playing||pl.parts.length)plRaf=requestAnimationFrame(plLoop)}
+function plDraw(){const cv=$('#pl-cv');const[w,h,d]=fit(cv),x=cv.getContext('2d');
+ const on=pl.seq.playing&&A.an;const fd=new Uint8Array(256),td=new Uint8Array(512);if(on){A.an.getByteFrequencyData(fd);A.an.getByteTimeDomainData(td)}else td.fill(128);
+ x.fillStyle='rgba(12,11,34,'+(pl.mode==='storm'?.22:1)+')';x.fillRect(0,0,w,h);
+ if(!on&&pl.mode!=='storm'){x.fillStyle='#C9C2EA';x.font=`${20*d}px Golos Text,system-ui,sans-serif`;x.textAlign='center';x.fillText('Натисни ▶, щоб побачити зоровий образ',w/2,h/2)}
+ if(pl.mode==='bars'){const n=40,bw=w/n;for(let i=0;i<n;i++){const a=Math.floor(1+(i/n)**1.6*110),b2=Math.floor(1+((i+1)/n)**1.6*110);let m=0;for(let k=a;k<=b2;k++)m=Math.max(m,fd[k]);const v=m/255,bh=v*h*.9;const g=x.createLinearGradient(0,h,0,h-bh);g.addColorStop(0,'#2F55F0');g.addColorStop(1,'#FF3D57');x.fillStyle=g;x.fillRect(i*bw+2*d,h-bh,bw-4*d,bh)}}
+ else if(pl.mode==='wave'){for(let k=0;k<3;k++){x.beginPath();x.lineWidth=(4-k)*d;x.strokeStyle=['#FFC23D','#FF3D57','#2F55F0'][k];for(let i=0;i<td.length;i++){const X=i/(td.length-1)*w,Y=h/2+(td[i]-128)/128*h*.42*(1-k*.25)+k*10*d;i?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke()}}
+ else if(pl.mode==='storm'){let bass=0;for(let i=0;i<8;i++)bass+=fd[i];bass/=8*255;const n=on?Math.floor(bass*14):0;
+  for(let i=0;i<n;i++)pl.parts.push({x:w/2+(Math.random()-.5)*w*.6,y:h,vx:(Math.random()-.5)*3*d,vy:-(3+Math.random()*7*bass*2)*d,l:1,r:(4+Math.random()*10)*d});
+  pl.parts=pl.parts.filter(p=>(p.l-=.014)>0);for(const p of pl.parts){p.x+=p.vx;p.y+=p.vy;p.vy*=.985;x.fillStyle=`hsla(${15+p.l*35},100%,${45+p.l*20}%,${p.l})`;x.beginPath();x.arc(p.x,p.y,p.r*p.l,0,7);x.fill()}
+  if(pl.parts.length>700)pl.parts.splice(0,pl.parts.length-700)}
+ else{const cx=w/2,cy=h/2,R=Math.min(w,h)*.22,n=72;x.lineWidth=4*d;for(let i=0;i<n;i++){const a=i/n*Math.PI*2,v=fd[(i%36)*3]/255,r2=R+v*R*.9;x.strokeStyle=`hsl(${i/n*360},90%,62%)`;x.beginPath();x.moveTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);x.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);x.stroke()}
+  x.fillStyle='#FF3D57';x.beginPath();x.arc(cx,cy,R*.55*(1+level()),0,7);x.fill()}}
+plSel(0,false);
+const plRO=new ResizeObserver(()=>{if(!pl.seq.playing)plDraw()});plRO.observe($('#pl-cv'));
+stoppers.push(()=>{if(pl.seq.playing){pl.seq.stop();plIcon(false)}});
+starters[idx('Медіаплеєр')]=()=>plDraw();
+
+/* ========== RECORDER ========== */
+const rc={st:'idle',env:[],marks:[],t0:0,timer:null,recs:[],sel:-1,play:null,pos:0,ph:0,talk:true,left:0};
+const RSTEP=.05;
+function rcHint(t){$('#rc-hint').textContent=t}
+function rcSample(){if(--rc.left<=0){rc.talk=!rc.talk;rc.left=rc.talk?8+Math.random()*30:3+Math.random()*10}
+ const t=rc.env.length*RSTEP;const v=rc.talk?Math.min(1,.25+.75*Math.abs(Math.sin(t*11+Math.sin(t*3)))*(.5+Math.random()*.5)):.03+Math.random()*.05;rc.env.push(v)}
+function rcDraw(){const cv=$('#rc-cv');const[w,h,d]=fit(cv),x=cv.getContext('2d');x.clearRect(0,0,w,h);
+ const env=rc.st==='rec'?rc.env:(rc.sel>=0?rc.recs[rc.sel].env:[]);const marks=rc.st==='rec'?rc.marks:(rc.sel>=0?rc.recs[rc.sel].marks:[]);
+ const bw=4*d,gap=2*d,fitAll=rc.st!=='rec';const n=fitAll?env.length:Math.floor(w/(bw+gap));const start=fitAll?0:Math.max(0,env.length-n);
+ const sx=fitAll&&env.length?w/env.length:bw+gap;const cs=getComputedStyle(document.documentElement);
+ x.strokeStyle='#8883';x.lineWidth=d;x.beginPath();x.moveTo(0,h/2);x.lineTo(w,h/2);x.stroke();
+ for(let i=start;i<env.length;i++){const X=(i-start)*sx,bh=env[i]*h*.8;const played=fitAll&&i<rc.pos;x.fillStyle=rc.st==='rec'?'#FF3D57':played?'#FF3D57':'#8A83B0';x.fillRect(X,h/2-bh/2,Math.max(1,sx-gap),Math.max(2*d,bh))}
+ for(const m of marks){if(m<start)continue;const X=(m-start)*sx;x.fillStyle='#E89B00';x.fillRect(X-1*d,0,2*d,h);x.beginPath();x.moveTo(X,4*d);x.lineTo(X+14*d,10*d);x.lineTo(X,16*d);x.fill()}
+ if(fitAll&&env.length){const X=rc.pos*sx;x.fillStyle='#2F55F0';x.fillRect(X-1*d,0,3*d,h)}
+ if(!env.length){x.fillStyle='#8A83B0';x.font=`${18*d}px Golos Text,system-ui,sans-serif`;x.textAlign='center';x.fillText('Тут з’явиться звукова хвиля',w/2,h/2-12*d)}}
+function rcList(){$('#rc-list').innerHTML=rc.recs.map((r,i)=>`<button data-i="${i}" aria-pressed="${i===rc.sel}"><span>Запис (${i+1})</span><span>${fmt(r.env.length*RSTEP)}</span></button>`).join('');
+ $$('#rc-list button').forEach(b=>b.onclick=()=>{rcStopPlay();rc.sel=+b.dataset.i;rc.pos=0;rcList();rcMarks();rcDraw();$('#rc-time').textContent=fmt(rc.recs[rc.sel].env.length*RSTEP)})}
+function rcMarks(){const r=rc.st==='rec'?{marks:rc.marks}:rc.recs[rc.sel]||{marks:[]};
+ $('#rc-marks').innerHTML=r.marks.map((m,i)=>`<button data-m="${m}" ${rc.st==='rec'?'disabled':''}>Маркер ${i+1} · ${fmt(m*RSTEP)}</button>`).join('');
+ $$('#rc-marks button').forEach(b=>b.onclick=()=>{rcStopPlay();rc.pos=+b.dataset.m;rcPlay()})}
+$('#rc-rec').onclick=()=>{if(rc.st==='rec'){clearInterval(rc.timer);rc.st='idle';rc.recs.push({env:rc.env,marks:rc.marks});rc.sel=rc.recs.length-1;rc.pos=0;
+  $('#rc-rec').classList.remove('on');$('#rc-rec').setAttribute('aria-label','Почати запис');$('#rc-mark').disabled=true;$('#rc-play').disabled=false;rcHint('3. Відтвори запис або натисни на маркер');rcList();rcMarks();rcDraw();return}
+ rcStopPlay();rc.st='rec';rc.env=[];rc.marks=[];rc.talk=true;rc.left=10;$('#rc-rec').classList.add('on');$('#rc-rec').setAttribute('aria-label','Зупинити запис');$('#rc-mark').disabled=false;$('#rc-play').disabled=true;rcHint('2. Говори! Став маркери прапорцем, зупини квадратом');rcMarks();
+ rc.timer=setInterval(()=>{rcSample();$('#rc-time').textContent=fmt(rc.env.length*RSTEP);rcDraw();if(rc.env.length*RSTEP>=120)$('#rc-rec').click()},RSTEP*1000)};
+$('#rc-mark').onclick=()=>{if(rc.st!=='rec')return;rc.marks.push(rc.env.length);rcMarks()};
+function rcStopPlay(){if(rc.play){try{rc.play.o.stop()}catch(e){}rc.play=null}cancelAnimationFrame(rc.raf);if(rc.st==='play')rc.st='idle';$('#rc-pico').innerHTML='<path d="M7 4l13 8-13 8z" fill="currentColor"/>'}
+function rcPlay(){const r=rc.recs[rc.sel];if(!r||!audio())return;if(rc.pos>=r.env.length-1)rc.pos=0;const c=A.ctx;
+ const o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';f.type='bandpass';f.Q.value=3;g.gain.value=0;o.connect(f);f.connect(g);g.connect(A.master);
+ const t0=c.currentTime+.05,from=rc.pos;for(let j=from;j<r.env.length;j++){const t=t0+(j-from)*RSTEP,v=r.env[j];g.gain.setTargetAtTime(v>.1?v*.5:0,t,.012);o.frequency.setTargetAtTime(140+v*90+(j*7%5)*12,t,.02);f.frequency.setTargetAtTime(500+(j*37%7)*180,t,.03)}
+ o.start(t0);o.stop(t0+(r.env.length-from)*RSTEP+.1);rc.play={o,t0,from};rc.st='play';$('#rc-pico').innerHTML='<path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/>';
+ const tick=()=>{if(!rc.play)return;rc.pos=Math.min(r.env.length,from+(c.currentTime-t0)/RSTEP);$('#rc-time').textContent=fmt(rc.pos*RSTEP);rcDraw();if(rc.pos>=r.env.length){rcStopPlay();rc.pos=0;rcDraw();return}rc.raf=requestAnimationFrame(tick)};tick()}
+$('#rc-play').onclick=()=>{if(rc.play)rcStopPlay();else rcPlay()};
+$('#rc-cv').onclick=e=>{const r=rc.recs[rc.sel];if(rc.st==='rec'||!r)return;const b=e.target.getBoundingClientRect();rcStopPlay();rc.pos=Math.floor((e.clientX-b.left)/b.width*r.env.length);rcPlay()};
+const rcRO=new ResizeObserver(()=>rcDraw());rcRO.observe($('#rc-cv'));
+stoppers.push(()=>{if(rc.st==='rec')$('#rc-rec').click();rcStopPlay()});
+
+/* ========== CAMERA ========== */
+const cm={mode:'photo',rec:false,paused:false,secs:0,timer:null,filt:'',raf:0};
+const FL=[['','Звичайний'],['f-bw','Ч/Б'],['f-sep','Сепія'],['f-viv','Яскравий']];
+$('#cm-filt').innerHTML=FL.map(([k,n])=>`<button data-f="${k}" aria-pressed="${!k}">${n}</button>`).join('');
+$$('#cm-filt button').forEach(b=>b.onclick=()=>{cm.filt=b.dataset.f;$('#cm-cv').className=cm.filt;$$('#cm-filt button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+function cmScene(t){const cv=$('#cm-cv'),x=cv.getContext('2d'),W=cv.width,H=cv.height;
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#5FA8FF');g.addColorStop(1,'#CDE7FF');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.fillStyle='#FFE27A';x.beginPath();x.arc(640,90,46,0,7);x.fill();
+ x.fillStyle='#fff';for(let i=0;i<3;i++){const cx=((t*18+i*300)%1100)-150;x.beginPath();x.ellipse(cx,70+i*40,70,20,0,0,7);x.ellipse(cx+40,60+i*40,40,18,0,0,7);x.fill()}
+ x.fillStyle='#7FCB6B';x.beginPath();x.moveTo(0,330);x.quadraticCurveTo(200,270,420,320);x.quadraticCurveTo(620,360,800,300);x.lineTo(800,500);x.lineTo(0,500);x.fill();
+ x.fillStyle='#F2D8B0';x.fillRect(470,210,200,130);x.fillStyle='#E25B45';x.beginPath();x.moveTo(455,215);x.lineTo(570,150);x.lineTo(685,215);x.fill();
+ x.fillStyle='#5FA8FF';for(let i=0;i<3;i++)x.fillRect(490+i*60,240,36,30);x.fillStyle='#8A5A34';x.fillRect(555,290,32,50);
+ x.fillStyle='#4E9E45';x.beginPath();x.moveTo(0,400);x.quadraticCurveTo(300,360,800,410);x.lineTo(800,500);x.lineTo(0,500);x.fill();
+ for(const [tx,s] of [[110,1],[220,.8],[360,1.1]]){x.fillStyle='#8A5A34';x.fillRect(tx-6*s,300,12*s,90*s);x.fillStyle='#2F8F46';x.beginPath();x.arc(tx,290,44*s,0,7);x.fill()}
+ const bx=(t*120)%1000-100,by=170+Math.sin(t*2)*20,f=Math.sin(t*12)*10;x.strokeStyle='#1D1A39';x.lineWidth=4;x.beginPath();x.moveTo(bx-18,by-f);x.quadraticCurveTo(bx-8,by-6,bx,by);x.quadraticCurveTo(bx+8,by-6,bx+18,by-f);x.stroke();
+ const kx=250+Math.sin(t*1.3)*120;x.fillStyle='#FF3D57';x.beginPath();x.arc(kx,402,10,0,7);x.fill();x.fillStyle='#1D1A39';x.fillRect(kx-12,412,24,34);x.fillRect(kx-10,446,6,22);x.fillRect(kx+4,446,6,22);x.fillStyle='#F2C9A0';x.beginPath();x.arc(kx,395,13,0,7);x.fill();x.fillStyle='#FF3D57';x.fillRect(kx-14,383,28,8)}
+function cmLoop(){cmScene(performance.now()/1000);cm.raf=requestAnimationFrame(cmLoop)}
+function cmThumb(lbl){const cv=$('#cm-cv');let u='';try{const s=document.createElement('canvas');s.width=192;s.height=120;s.getContext('2d').drawImage(cv,0,0,192,120);u=s.toDataURL('image/jpeg',.7)}catch(e){}
+ const f=document.createElement('figure');f.innerHTML=`<img alt="${esc(lbl)}" class="${cm.filt}"><figcaption>${esc(lbl)}</figcaption>`;f.querySelector('img').src=u;$('#cm-gal').prepend(f)}
+function cmUI(){const s=$('#cm-shut');s.classList.toggle('vid',cm.mode==='video');s.classList.toggle('on',cm.rec);$('#cm-pause').style.visibility=cm.rec?'visible':'hidden';
+ $('#cm-hud').style.display=cm.rec?'flex':'none';$('#cm-hud').classList.toggle('paused',cm.paused);$('#cm-t').textContent=fmt(cm.secs)+(cm.paused?' · пауза':'');
+ s.setAttribute('aria-label',cm.mode==='photo'?'Зробити фото':cm.rec?'Завершити відео':'Почати відео');
+ $('#cm-pause').innerHTML=cm.paused?'<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg>':'<svg viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/></svg>';
+ $('#cm-pause').setAttribute('aria-label',cm.paused?'Продовжити':'Призупинити')}
+$$('#cm-modes button').forEach(b=>b.onclick=()=>{if(cm.rec)return;cm.mode=b.dataset.m;$$('#cm-modes button').forEach(x=>x.setAttribute('aria-pressed',x===b));cmUI()});
+$('#cm-shut').onclick=()=>{if(cm.mode==='photo'){const f=$('#cm-fl');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');cmThumb('Фото');return}
+ if(!cm.rec){cm.rec=true;cm.paused=false;cm.secs=0;cm.timer=setInterval(()=>{if(!cm.paused){cm.secs++;cmUI()}},1000)}
+ else{clearInterval(cm.timer);cm.rec=false;cmThumb('Відео '+fmt(cm.secs))}cmUI()};
+$('#cm-pause').onclick=()=>{cm.paused=!cm.paused;cmUI()};
+stoppers.push(()=>{cancelAnimationFrame(cm.raf);if(cm.rec){clearInterval(cm.timer);cm.rec=false;cmThumb('Відео '+fmt(cm.secs));cmUI()}});
+starters[idx('Камера')]=()=>cmLoop();cmScene(0);cmUI();
+
+/* ========== EYE GYM ========== */
+const GY=[['circle','Коло'],['eight','Вісімка'],['h','Вліво — вправо'],['v','Вгору — вниз'],['diag','Діагоналі']];
+let gy={k:null,t0:0,raf:0};
+$('#gym-btns').innerHTML=GY.map(([k,n])=>`<button class="btn" data-k="${k}">${n}</button>`).join('')+'<button class="btn" id="gym-stop">Стоп</button>';
+function gyLoop(){const t=(performance.now()-gy.t0)/1000,b=$('#gym').getBoundingClientRect(),cx=b.width/2,cy=b.height/2,rx=b.width*.38,ry=b.height*.34,w=t*1.1;let X=cx,Y=cy;
+ if(gy.k==='circle'){X=cx+Math.cos(w)*rx;Y=cy+Math.sin(w)*ry}else if(gy.k==='eight'){X=cx+Math.sin(w)*rx;Y=cy+Math.sin(w*2)*ry*.8}
+ else if(gy.k==='h'){X=cx+Math.sin(w)*rx}else if(gy.k==='v'){Y=cy+Math.sin(w)*ry}else if(gy.k==='diag'){const s=Math.sin(w),side=Math.floor(w/(Math.PI*2))%2?-1:1;X=cx+s*rx;Y=cy+s*ry*side}
+ const d=$('#gym-dot');d.style.left=X+'px';d.style.top=Y+'px';const left=Math.ceil(20-t);
+ if(left<=0){gyStop('Молодці! Тепер кліпніть швидко 10 разів і подивіться у вікно.');return}
+ $('#gym-say').textContent=`Стеж очима, голова нерухома · ${left} с`;gy.raf=requestAnimationFrame(gyLoop)}
+function gyStop(m){cancelAnimationFrame(gy.raf);gy.k=null;const d=$('#gym-dot');d.style.left='50%';d.style.top='50%';$('#gym-say').textContent=m||'Голова нерухома. Обери вправу.'}
+$$('#gym-btns [data-k]').forEach(b=>b.onclick=()=>{cancelAnimationFrame(gy.raf);gy.k=b.dataset.k;gy.t0=performance.now();gyLoop()});
+$('#gym-stop').onclick=()=>gyStop();stoppers.push(()=>gyStop());
+
+/* ========== EXPLORER ========== */
+const XI={
+ pc:'<rect x="6" y="8" width="52" height="34" rx="3" fill="#2F55F0"/><rect x="10" y="12" width="44" height="26" fill="#9DB4FF"/><path d="M24 42l-4 10h24l-4-10" fill="#575273"/>',
+ bin:'<path d="M16 16h32l-3 40H19z" fill="#B9B9C6"/><rect x="12" y="10" width="40" height="6" rx="2" fill="#8A8399"/>',
+ disk:'<rect x="6" y="20" width="52" height="26" rx="5" fill="#8A8399"/><rect x="10" y="36" width="44" height="6" rx="2" fill="#575273"/><circle cx="50" cy="28" r="3" fill="#1FC7A3"/>',
+ phone:'<rect x="18" y="4" width="28" height="56" rx="6" fill="#1D1A39"/><rect x="22" y="10" width="20" height="40" fill="#7A3BD1"/>',
+ folder:'<path d="M4 14h20l6 6h30v34H4z" fill="#FFC23D"/><path d="M4 24h56v30H4z" fill="#FFD978"/>',
+ video:'<rect x="8" y="10" width="48" height="44" rx="6" fill="#FF3D57"/><path d="M26 22l16 10-16 10z" fill="#fff"/>',
+ image:'<rect x="8" y="10" width="48" height="44" rx="6" fill="#1FC7A3"/><circle cx="22" cy="24" r="5" fill="#fff"/><path d="M8 48l16-14 10 8 10-10 12 12v10H8z" fill="#0E6F58"/>'};
+const xi=k=>`<svg viewBox="0 0 64 64" aria-hidden="true">${XI[k]}</svg>`;
+const VIDF='VID_20261125_101530.mp4';
+const XSTEPS=['Під’єднати телефон через USB до комп’ютера','Відкрити папку «Цей ПК»','Відшукати додатковий диск — пам’ять телефона','Відкрити папку збереження медіафайлів (DCIM › Camera)','Відкрити файл відео','Зберегти файл відео у своїй структурі папок'];
+let X;
+function xReset(){X={plug:0,mode:null,path:['desk'],sel:null,done:new Set(),copied:false,clip:false,prog:0,msg:''};xRender()}
+function xNode(){const p=X.path.join('/');
+ if(p==='desk')return{t:'Робочий стіл',items:[['pc','Цей ПК','pc'],['bin','Кошик','bin']]};
+ if(p==='desk/pc')return{t:'Цей ПК',items:[['disk','Локальний диск (C:)','c'],...(X.mode==='mtp'?[['phone','Мій телефон','phone']]:[])]};
+ if(p==='desk/pc/c')return{t:'Локальний диск (C:)',items:[['folder','Windows','x'],['folder','Program Files','x'],['folder','Користувачі','x']]};
+ if(p==='desk/pc/phone')return{t:'Мій телефон',items:[['disk','Внутрішня пам’ять','int']]};
+ if(p==='desk/pc/phone/int')return{t:'Внутрішня пам’ять',items:[['folder','DCIM','dcim'],['folder','Download','x'],['folder','Music','x'],['folder','Android','x']]};
+ if(p==='desk/pc/phone/int/dcim')return{t:'DCIM',items:[['folder','Camera','cam'],['folder','Screenshots','x']]};
+ if(p==='desk/pc/phone/int/dcim/cam')return{t:'Camera',items:[['image','IMG_20261125_101210.jpg','img'],['video',VIDF,'vid'],['image','IMG_20261125_101702.jpg','img']]};
+ if(p==='desk/vid')return{t:'Відео › Урок 16',items:X.copied?[['video',VIDF,'vid2']]:[]};
+ if(p==='desk/bin')return{t:'Кошик',items:[]};
+ return{t:'Папка',items:[]}}
+const XNAMES={desk:'Робочий стіл',pc:'Цей ПК',c:'Диск C:',phone:'Мій телефон',int:'Внутрішня пам’ять',dcim:'DCIM',cam:'Camera',vid:'Відео › Урок 16',bin:'Кошик'};
+function xMark(i){X.done.add(i)}
+function xOpen(id){if(id==='x'){X.msg='Тут потрібного файла немає.';xRender();return}
+ if(id==='img'){X.sel=null;X.msg='Це фото, а нам потрібне відео (.mp4).';xRender();return}
+ if(id==='vid'||id==='vid2'){X.sel=id;X.msg='';xRender();return}
+ if(id==='pc')xMark(1);if(id==='phone')xMark(2);if(id==='cam')xMark(3);
+ X.path.push(id);X.sel=null;X.msg='';xRender()}
+function xRender(){
+ const scr=$('#ph-scr');
+ if(!X.plug)scr.innerHTML='<div class="clock">10:16</div><div style="text-align:center;opacity:.85">Середа, 25 листопада</div><div style="margin-top:auto;text-align:center;opacity:.8">Телефон не під’єднано</div>';
+ else if(!X.mode)scr.innerHTML='<div class="clock">10:16</div><div class="sheet"><b>Використовувати USB для:</b><button data-m="charge">Лише заряджання</button><button data-m="mtp">Передача файлів</button><button data-m="ptp">Передача фото (PTP)</button></div>';
+ else scr.innerHTML=`<div class="clock">10:16</div><div class="sheet"><b>USB: ${X.mode==='mtp'?'передача файлів':X.mode==='ptp'?'передача фото':'лише заряджання'}</b><span style="font-size:.9em;color:#575273">${X.mode==='mtp'?'Комп’ютер бачить пам’ять телефона.':'Комп’ютер не бачить файлів телефона. Обери інший режим.'}</span>${X.mode!=='mtp'?'<button data-m="">Змінити режим</button>':''}</div>`;
+ scr.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{X.mode=b.dataset.m||null;if(X.mode==='mtp')xMark(0);if(X.mode!=='mtp'&&X.path.includes('phone'))X.path=['desk','pc'];xRender()});
+ $('#ph-cable').textContent=X.plug?'Від’єднати кабель':'Під’єднати кабель USB';
+ const n=xNode();$('#x-crumbs').textContent=X.path.map(p=>XNAMES[p]||p).join(' › ');
+ $('#x-nav').innerHTML=[['desk','Робочий стіл'],['pc','Цей ПК'],['vid','Відео › Урок 16']].map(([k,t])=>`<button data-k="${k}" class="${k==='vid'&&X.clip&&!X.copied?'hl':''}">${t}</button>`).join('');
+ $$('#x-nav button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==='desk')X.path=['desk'];else if(k==='pc'){X.path=['desk','pc'];xMark(1)}else X.path=['desk','vid'];X.sel=null;X.msg='';xRender()});
+ $('#x-files').innerHTML=n.items.length?n.items.map(([ic,t,id])=>`<button data-id="${id}" class="${X.sel===id?'sel':''}">${xi(ic)}<span>${esc(t)}</span></button>`).join(''):'<p class="muted" style="grid-column:1/-1">Тут порожньо</p>';
+ $$('#x-files button').forEach(b=>b.onclick=()=>xOpen(b.dataset.id));
+ const act=$('#x-act');let h='';
+ if(X.sel==='vid')h=`<button class="btn" id="xa-open">Відкрити</button><button class="btn pri" id="xa-copy">Копіювати</button>`;
+ else if(X.sel==='vid2')h=`<button class="btn" id="xa-open">Відкрити</button>`;
+ if(X.path.join('/')==='desk/vid'&&X.clip&&!X.copied)h+=`<button class="btn pri" id="xa-paste">Вставити сюди</button>`;
+ if(X.prog>0&&X.prog<100)h+=`<span>Копіювання…</span><div class="prog"><i style="width:${X.prog}%"></i></div>`;
+ h+=`<span class="note">${esc(X.msg||(X.clip&&!X.copied?'Файл скопійовано. Відкрий папку «Відео › Урок 16» ліворуч.':''))}</span>`;
+ act.innerHTML=h;
+ const o=$('#xa-open');if(o)o.onclick=()=>{xMark(4);X.msg='▶ Відео відтворюється в Медіапрогравачі. Обговоріть: чи обов’язковий цей крок?';xRender()};
+ const c=$('#xa-copy');if(c)c.onclick=()=>{X.clip=true;X.msg='';xRender()};
+ const p=$('#xa-paste');if(p)p.onclick=()=>{X.prog=1;const iv=setInterval(()=>{X.prog+=7;if(X.prog>=100){clearInterval(iv);X.prog=0;X.copied=true;xMark(5);X.msg='Готово! Відео збережено у твою папку.'}xRender()},70)};
+ $('#x-steps').innerHTML=XSTEPS.map((s,i)=>`<li class="${X.done.has(i)?'done':''}">${s}</li>`).join('')}
+$('#ph-cable').onclick=()=>{X.plug=!X.plug;X.mode=null;if(!X.plug&&X.path.includes('phone'))X.path=['desk','pc'];X.sel=null;xRender()};
+$('#x-back').onclick=()=>{if(X.path.length>1)X.path.pop();X.sel=null;X.msg='';xRender()};
+$('#x-reset').onclick=xReset;xReset();
+
+/* ========== ORDER ========== */
+let ord=[];
+function ordMix(){do{ord=shuffle(XSTEPS.map((_,i)=>i))}while(ord.every((v,i)=>v===i));$('#ord-msg').textContent='';ordDraw()}
+function ordDraw(chk){$('#order').innerHTML=ord.map((v,i)=>`<div class="oitem ${chk?(v===i?'right':'wrong'):''}"><span>${XSTEPS[v]}</span><button data-i="${i}" data-d="-1" aria-label="Вгору" ${i===0?'disabled':''}>↑</button><button data-i="${i}" data-d="1" aria-label="Вниз" ${i===ord.length-1?'disabled':''}>↓</button></div>`).join('');
+ $$('#order button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,j=i+ +b.dataset.d;[ord[i],ord[j]]=[ord[j],ord[i]];$('#ord-msg').textContent='';ordDraw()})}
+$('#ord-check').onclick=()=>{const ok=ord.filter((v,i)=>v===i).length;ordDraw(true);const m=$('#ord-msg');m.textContent=ok===ord.length?'Усе правильно! А крок «Відкрити файл відео» — обов’язковий?':`На своєму місці: ${ok} з ${ord.length}`;m.className=ok===ord.length?'ok':'bad'};
+$('#ord-mix').onclick=ordMix;ordMix();
+
+/* ========== QUIZ ========== */
+const QZ=[
+ ['Що таке мультимедіа?',['Поєднання різних форм подання повідомлень: тексту, звуку, графіки, відео','Будь-яка програма на комп’ютері','Лише відеофайли','Дуже великий монітор'],0],
+ ['Який із цих файлів — відео?',['song.mp3','lesson.mp4','voice.wav','melody.mid'],1],
+ ['Як називається програма Windows 11 для запису звуку?',['Paint','Камера','Звукозапис','Калькулятор'],2],
+ ['Що таке подкаст?',['Вірус для навушників','Серія аудіофайлів за однією адресою в інтернеті, що регулярно оновлюється','Кабель для колонок','Формат фотографій'],1],
+ ['Кардрідер — це…',['Пристрій для зчитування карт пам’яті','Програма для малювання','Вид навушників','Радіостанція'],0],
+ ['Що обрати на телефоні після під’єднання кабелем, щоб скопіювати відео?',['Лише заряджання','Передача файлів','Режим польоту','Нічого, кабель усе зробить сам'],1]];
+let qz={i:0,res:[]};
+function qzDraw(){const q=QZ[qz.i];$('#qz-bar').innerHTML=QZ.map((_,i)=>`<i class="${qz.res[i]===true?'r':qz.res[i]===false?'w':i===qz.i?'c':''}"></i>`).join('');
+ if(qz.i>=QZ.length){const s=qz.res.filter(Boolean).length;$('#qz-q').textContent=`Результат: ${s} з ${QZ.length}`;$('#qz-o').innerHTML='';$('#qz-msg').textContent=s===QZ.length?'Бездоганно!':s>=4?'Чудово! Ще трохи — і ідеально.':'Повтори словничок і спробуй ще раз.';$('#qz-next').textContent='Пройти знову';$('#qz-next').disabled=false;return}
+ $('#qz-q').textContent=`${qz.i+1}. ${q[0]}`;$('#qz-msg').textContent='';$('#qz-msg').className='';$('#qz-next').disabled=true;$('#qz-next').textContent='Далі';
+ $('#qz-o').innerHTML=q[1].map((o,k)=>`<button data-k="${k}">${esc(o)}</button>`).join('');
+ $$('#qz-o button').forEach(b=>b.onclick=()=>{if(qz.res[qz.i]!==undefined)return;const k=+b.dataset.k,ok=k===q[2];qz.res[qz.i]=ok;
+  b.classList.add(ok?'right':'wrong');$$('#qz-o button')[q[2]].classList.add('right');$('#qz-msg').textContent=ok?'Правильно!':'Не зовсім — правильну відповідь позначено.';$('#qz-msg').className=ok?'ok':'bad';$('#qz-next').disabled=false;
+  $('#qz-bar').children[qz.i].className=ok?'r':'w'})}
+$('#qz-next').onclick=()=>{if(qz.i>=QZ.length)qz={i:0,res:[]};else qz.i++;qzDraw()};qzDraw();
+
+/* ========== SUMMARY ========== */
+$('#sum').innerHTML=[
+ ['Що таке медіа, мультимедіа, мультимедійні продукти?','Медіа — засоби передавання й поширення інформації. Мультимедіа — поєднання тексту, звуку, графіки, анімації, відео. Мультимедійний продукт — те, що їх поєднує: фільм, гра, презентація.'],
+ ['Які вбудовані програми Windows допомагають працювати з мультимедіа?','Звукозапис (Диктофон), Камера, Медіапрогравач, Clipchamp, Фотографії.'],
+ ['Що таке подкаст?','Аудіо- чи відеофайл або серія файлів за однією адресою в інтернеті, що регулярно оновлюється.'],
+ ['Опишіть алгоритм збереження на комп’ютер відео, знятого на смартфон.','Під’єднати телефон через USB (режим «Передача файлів») → Цей ПК → пам’ять телефона → DCIM › Camera → скопіювати відео у свою папку.']
+].map(([q,a])=>`<button class="card reveal"><h3>${q}</h3><span class="ans">${a}</span><span class="hint">Показати відповідь</span></button>`).join('');
+$$('#sum .reveal').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+
+/* ========== TREE ========== */
+const LV=[['Не сподобалось','#8A8399'],['Сподобалось','#FFB020'],['Дуже сподобалось','#E8452C']];
+let lc=[0,0,0];const leafPath='M0 -16 C10 -10 12 4 0 16 C-12 4 -10 -10 0 -16Z';
+$('#leafbtns').innerHTML=LV.map(([n,c],i)=>`<button class="leafbtn" data-i="${i}"><svg viewBox="-20 -20 40 40" aria-hidden="true"><path d="${leafPath}" fill="${c}"/><path d="M0 -12V14" stroke="#0003" stroke-width="1.5"/></svg>${n}<b id="lc${i}">0</b></button>`).join('')+'<button class="btn" id="leaf-reset" style="align-self:flex-start">Очистити дерево</button>';
+$$('#leafbtns .leafbtn').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;let x,y;do{x=(Math.random()*2-1);y=(Math.random()*2-1)}while(x*x+y*y>.85);
+ const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('transform',`translate(${300+x*240} ${170+y*140}) rotate(${Math.random()*360|0}) scale(1.7)`);
+ g.innerHTML=`<path class="lf" d="${leafPath}" fill="${LV[i][1]}"/>`;$('#leaves').appendChild(g);lc[i]++;$('#lc'+i).textContent=lc[i]});
+$('#leaf-reset').onclick=()=>{$('#leaves').innerHTML='';lc=[0,0,0];[0,1,2].forEach(i=>$('#lc'+i).textContent=0)};
+
+$$('.stack td').forEach(c=>{const t=c.closest('table');c.dataset.l=t.rows[0].cells[c.cellIndex]?.textContent||''});
+setCur(0);
+}
+
+</script>
+</body></html>
