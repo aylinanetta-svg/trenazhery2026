@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Комп’ютер під контролем</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+/* VOICE: жвавий урок-тренажер для школярів, чіткий як центр техпідтримки
+   IDEA: пульт сервісного центру — кожен слайд це «зміна» техніка з живим комп’ютером
+   PICTURE: симульований робочий стіл Windows, який учні налаштовують і «лікують»
+   COLOUR and TYPE: сталева панель, чорний, білий, сигнальний червоний; синій Windows усередині симулятора; Inter Tight + Inter
+   LAYOUT: горизонтальна колода слайдів, симулятор ліворуч на всю ширину, місії праворуч, на телефоні — стовпчиком */
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--card:light-dark(#ffffff,#22272b);--ink:light-dark(#0d0f11,#f2f4f6);--mute:light-dark(#4a535b,#a7b0b8);--line:light-dark(#b9c2ca,#353c42);--red:#e8251a;--ok:light-dark(#11804a,#3ccf86);--win:#0067c0}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow:hidden}
+h1,h2,h3{font-family:"Inter Tight",Inter,sans-serif;line-height:1.08;text-wrap:balance;margin:0 0 .4em}
+h1{font-size:clamp(34px,5.4vw,64px);font-weight:700}
+h2{font-size:clamp(26px,3.2vw,40px);font-weight:700}
+h3{font-size:20px;font-weight:600}
+p{margin:0 0 .8em;max-width:70ch}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.top{height:56px;display:flex;align-items:center;gap:16px;padding:0 max(3vw,12px);border-bottom:1px solid var(--line);background:var(--card)}
+.top b{font-family:"Inter Tight",Inter,system-ui,sans-serif;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.prog{position:absolute;left:0;top:55px;height:3px;background:var(--red);transition:width .3s}
+.pts{display:flex;align-items:center;gap:8px;font-weight:700;white-space:nowrap}
+.pts span{background:var(--red);color:#fff;border-radius:99px;padding:2px 12px;min-width:44px;text-align:center}
+.pts span.bump{animation:bump .5s}
+@keyframes bump{50%{transform:scale(1.35)}}
+.ib{min-height:40px;min-width:40px;border:1px solid var(--line);background:transparent;border-radius:10px;padding:0 10px}
+.deck{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;height:calc(100svh - 120px);scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;overflow-y:auto;padding:clamp(18px,3vw,44px) max(4vw,16px)}
+.in{max-width:1240px;margin:0 auto}
+.bot{height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 max(3vw,12px);border-top:1px solid var(--line);background:var(--card)}
+.nav{min-height:44px;padding:0 20px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font-weight:600}
+.nav:disabled{opacity:.3}
+.dots{display:flex;gap:6px;overflow-x:auto;padding:4px}
+.dots button{flex:none;width:12px;height:12px;border-radius:50%;border:0;background:var(--line);padding:0}
+.dots button.on{background:var(--red);transform:scale(1.3)}
+.kick{color:var(--red);font-weight:700;font-size:15px;margin-bottom:6px}
+.lead{font-size:18px;color:var(--mute)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:var(--card);border-radius:16px;padding:18px 20px;border:1px solid var(--line)}
+.btn{min-height:44px;padding:8px 18px;border-radius:12px;border:2px solid var(--ink);background:var(--card);font-weight:600}
+.btn.pri{background:var(--red);border-color:var(--red);color:#fff}
+.btn.good{border-color:var(--ok);color:var(--ok)}
+.btn.bad{border-color:var(--red);color:var(--red)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.fb{min-height:1.6em;font-weight:600;margin-top:10px}
+.fb.ok{color:var(--ok)}.fb.no{color:var(--red)}
+/* title */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;min-height:100%}
+.hero svg{width:100%;height:auto}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;font-size:14px;font-weight:500}
+/* myth */
+.myth{font-size:clamp(22px,2.6vw,32px);font-family:"Inter Tight",Inter,sans-serif;font-weight:600;line-height:1.2;min-height:3.8em}
+.timer{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:14px 0}
+.timer i{display:block;height:100%;background:var(--red);width:100%}
+/* plan */
+.plan .card{cursor:pointer;transition:transform .15s}
+.plan .card:hover{transform:translateY(-3px)}
+.plan .card .n{font-family:"Inter Tight",Inter,sans-serif;font-size:40px;font-weight:700;color:var(--red);line-height:1}
+/* eye sim */
+.eye-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px}
+.ctrl label{display:block;font-weight:600;font-size:15px;margin-top:12px}
+.ctrl label output{float:right;font-weight:700;color:var(--red)}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+.meter{height:22px;border-radius:12px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;transition:width .3s,background .3s}
+.prev{border-radius:14px;padding:18px;background:#fff;color:#111;min-height:170px;transition:filter .2s}
+.prev.flick{animation:flick .09s infinite}
+@keyframes flick{50%{opacity:.82}}
+.tips li{margin:4px 0}
+.tips li.bad{color:var(--red);font-weight:600}
+.tips li.good{color:var(--ok)}
+/* simulator */
+.sim{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;margin-top:10px}
+.scr{position:relative;aspect-ratio:16/10;min-height:380px;border-radius:12px;overflow:hidden;border:10px solid #111;background:#000;font:13px/1.4 "Segoe UI",Inter,sans-serif;color:#111;user-select:none;box-shadow:0 18px 40px -20px #000}
+.scr .vis{position:absolute;inset:0;transform-origin:0 0}
+.wp{position:absolute;inset:0;width:100%;height:100%}
+.icons{position:absolute;left:10px;top:10px;display:grid;gap:6px}
+.ico{display:flex;flex-direction:column;align-items:center;width:var(--isz);color:#fff;text-shadow:0 1px 2px #000;font-size:11px;text-align:center;padding:3px;border-radius:4px}
+.ico svg{width:calc(var(--isz) * .6);height:calc(var(--isz) * .6)}
+.ico:hover{background:#ffffff33}
+.task{position:absolute;left:0;right:0;bottom:0;height:40px;background:#1f1f1f;display:flex;align-items:center;gap:6px;padding:0 6px;color:#fff}
+.dark .task{background:#111}.light .task{background:#e6ebf0;color:#111}
+.stbtn{width:40px;height:34px;border:0;background:transparent;display:grid;place-items:center;border-radius:4px}
+.stbtn:hover{background:#ffffff26}
+.tray{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;padding-right:6px}
+.tray button{border:0;background:transparent;padding:4px;border-radius:4px;display:grid}
+.tray button:hover{background:#ffffff26}
+.menu{position:absolute;background:#2b2b2b;color:#fff;border:1px solid #444;border-radius:6px;padding:4px;min-width:190px;z-index:30;box-shadow:0 8px 24px #0008}
+.light .menu{background:#f9f9f9;color:#111;border-color:#ccc}
+.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:7px 12px;border-radius:4px;font:inherit}
+.menu button:hover{background:var(--acc);color:#fff}
+.menu hr{border:0;border-top:1px solid #8885;margin:4px 0}
+.menu .sub{padding-left:22px;font-size:12px}
+.win{position:absolute;left:6%;top:5%;width:88%;height:calc(90% - 40px);background:#fff;color:#111;border-radius:8px;box-shadow:0 16px 40px #0009;display:flex;flex-direction:column;z-index:10;overflow:hidden;font-size:var(--fs)}
+.dark .win{background:#202020;color:#f0f0f0}
+.wt{height:32px;flex:none;display:flex;align-items:center;justify-content:space-between;padding-left:12px;font-size:12px;border-bottom:1px solid #8883}
+.wt button{border:0;background:transparent;width:44px;height:32px}
+.wt button:hover{background:#e81123;color:#fff}
+.wb{flex:1;display:flex;min-height:0}
+.wn{width:34%;max-width:200px;border-right:1px solid #8883;padding:8px;overflow:auto;background:#f3f3f3}
+.dark .wn{background:#1a1a1a}
+.wn button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:6px 8px;border-radius:4px;font:inherit}
+.wn button.on{background:#8882;font-weight:600;box-shadow:inset 3px 0 var(--acc)}
+.wc{flex:1;padding:12px 16px;overflow:auto}
+.wc h4{font-size:1.5em;font-weight:400;margin:0 0 .5em}
+.wc h5{font-size:1.05em;margin:1em 0 .3em}
+.wc select{font:inherit;padding:4px;border:1px solid #888;border-radius:4px;min-width:200px;background:inherit;color:inherit}
+.wc input[type=range]{accent-color:var(--acc);height:24px;max-width:280px}
+.tg{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;padding:4px 0;font:inherit}
+.tg i{width:40px;height:20px;border-radius:10px;border:1.5px solid #888;position:relative}
+.tg i::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#888;top:2.5px;left:3px;transition:left .15s}
+.tg.on i{background:var(--acc);border-color:var(--acc)}
+.tg.on i::after{left:22px;background:#fff}
+.wbtn{border:1px solid #8886;background:#8881;padding:5px 12px;border-radius:4px;font:inherit;margin:2px 4px 2px 0}
+.wbtn:hover{background:#8883}
+.wbtn.acc{background:var(--acc);color:#fff;border-color:var(--acc)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs button{width:84px;height:52px;border-radius:4px;border:3px solid transparent;padding:0;overflow:hidden}
+.thumbs button.on{border-color:var(--acc)}
+.thumbs svg{width:100%;height:100%;display:block}
+.sw{display:flex;gap:6px}
+.sw button{width:28px;height:28px;border-radius:4px;border:2px solid transparent}
+.sw button.on{border-color:#888;outline:2px solid currentColor}
+.hc .wp{display:none}.hc .vis{background:#000}
+.hc .win,.hc .menu,.hc .task,.hc .wn,.hc .dlg{background:#000!important;color:#ffff00!important;border:2px solid #fff!important}
+.hc .wc h4,.hc .wc h5{color:#00ffff}
+.hc .ico{color:#fff;text-shadow:none}
+.ovl{position:absolute;inset:0;pointer-events:none;z-index:40}
+.night{background:#ff8a00;mix-blend-mode:multiply;opacity:.28}
+.flicker{background:#000;animation:fl .07s infinite}
+@keyframes fl{0%{opacity:0}50%{opacity:.18}}
+.toasts{position:absolute;right:8px;bottom:48px;display:grid;gap:6px;z-index:45;width:min(260px,60%)}
+.toast{background:#2b2b2b;color:#fff;border-radius:6px;padding:8px 12px;font-size:12px;box-shadow:0 6px 20px #0008;border-left:4px solid var(--acc)}
+.toast.err{border-left-color:#e81123}
+.toast.good{border-left-color:#16c60c}
+.toast button{margin-top:6px;border:1px solid #fff6;background:transparent;color:#fff;border-radius:4px;padding:3px 8px;font:inherit;margin-right:4px}
+.dlg{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);width:min(420px,86%);background:#fff;color:#111;border-radius:8px;box-shadow:0 20px 50px #000a;padding:16px;z-index:50;font-size:13px}
+.dark .dlg{background:#2b2b2b;color:#fff}
+.dlg h5{font-size:15px;margin:0 0 8px}
+.dlg label{display:flex;gap:8px;align-items:flex-start;padding:6px;border-radius:4px;cursor:pointer}
+.dlg label:hover{background:#8882}
+.bar{height:6px;background:#8884;border-radius:3px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:var(--acc);animation:grow 1.6s linear forwards}
+@keyframes grow{from{width:0}to{width:100%}}
+.boot{position:absolute;inset:0;background:#0b2a6b;color:#fff;display:grid;place-items:center;z-index:60;font-size:16px;text-align:center}
+.spin{width:34px;height:34px;border-radius:50%;border:4px solid #fff4;border-top-color:#fff;animation:sp 1s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.glitch .vis{animation:gl 3.2s infinite}
+@keyframes gl{0%,92%,100%{transform:none;filter:none}93%{transform:translate(4px,-2px);filter:hue-rotate(90deg)}95%{transform:translate(-5px,3px)}97%{transform:translate(2px,0);filter:invert(.15)}}
+.err{position:absolute;left:30%;top:22%;width:min(300px,60%);background:#fff;color:#111;border-radius:6px;box-shadow:0 10px 30px #000a;z-index:9;font-size:12px;overflow:hidden}
+.err b{display:block;background:#e81123;color:#fff;padding:6px 10px}
+.err div{padding:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95em}
+.tbl td,.tbl th{padding:5px 6px;border-bottom:1px solid #8883;text-align:left}
+.tbl td.r,.tbl th.r{text-align:right;white-space:nowrap}
+.ram{height:14px;background:#8883;border-radius:3px;overflow:hidden;margin:6px 0 10px}
+.ram i{display:block;height:100%;transition:width .4s}
+.tree div{padding:3px 6px;border-radius:3px;cursor:default}
+.tree .dv{padding-left:26px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.tree .dv.sel{background:var(--acc);color:#fff}
+.warn{display:inline-grid;place-items:center;width:15px;height:15px;background:#ffcc00;color:#000;font-weight:800;font-size:11px;border-radius:2px;clip-path:polygon(50% 0,100% 100%,0 100%);padding-top:3px}
+.side h3{margin-bottom:6px}
+.ms{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:8px}
+.ms li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 10px 40px;position:relative;font-size:15px;line-height:1.35}
+.ms li::before{content:"";position:absolute;left:12px;top:11px;width:18px;height:18px;border-radius:50%;border:2px solid var(--line)}
+.ms li.done{border-color:var(--ok)}
+.ms li.done::before{background:var(--ok);border-color:var(--ok);box-shadow:inset 0 0 0 3px var(--card)}
+.ms li.cur{border-color:var(--red);box-shadow:0 0 0 2px color-mix(in srgb,var(--red) 30%,transparent)}
+.hintbox{font-size:14px;background:color-mix(in srgb,var(--red) 10%,var(--card));border-radius:10px;padding:10px 12px;margin:8px 0;display:none}
+.hintbox.show{display:block}
+.desk{border:2px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px}
+.win-all{background:var(--ok);color:#fff;border-radius:12px;padding:10px 14px;font-weight:600;display:none}
+.win-all.show{display:block}
+/* posture */
+.post svg{width:100%;height:auto;max-height:460px}
+.hs{cursor:pointer}
+.hs circle{fill:var(--red)}
+.hs text{fill:#fff;font:700 15px Inter;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.plist li{padding:8px 10px;border-radius:10px;margin:4px 0;list-style:none;border:1px solid transparent}
+.plist{padding:0}
+.plist li.on{border-color:var(--red);background:var(--card)}
+/* causes */
+.flip{perspective:900px;min-height:230px;cursor:pointer}
+.flip .fi{position:relative;height:100%;min-height:230px;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .fi{transform:rotateY(180deg)}
+.flip .fa,.flip .fbk{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:18px;border:1px solid var(--line);background:var(--card);overflow:auto}
+.flip .fbk{transform:rotateY(180deg);background:var(--ink);color:var(--bg)}
+.flip .fa svg{width:48px;height:48px;color:var(--red)}
+.flip .fbk p{font-size:14px;margin-bottom:6px}
+.match{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+.match button{display:block;width:100%;text-align:left;min-height:48px;margin:6px 0;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-size:15px}
+.match button.sel{border-color:var(--red)}
+.match button.ok{border-color:var(--ok);opacity:.55;pointer-events:none}
+.shake{animation:shk .35s}
+@keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* gym */
+.gym{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start}
+.gymbox{background:#0d0f11;border-radius:18px;aspect-ratio:16/9;position:relative;overflow:hidden}
+.gymbox svg{position:absolute;inset:0;width:100%;height:100%}
+.gl li{padding:6px 10px;border-radius:8px;list-style:none}
+.gl{padding:0}
+.gl li.on{background:var(--red);color:#fff;font-weight:600}
+/* cases */
+.chat{display:grid;gap:12px;max-width:760px}
+.bub{background:var(--card);border:1px solid var(--line);border-radius:18px 18px 18px 4px;padding:14px 18px;font-size:18px}
+.who{font-weight:700;color:var(--red);font-size:14px}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;min-height:48px;padding:10px 16px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-size:16px}
+.opts button.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--card))}
+.opts button.no{border-color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--card))}
+/* order */
+.ord button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;min-height:46px;margin:6px 0;padding:8px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-size:15px}
+.ord button b{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:var(--line);font-size:14px}
+.ord button.ok{border-color:var(--ok)}
+.ord button.ok b{background:var(--ok);color:#fff}
+/* envelopes */
+.envs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+.env{aspect-ratio:3/2;border:0;border-radius:10px;background:var(--card);position:relative;overflow:hidden;box-shadow:0 8px 20px -12px #000}
+.env svg{position:absolute;inset:0;width:100%;height:100%}
+.env span{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-family:"Inter Tight",Inter,sans-serif;font-weight:700;font-size:22px}
+.env.open{opacity:.4}
+.letter{background:var(--card);border:2px solid var(--red);border-radius:16px;padding:20px 24px;font-size:clamp(20px,2.2vw,28px);font-family:"Inter Tight",Inter,sans-serif;font-weight:600;margin-top:18px;min-height:110px}
+.stars button{border:0;background:transparent;font-size:34px;color:var(--line);padding:0 4px}
+.stars button.on{color:var(--red)}
+.big{font-family:"Inter Tight",Inter,sans-serif;font-weight:700;font-size:clamp(48px,7vw,88px);line-height:1;color:var(--red)}
+@media(max-width:980px){.sim,.eye-wrap,.grid2,.hero,.gym,.match{grid-template-columns:minmax(0,1fr)}.scr{min-height:300px}}
+@media(max-width:600px){.top b{font-size:14px}.dots{display:none}.scr{border-width:6px;min-height:260px;aspect-ratio:4/5}.wn{width:38%}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="top">
+  <b>Налаштування екрана, пристрої та усунення збоїв</b>
+  <div class="pts">Бали класу <span id="pts">0</span></div>
+  <button class="ib" id="fs" title="На весь екран" aria-label="На весь екран"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</div>
+<div class="prog" id="prog"></div>
+<main class="deck" id="deck">
+
+<!-- 1 TITLE -->
+<section class="slide" id="start"><div class="in hero">
+  <div>
+    <div class="kick">Інформатика · урок 21–22</div>
+    <h1>Комп’ютер під контролем</h1>
+    <p class="lead">Налаштовуємо екран, змінюємо вигляд системи, безпечно підключаємо пристрої та «лікуємо» комп’ютер, коли програми працюють нестабільно.</p>
+    <div class="chips"><span class="chip">4 симулятори Windows</span><span class="chip">Тренажер для очей</span><span class="chip">Служба техпідтримки</span><span class="chip">Квіз</span></div>
+    <div class="row" style="margin-top:22px"><button class="btn pri" data-go="1">Почати урок</button></div>
+  </div>
+  <svg viewBox="0 0 520 400" aria-hidden="true">
+    <defs><linearGradient id="hs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f7fd8"/><stop offset="1" stop-color="#0a3d8f"/></linearGradient></defs>
+    <ellipse cx="260" cy="372" rx="210" ry="16" fill="#0003"/>
+    <rect x="70" y="30" width="380" height="250" rx="16" fill="#111"/>
+    <rect x="84" y="44" width="352" height="222" rx="6" fill="url(#hs)"/>
+    <circle cx="380" cy="90" r="60" fill="#ffffff22"/>
+    <rect x="110" y="70" width="210" height="150" rx="6" fill="#fff"/>
+    <rect x="110" y="70" width="210" height="22" rx="6" fill="#e6ebf0"/>
+    <text x="122" y="86" font-size="11" font-family="Inter" fill="#333">Параметри · Дисплей</text>
+    <rect x="126" y="108" width="120" height="8" rx="4" fill="#ccd"/>
+    <rect x="126" y="108" width="80" height="8" rx="4" fill="#e8251a"/>
+    <rect x="126" y="132" width="40" height="18" rx="9" fill="#e8251a"/><circle cx="157" cy="141" r="6" fill="#fff"/>
+    <rect x="176" y="136" width="100" height="8" rx="4" fill="#ccd"/>
+    <rect x="126" y="166" width="170" height="20" rx="4" fill="none" stroke="#99a"/>
+    <text x="134" y="180" font-size="10" font-family="Inter" fill="#333">1920 × 1080 (рекомендовано)</text>
+    <rect x="84" y="244" width="352" height="22" fill="#1f1f1f"/>
+    <rect x="94" y="249" width="12" height="12" fill="#4cc2ff"/>
+    <rect x="236" y="280" width="48" height="60" fill="#2a2a2a"/>
+    <rect x="180" y="336" width="160" height="16" rx="6" fill="#2a2a2a"/>
+    <g transform="translate(360 250)"><rect x="0" y="0" width="70" height="100" rx="10" fill="#e8251a"/><rect x="18" y="-26" width="34" height="30" rx="4" fill="#bfc6cc"/><rect x="24" y="-18" width="8" height="8" fill="#555"/><rect x="38" y="-18" width="8" height="8" fill="#555"/><text x="35" y="58" font-size="14" font-family="Inter Tight" font-weight="700" fill="#fff" text-anchor="middle">USB</text></g>
+    <g transform="translate(40 280)"><circle cx="30" cy="30" r="30" fill="#fff" stroke="#111" stroke-width="3"/><path d="M14 30c8-12 24-12 32 0-8 12-24 12-32 0z" fill="none" stroke="#111" stroke-width="3"/><circle cx="30" cy="30" r="6" fill="#e8251a"/></g>
+  </svg>
+</div></section>
+
+<!-- 2 ICEBREAKER -->
+<section class="slide" id="icebreaker"><div class="in">
+  <div class="kick">Криголам · 3 хвилини</div>
+  <h2>Правда чи міф?</h2>
+  <p class="lead">Голосуйте руками: «правда» — рука вгору, «міф» — схрещені руки. Потім натисніть відповідь. 10 секунд на роздуми!</p>
+  <div class="card" style="max-width:900px">
+    <div class="row" style="justify-content:space-between"><b id="mN">Твердження 1 з 6</b><span class="kick" id="mScore" style="margin:0">Правильно: 0</span></div>
+    <div class="timer"><i id="mT"></i></div>
+    <div class="myth" id="mQ"></div>
+    <div class="row"><button class="btn" data-m="1">Правда</button><button class="btn" data-m="0">Міф</button><button class="btn" id="mNext" style="margin-left:auto">Далі</button></div>
+    <div class="fb" id="mFb"></div>
+  </div>
+</div></section>
+
+<!-- 3 PLAN -->
+<section class="slide" id="plan"><div class="in">
+  <div class="kick">Мета уроку</div>
+  <h2>Сьогодні ви станете техніками служби підтримки</h2>
+  <p class="lead">Кожен блок — це теорія плюс симулятор, де ви самі виконуєте дії на «комп’ютері». Натисніть на блок, щоб перейти до нього.</p>
+  <div class="grid3 plan">
+    <div class="card" data-go="3"><div class="n">1</div><h3>Як налаштувати екран</h3><p>Яскравість, контраст, частота оновлення, відстань до монітора.</p></div>
+    <div class="card" data-go="6"><div class="n">2</div><h3>Як змінити вигляд екрана</h3><p>Персоналізація: фон, теми, значки, контрастні теми.</p></div>
+    <div class="card" data-go="7"><div class="n">3</div><h3>Як безпечно підключати пристрої</h3><p>Флешки, Bluetooth-навушники та безпечне вилучення.</p></div>
+    <div class="card" data-go="9"><div class="n">4</div><h3>Що робити, коли програми «глючать»</h3><p>Причини збоїв, Диспетчер завдань, драйвери та відновлення системи.</p></div>
+  </div>
+</div></section>
+
+<!-- 4 THEORY EYES -->
+<section class="slide" id="eyes"><div class="in grid2">
+  <div>
+    <div class="kick">Блок 1 · теорія</div>
+    <h2>Чому від комп’ютера втомлюються очі</h2>
+    <p>Після довгої роботи болять очі, картинка мутніє, кольори гірше розрізняються, а в очах ніби пісок. Причини — неправильно налаштований монітор, завелика діагональ або занадто мала відстань до екрана.</p>
+    <p><b>Що налаштовуємо:</b> яскравість і контрастність, частоту оновлення та відстань від очей до монітора. І обов’язково — перерви та правильне освітлення.</p>
+    <ul class="plist" id="plist">
+      <li data-p="0"><b>Відстань 50–70 см</b> — приблизно довжина витягнутої руки.</li>
+      <li data-p="1"><b>Верхній край екрана — на рівні очей</b> або трохи нижче: погляд падає злегка вниз.</li>
+      <li data-p="2"><b>Світло збоку</b>, не позаду монітора й не в екран: без відблисків.</li>
+      <li data-p="3"><b>Правило 20-20-20:</b> кожні 20 хвилин дивись 20 секунд на предмет за 6 метрів (20 футів).</li>
+    </ul>
+  </div>
+  <div class="post card">
+    <svg viewBox="0 0 520 420" role="img" aria-label="Правильна поза за комп’ютером">
+      <rect x="0" y="0" width="520" height="420" fill="none"/>
+      <line x1="20" y1="380" x2="500" y2="380" stroke="currentColor" stroke-opacity=".3" stroke-width="3"/>
+      <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-opacity=".75">
+        <path d="M120 380v-90h70v90"/><path d="M110 290h90"/><path d="M118 290v-110"/>
+      </g>
+      <circle cx="160" cy="120" r="28" fill="currentColor" fill-opacity=".85"/>
+      <path d="M150 150 L150 280 L230 282 L232 380" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".85"/>
+      <path d="M152 180 L210 240 L280 236" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".85"/>
+      <rect x="260" y="236" width="220" height="10" fill="currentColor" fill-opacity=".5"/>
+      <path d="M280 246v134M460 246v134" stroke="currentColor" stroke-opacity=".5" stroke-width="6"/>
+      <rect x="392" y="104" width="14" height="110" rx="3" fill="#111"/>
+      <rect x="388" y="98" width="20" height="10" fill="#e8251a"/>
+      <rect x="380" y="214" width="50" height="10" rx="3" fill="#111" transform="translate(-6 12)"/>
+      <path d="M396 214v20" stroke="#111" stroke-width="6"/>
+      <line x1="176" y1="116" x2="388" y2="128" stroke="#e8251a" stroke-width="2" stroke-dasharray="6 6"/>
+      <line x1="176" y1="70" x2="392" y2="70" stroke="currentColor" stroke-opacity=".5"/>
+      <path d="M176 64v12M392 64v12" stroke="currentColor" stroke-opacity=".5"/>
+      <text x="284" y="60" font-size="15" font-family="Inter" font-weight="600" fill="currentColor" text-anchor="middle">50–70 см</text>
+      <g fill="#ffd34d"><circle cx="70" cy="60" r="18"/></g>
+      <path d="M70 84v40" stroke="currentColor" stroke-opacity=".5" stroke-width="4"/>
+      <g class="hs" data-p="0"><circle cx="284" cy="96" r="15"/><text x="284" y="96">1</text></g>
+      <g class="hs" data-p="1"><circle cx="440" cy="104" r="15"/><text x="440" y="104">2</text></g>
+      <g class="hs" data-p="2"><circle cx="70" cy="140" r="15"/><text x="70" y="140">3</text></g>
+      <g class="hs" data-p="3"><circle cx="120" cy="90" r="15"/><text x="120" y="90">4</text></g>
+    </svg>
+    <p style="font-size:14px;color:var(--mute);margin:0">Натискайте на червоні мітки на малюнку.</p>
+  </div>
+</div></section>
+
+<!-- 5 EYE SIM -->
+<section class="slide" id="eye-sim"><div class="in">
+  <div class="kick">Симулятор 1 · лабораторія зору</div>
+  <h2>Налаштуй робоче місце так, щоб очам було комфортно</h2>
+  <p class="lead">Рухайте повзунки й стежте за шкалою комфорту. Завдання: досягти 90% і більше.</p>
+  <div class="eye-wrap">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="row" style="justify-content:space-between"><b>Комфорт для очей</b><b id="eScore" style="font-size:26px;font-family:'Inter Tight',Inter,sans-serif">0%</b></div>
+        <div class="meter"><i id="eBar"></i></div>
+      </div>
+      <div style="background:#000;padding:14px;border-radius:16px;position:relative" id="eRoom">
+        <div class="prev" id="ePrev">
+          <b style="font-size:1.2em">Домашнє завдання з історії</b>
+          <p style="margin-top:8px">Київська Русь — середньовічна держава, що виникла наприкінці IX століття. Столицею був Київ. Прочитай параграф і дай відповіді на запитання наприкінці.</p>
+        </div>
+      </div>
+      <ul class="tips" id="eTips"></ul>
+    </div>
+    <div class="card ctrl">
+      <label>Освітлення кімнати <output id="oRoom"></output><input type="range" id="room" min="0" max="100" value="15"></label>
+      <label>Яскравість екрана <output id="oBr"></output><input type="range" id="br" min="0" max="100" value="100"></label>
+      <label>Контрастність <output id="oCt"></output><input type="range" id="ct" min="0" max="100" value="20"></label>
+      <label>Розмір тексту <output id="oFs"></output><input type="range" id="efs" min="10" max="24" value="11"></label>
+      <label>Відстань до монітора <output id="oDs"></output><input type="range" id="ds" min="25" max="100" value="35"></label>
+      <label>Частота оновлення <output id="oHz"></output><input type="range" id="hz" min="0" max="2" value="0" step="1"></label>
+      <label>Без паузи для очей <output id="oBk"></output><input type="range" id="bk" min="5" max="90" value="60" step="5"></label>
+      <button class="btn" id="eReset" style="margin-top:14px">Скинути</button>
+    </div>
+  </div>
+</div></section>
+
+<!-- 6 SIM DISPLAY -->
+<section class="slide" id="sim-display"><div class="in">
+  <div class="kick">Симулятор 2 · налаштування дисплея</div>
+  <h2>Хтось «зламав» екран. Поверніть нормальні налаштування</h2>
+  <p class="lead">Шлях: праве клацання на кнопці <b>Пуск</b> → <b>Система</b> → <b>Дисплей</b>. Якщо обрані налаштування погіршують роботу — обирайте <b>рекомендовані</b>.</p>
+  <div class="simhost" data-sim="display"></div>
+</div></section>
+
+<!-- 7 SIM PERSONAL -->
+<section class="slide" id="sim-personal"><div class="in">
+  <div class="kick">Симулятор 3 · персоналізація</div>
+  <h2>Зробіть комп’ютер «своїм»</h2>
+  <p class="lead">Праве клацання на порожньому місці <b>робочого стола</b> → <b>Персоналізація</b>. Тут змінюють фон, кольори, теми. Контрастні теми допомагають людям зі слабким зором. Розмір значків — у пункті <b>Вигляд</b> того ж меню.</p>
+  <div class="simhost" data-sim="personal"></div>
+</div></section>
+
+<!-- 8 THEORY DEVICES -->
+<section class="slide" id="devices"><div class="in grid2">
+  <div>
+    <div class="kick">Блок 3 · теорія</div>
+    <h2>Як безпечно підключити новий пристрій</h2>
+    <p>Операційна система зазвичай сама знаходить пристрій, щойно його підключили або ввімкнули. Якщо цього не сталося:</p>
+    <ol>
+      <li><b>Пуск → Налаштування → Пристрої → Bluetooth та інші пристрої.</b></li>
+      <li>Обрати <b>Додавання пристрою Bluetooth або іншого пристрою</b> і дотримуватися вказівок.</li>
+    </ol>
+    <p>У цьому ж вікні налаштовують <b>принтери і сканери</b> та інші пристрої.</p>
+  </div>
+  <div class="card">
+    <h3>Три правила безпеки</h3>
+    <p><b>Перевір чужу флешку антивірусом</b>, перш ніж відкривати файли. Невідомі флешки «з вулиці» не підключай узагалі.</p>
+    <p><b>Витягуй флешку лише після «Безпечного вилучення»</b> — значок у правому куті панелі задач. Інакше файли, які саме записувались, можуть пошкодитися.</p>
+    <p style="margin:0"><b>Встановлюй драйвери лише з офіційних джерел</b> — від Windows або сайту виробника пристрою.</p>
+  </div>
+</div></section>
+
+<!-- 9 SIM DEVICES -->
+<section class="slide" id="sim-devices"><div class="in">
+  <div class="kick">Симулятор 4 · пристрої</div>
+  <h2>Підключіть флешку і навушники як професіонали</h2>
+  <p class="lead">Флешку «вставляйте» кнопками під списком місій. Bluetooth — через <b>Пуск → Параметри → Пристрої</b>.</p>
+  <div class="simhost" data-sim="devices"></div>
+</div></section>
+
+<!-- 10 THEORY CAUSES -->
+<section class="slide" id="causes"><div class="in">
+  <div class="kick">Блок 4 · теорія</div>
+  <h2>Чому програми працюють нестабільно: 5 причин</h2>
+  <p class="lead">Натисніть на картку, щоб перевернути її й дізнатися, що робити.</p>
+  <div class="grid3" id="flips"></div>
+  <h3 style="margin-top:28px">Міні-гра «Постав діагноз»</h3>
+  <p>Оберіть симптом ліворуч, потім — причину праворуч.</p>
+  <div class="match"><div id="mS"></div><div id="mC"></div></div>
+  <div class="fb" id="matchFb"></div>
+</div></section>
+
+<!-- 11 THEORY RESTORE -->
+<section class="slide" id="restore"><div class="in grid2">
+  <div>
+    <div class="kick">Блок 4 · теорія</div>
+    <h2>Відновлення системи — «машина часу» для комп’ютера</h2>
+    <p>Буває, що після встановлення програми або зміни налаштувань комп’ютер починає працювати нестабільно. Тоді можна <b>повернути систему до попереднього стану</b> — до точки відновлення, коли все працювало.</p>
+    <p>Особисті файли (фото, документи) при цьому не видаляються — повертаються лише програми, драйвери й налаштування.</p>
+    <p><b>Важливо:</b> функція працює, лише якщо користувач із <b>правами адміністратора</b> заздалегідь увімкнув <b>захист системи</b>.</p>
+    <p>Перевірити драйвери: праве клацання на <b>Пуск → Диспетчер пристроїв</b>. Жовтий знак оклику біля пристрою — сигнал проблеми.</p>
+  </div>
+  <div class="card">
+    <h3>Обери точку, до якої варто «повернутися»</h3>
+    <p style="font-size:14px;color:var(--mute)">Нова програма встановлена 25.11, і відтоді комп’ютер зависає.</p>
+    <svg viewBox="0 0 460 150" style="width:100%;height:auto" id="tl">
+      <line x1="20" y1="70" x2="440" y2="70" stroke="currentColor" stroke-opacity=".4" stroke-width="4"/>
+      <g data-t="0" class="hs"><circle cx="70" cy="70" r="16"/><text x="70" y="70">A</text></g>
+      <g data-t="1" class="hs"><circle cx="190" cy="70" r="16"/><text x="190" y="70">B</text></g>
+      <rect x="282" y="52" width="36" height="36" rx="6" fill="#ffcc00"/><text x="300" y="71" text-anchor="middle" dominant-baseline="central" font-weight="800" font-family="Inter" fill="#000">!</text>
+      <g data-t="2" class="hs"><circle cx="400" cy="70" r="16"/><text x="400" y="70">C</text></g>
+      <text x="70" y="112" text-anchor="middle" font-size="13" fill="currentColor" font-family="Inter">18.11</text>
+      <text x="190" y="112" text-anchor="middle" font-size="13" fill="currentColor" font-family="Inter">24.11</text>
+      <text x="300" y="112" text-anchor="middle" font-size="13" fill="currentColor" font-family="Inter">25.11 · нова програма</text>
+      <text x="400" y="132" text-anchor="middle" font-size="13" fill="currentColor" font-family="Inter">26.11</text>
+    </svg>
+    <div class="fb" id="tlFb"></div>
+  </div>
+</div></section>
+
+<!-- 12 SIM REPAIR -->
+<section class="slide" id="sim-repair"><div class="in">
+  <div class="kick">Симулятор 5 · комп’ютерна лікарня</div>
+  <h2>Комп’ютер «гальмує», зависає і не бачить Wi-Fi. Вилікуйте його!</h2>
+  <p class="lead">Інструменти: праве клацання на <b>Пуск</b> → <b>Диспетчер завдань</b> / <b>Диспетчер пристроїв</b>; <b>Пуск → Параметри → Оновлення та захист → Відновлення</b>.</p>
+  <div class="simhost" data-sim="repair"></div>
+</div></section>
+
+<!-- 13 GYM -->
+<section class="slide" id="gym"><div class="in">
+  <div class="kick">Фізхвилинка</div>
+  <h2>Гімнастика для очей</h2>
+  <p class="lead">Голова нерухома — рухаються лише очі. Стежте поглядом за червоною точкою.</p>
+  <div class="gym">
+    <div class="gymbox"><svg viewBox="0 0 1600 900" id="gymSvg"><circle id="gDot" cx="800" cy="450" r="34" fill="#e8251a"/><text id="gTxt" x="800" y="840" text-anchor="middle" fill="#fff" font-size="44" font-family="Inter Tight" font-weight="600">Натисніть «Старт»</text></svg></div>
+    <div>
+      <ul class="gl" id="gList"></ul>
+      <div class="row"><button class="btn pri" id="gGo">Старт</button><button class="btn" id="gStop">Стоп</button></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 14 CASES -->
+<section class="slide" id="support"><div class="in">
+  <div class="kick">Практика · служба техпідтримки</div>
+  <h2>Вам пишуть користувачі. Що порадите?</h2>
+  <div class="chat" id="chat"></div>
+</div></section>
+
+<!-- 15 ORDER -->
+<section class="slide" id="order"><div class="in">
+  <div class="kick">Інтерактивне завдання</div>
+  <h2>Розставте кроки в правильному порядку</h2>
+  <p class="lead">Натискайте на кроки по черзі — від першого до останнього.</p>
+  <div class="grid2">
+    <div class="card ord" id="ordA"></div>
+    <div class="card ord" id="ordB"></div>
+  </div>
+  <p style="margin-top:18px">Додаткове завдання від вчителя: <a href="https://wordwall.net/uk/embed/a24f9007cb3e4cf6aef4ec2192a03fcf?themeId=1&amp;templateId=36&amp;fontStackId=0" target="_blank" rel="noopener">відкрити гру на Wordwall</a>.</p>
+</div></section>
+
+<!-- 16 QUIZ -->
+<section class="slide" id="quiz"><div class="in">
+  <div class="kick">Підсумок</div>
+  <h2>Швидкий квіз: що ми запам’ятали?</h2>
+  <div class="card" style="max-width:860px" id="qz"></div>
+</div></section>
+
+<!-- 17 HOMEWORK -->
+<section class="slide" id="homework"><div class="in grid2">
+  <div>
+    <div class="kick">Домашнє завдання</div>
+    <h2>Опрацювати підручник, с. 82–86</h2>
+    <p class="lead">Перечитайте, як налаштовувати екран, підключати пристрої та відновлювати систему.</p>
+  </div>
+  <div class="card">
+    <h3>За бажанням — творче завдання</h3>
+    <p><b>Варіант А.</b> Створіть пам’ятку «5 порад для здорових очей за комп’ютером» для молодшого брата, сестри або друга.</p>
+    <p style="margin:0"><b>Варіант Б.</b> З дозволу дорослих відкрийте вдома <b>Система → Дисплей</b> і запишіть, яка роздільна здатність і масштаб позначені як «рекомендовано».</p>
+  </div>
+</div></section>
+
+<!-- 18 REFLECTION -->
+<section class="slide" id="reflect"><div class="in">
+  <div class="kick">Рефлексія</div>
+  <h2>Загадкові листи</h2>
+  <p class="lead">Оберіть лист і дайте відповідь уголос.</p>
+  <div class="envs" id="envs"></div>
+  <div class="letter" id="letter">Тут з’явиться ваше запитання.</div>
+  <div class="card" style="margin-top:18px">
+    <div class="row" style="justify-content:space-between"><b>Оцініть урок</b><div class="stars" id="stars"></div></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px"><span>Разом зароблено балів класом:</span><span class="big" id="finalPts">0</span></div>
+  </div>
+</div></section>
+
+</main>
+<div class="bot">
+  <button class="nav" id="prev">Назад</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav" id="next">Далі</button>
+</div>
+
+<script>
+{
+const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
+/* ---------- points ---------- */
+let PTS=0;
+const addPts=n=>{PTS+=n;const p=$('#pts');p.textContent=PTS;$('#finalPts').textContent=PTS;p.classList.remove('bump');void p.offsetWidth;p.classList.add('bump')};
+const shake=el=>{el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')};
+
+/* ---------- deck ---------- */
+const deck=$('#deck'), slides=$$('.slide'), dots=$('#dots');
+dots.innerHTML=slides.map((s,i)=>`<button aria-label="Слайд ${i+1}" data-go="${i}"></button>`).join('');
+let cur=0;
+const go=i=>{i=Math.max(0,Math.min(slides.length-1,i));deck.scrollTo({left:i*deck.clientWidth,behavior:'smooth'})};
+const sync=()=>{const i=Math.round(deck.scrollLeft/deck.clientWidth);if(i===cur&&dots.children[i].classList.contains('on'))return;cur=i;
+  $$('button',dots).forEach((b,j)=>b.classList.toggle('on',j===i));$('#prev').disabled=i===0;$('#next').disabled=i===slides.length-1;
+  $('#prog').style.width=((i+1)/slides.length*100)+'%';
+  try{history.replaceState(null,'','#'+slides[i].id)}catch(e){}
+  if(slides[i].id==='icebreaker')mStart();};
+deck.addEventListener('scroll',()=>{clearTimeout(deck._t);deck._t=setTimeout(sync,80)});
+window.addEventListener('resize',()=>deck.scrollTo({left:cur*deck.clientWidth}));
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(+g.dataset.go)});
+document.addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea'))return;if(e.key==='ArrowRight'||e.key==='PageDown')go(cur+1);if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1)});
+$('#fs').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+const startHash=()=>{const k=slides.findIndex(s=>'#'+s.id===location.hash);if(k>0)deck.scrollTo({left:k*deck.clientWidth})};
+setTimeout(()=>{startHash();sync()},50);
+
+/* ---------- icebreaker ---------- */
+const MYTHS=[
+ ['Якщо витягнути флешку без «Безпечного вилучення», файли на ній можуть пошкодитися.',1,'Правда! Якщо в цей момент іде запис, файл може зіпсуватися. Тому спершу — «Безпечне вилучення».'],
+ ['Чим яскравіший екран, тим краще для очей.',0,'Міф! Яскравість має відповідати освітленню в кімнаті. У темряві яскравий екран дуже втомлює очі.'],
+ ['Перший комп’ютерний «баг» був справжньою міллю, яку знайшли в комп’ютері в 1947 році.',1,'Правда! Інженери знайшли метелика-міль у реле комп’ютера Harvard Mark II і вклеїли його в журнал.'],
+ ['Комп’ютер «гальмує», бо він утомився і хоче спати.',0,'Міф! Найчастіше бракує оперативної пам’яті, бо відкрито забагато програм, або заважають віруси чи старі драйвери.'],
+ ['У Windows є спеціальні контрастні теми для людей зі слабким зором.',1,'Правда! Їх вмикають у Персоналізації — сьогодні спробуєте самі.'],
+ ['Відновлення системи видаляє всі ваші фото й документи.',0,'Міф! Воно повертає програми, драйвери й налаштування, а особисті файли залишаються.']];
+let mi=0,mOk=0,mDone=false,mTimer=null,mStarted=false;
+const mShow=()=>{const m=MYTHS[mi];$('#mN').textContent=`Твердження ${mi+1} з ${MYTHS.length}`;$('#mQ').textContent=m[0];$('#mFb').textContent='';$('#mFb').className='fb';mDone=false;
+  $$('[data-m]').forEach(b=>{b.className='btn';b.disabled=false});
+  const t=$('#mT');t.style.transition='none';t.style.width='100%';void t.offsetWidth;t.style.transition='width 10s linear';t.style.width='0%'};
+const mStart=()=>{if(mStarted)return;mStarted=true;mShow()};
+$$('[data-m]').forEach(b=>b.onclick=()=>{if(mDone)return;mDone=true;const m=MYTHS[mi],ok=+b.dataset.m===m[1];
+  $$('[data-m]').forEach(x=>{x.disabled=true;if(+x.dataset.m===m[1])x.classList.add('good')});if(!ok)b.classList.add('bad');
+  if(ok){mOk++;addPts(1)}$('#mScore').textContent='Правильно: '+mOk;
+  const f=$('#mFb');f.textContent=m[2];f.className='fb '+(ok?'ok':'no');$('#mT').style.transition='none'});
+$('#mNext').onclick=()=>{if(mi<MYTHS.length-1){mi++;mShow()}else{$('#mQ').textContent=`Розминку завершено! Правильних відповідей: ${mOk} з ${MYTHS.length}. Переходимо до уроку.`;$('#mFb').textContent='';$$('[data-m]').forEach(b=>b.disabled=true)}};
+
+/* ---------- posture ---------- */
+const pSel=i=>$$('#plist li').forEach((l,j)=>l.classList.toggle('on',j===+i));
+$$('#eyes [data-p]').forEach(el=>el.addEventListener('click',()=>pSel(el.dataset.p)));
+
+/* ---------- eye sim ---------- */
+const HZ=[30,60,120];
+let eyeBest=0;
+const eye=()=>{const v=id=>+$('#'+id).value;
+ const room=v('room'),br=v('br'),ct=v('ct'),fs=v('efs'),ds=v('ds'),hz=HZ[v('hz')],bk=v('bk');
+ $('#oRoom').textContent=room<30?'темно':room<65?'приглушене':'денне';$('#oBr').textContent=br+'%';$('#oCt').textContent=ct+'%';
+ $('#oFs').textContent=fs+' пт';$('#oDs').textContent=ds+' см';$('#oHz').textContent=hz+' Гц';$('#oBk').textContent=bk+' хв';
+ const ideal=30+room*.6, f=[];
+ const sB=Math.max(0,1-Math.max(0,Math.abs(br-ideal)-12)/40);
+ const sC=ct>=45&&ct<=85?1:Math.max(0,1-(ct<45?45-ct:ct-85)/35);
+ const sF=fs>=14&&fs<=20?1:Math.max(0,1-(fs<14?14-fs:fs-20)/5);
+ const sD=ds>=50&&ds<=70?1:Math.max(0,1-(ds<50?50-ds:ds-70)/22);
+ const sH=hz>=60?1:.3, sK=bk<=20?1:Math.max(0,1-(bk-20)/40), sR=room>=25?1:.6;
+ const sc=Math.round((sB+sC+sF+sD+sH+sK+sR)/7*100);
+ f.push([sB>.85,sB>.85?'Яскравість пасує до освітлення':(br>ideal?'Екран засліплює — зменш яскравість під освітлення кімнати':'Екран темний для такого освітлення — додай яскравості')]);
+ f.push([sC>.85,sC>.85?'Контраст комфортний':'Текст зливається або «ріже» очі — налаштуй контрастність']);
+ f.push([sF>.85,sF>.85?'Текст читається без напруження':(fs<14?'Літери задрібні — збільш розмір тексту':'Текст завеликий — доводиться крутити екран')]);
+ f.push([sD>.85,sD>.85?'Відстань правильна: 50–70 см':(ds<50?'Сидиш заблизько до монітора':'Монітор задалеко — очі напружуються')]);
+ f.push([sH>.85,sH>.85?'Частота оновлення без мерехтіння':'30 Гц — зображення мерехтить. Потрібно щонайменше 60 Гц']);
+ f.push([sK>.85,sK>.85?'Паузи для очей вчасно':'Роби паузу: кожні 20 хв — 20 секунд дивись удалину']);
+ f.push([sR>.85,sR>.85?'У кімнаті достатньо світла':'Працювати в темряві шкідливо — увімкни світло']);
+ $('#eTips').innerHTML=f.map(([g,t])=>`<li class="${g?'good':'bad'}">${t}</li>`).join('');
+ $('#eScore').textContent=sc+'%';const bar=$('#eBar');bar.style.width=sc+'%';bar.style.background=sc>=90?'var(--ok)':sc>=60?'#f0a500':'var(--red)';
+ const p=$('#ePrev');p.style.fontSize=fs+'px';p.style.filter=`brightness(${.45+br/100*.85}) contrast(${.35+ct/100*1.1})`;p.classList.toggle('flick',hz<60);
+ $('#eRoom').style.background=`hsl(40 30% ${4+room*.7}%)`;
+ p.style.transform=`scale(${Math.min(1.12,Math.max(.8,1.25-ds/150))})`;
+ if(sc>=90&&eyeBest<90){addPts(3)}eyeBest=Math.max(eyeBest,sc);};
+$$('#eye-sim input').forEach(i=>i.addEventListener('input',eye));
+$('#eReset').onclick=()=>{[['room',15],['br',100],['ct',20],['efs',11],['ds',35],['hz',0],['bk',60]].forEach(([k,v])=>$('#'+k).value=v);eye()};
+eye();
+
+/* ---------- Windows simulator ---------- */
+const WPS={
+ sky:`<defs><radialGradient id="g1" cx=".7" cy=".3" r=".9"><stop offset="0" stop-color="#9fd3ff"/><stop offset=".45" stop-color="#2f7fd8"/><stop offset="1" stop-color="#062c6e"/></radialGradient></defs><rect width="160" height="100" fill="url(#g1)"/><path d="M60 100 L118 18 L130 100Z" fill="#ffffff22"/><path d="M90 100 L126 30 L150 100Z" fill="#ffffff18"/>`,
+ mount:`<defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb36b"/><stop offset=".7" stop-color="#e46f7b"/></linearGradient></defs><rect width="160" height="100" fill="url(#g2)"/><circle cx="110" cy="44" r="12" fill="#ffe2a8"/><path d="M0 70 L30 40 L52 62 L80 30 L112 66 L136 46 L160 64 V100 H0Z" fill="#7a3f6e"/><path d="M0 84 L26 64 L60 82 L96 58 L128 80 L160 70 V100 H0Z" fill="#45264f"/><path d="M76 34 L80 30 L85 36 L81 35Z" fill="#fff"/>`,
+ sea:`<defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd6e8"/><stop offset=".55" stop-color="#bff0f5"/><stop offset=".56" stop-color="#1b8fb0"/><stop offset="1" stop-color="#0a4f73"/></linearGradient></defs><rect width="160" height="100" fill="url(#g3)"/><path d="M0 66 Q20 62 40 66 T80 66 T120 66 T160 66" stroke="#fff8" fill="none"/><path d="M0 78 Q20 74 40 78 T80 78 T120 78 T160 78" stroke="#fff6" fill="none"/><circle cx="34" cy="24" r="9" fill="#fff6c8"/>`,
+ night:`<rect width="160" height="100" fill="#0a1030"/>${Array.from({length:40},(_,i)=>`<circle cx="${(i*37)%160}" cy="${(i*23)%70}" r="${i%3?0.5:0.9}" fill="#fff"/>`).join('')}<circle cx="124" cy="22" r="10" fill="#f3f0d8"/><circle cx="128" cy="19" r="9" fill="#0a1030"/><path d="M0 86 L40 74 L80 84 L120 70 L160 82 V100 H0Z" fill="#05081a"/>`};
+const wpSvg=n=>`<svg class="wp" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice">${WPS[n]}</svg>`;
+const IC={
+ bin:'<svg viewBox="0 0 24 24" fill="#dfe7ee" stroke="#556" stroke-width="1"><path d="M6 7h12l-1 14H7z"/><path d="M4 7h16M9 4h6v3" fill="none"/></svg>',
+ doc:'<svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v12H3z" fill="#f8c545"/><path d="M3 9h18v11H3z" fill="#ffd862"/></svg>',
+ web:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#1a73e8"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" stroke="#fff" fill="none" stroke-width="1.2"/></svg>',
+ game:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" fill="#7b2ff7"/><path d="M8 9v6M5 12h6" stroke="#fff" stroke-width="2"/><circle cx="16" cy="11" r="1.5" fill="#fff"/><circle cx="18" cy="14" r="1.5" fill="#fff"/></svg>',
+ usb:'<svg viewBox="0 0 24 24" width="18" height="18"><rect x="7" y="9" width="10" height="12" rx="2" fill="#4cc2ff"/><rect x="9" y="3" width="6" height="6" fill="#ccc"/></svg>',
+ wifi:ok=>`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a15 15 0 0 1 20 0M5 13a10 10 0 0 1 14 0M8.5 16.5a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/>${ok?'':'<path d="M16 2l6 6M22 2l-6 6" stroke="#e81123"/>'}</svg>`,
+ bt:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg>',
+ start:'<svg viewBox="0 0 24 24" width="20" height="20"><path d="M2 4.5l8-1.1v7.9H2zM11 3.3L22 2v9.3H11zM2 12.4h8v7.9l-8-1.1zM11 12.4h11V22l-11-1.5z" fill="#4cc2ff"/></svg>'};
+const RES=['1920 × 1080 (рекомендовано)','1600 × 900','1280 × 720','800 × 600'];
+const SCALES=[100,125,150,175];
+const ACC=['#0067c0','#e8251a','#8e44ad','#0f7b5f','#d97706'];
+const PROCS=[['Браузер (37 вкладок)',2.9,0],['Відеоредактор (у фоні)',1.6,0],['Гра (згорнута)',1.4,0],['Месенджер',.3,0],['Провідник',.1,0],['Системні процеси Windows',1.2,1]];
+const POINTS=[['18.11.2026 10:12','Автоматична точка відновлення',0],['24.11.2026 16:40','Оновлення Windows — усе працювало стабільно',0],['25.11.2026 19:05','Встановлено GameBooster 2.0 — після цього почалися збої',1]];
+
+const MISSIONS={
+ display:{init:{res:2,scale:175,hz:30,bright:100},desk:false,list:[
+  ['Відкрийте «Система» через праве клацання на кнопці Пуск',s=>s.f.sysCtx,'Наведіть на кнопку Пуск у лівому нижньому куті й натисніть ПРАВОЮ кнопкою миші (на дошці — увімкніть «режим правої кнопки»). У меню оберіть «Система».'],
+  ['Встановіть рекомендовану роздільну здатність',s=>s.res===0,'У розділі «Дисплей» знайдіть список «Роздільна здатність дисплея» й оберіть пункт з позначкою «рекомендовано».'],
+  ['Поверніть рекомендований масштаб — 100%',s=>s.scale===100,'Список «Масштаб і макет»: оберіть 100% (рекомендовано).'],
+  ['Приберіть мерехтіння: частота оновлення 60 Гц',s=>s.hz===60,'Унизу розділу «Дисплей» — «Частота оновлення». 30 Гц мерехтить, потрібно 60 Гц.'],
+  ['Зменште яскравість до комфортних 40–80%',s=>s.bright>=40&&s.bright<=80,'Повзунок «Яскравість» на початку розділу «Дисплей».'],
+  ['Увімкніть «Нічне світло» для роботи ввечері',s=>s.night,'Перемикач «Нічне світло» — під повзунком яскравості.']]},
+ personal:{init:{mode:'light'},desk:false,list:[
+  ['Відкрийте «Персоналізацію» через праве клацання на робочому столі',s=>s.f.persCtx,'Клацніть ПРАВОЮ кнопкою на порожньому місці робочого стола (не на значках) і оберіть «Персоналізація».'],
+  ['Змініть фон на «Гори»',s=>s.wp==='mount','Підрозділ «Фон» — оберіть мініатюру із заходом сонця в горах.'],
+  ['Увімкніть темний режим',s=>s.mode==='dark','Підрозділ «Кольори» → «Темний».'],
+  ['Оберіть свій колір акценту',s=>s.f.accent,'Підрозділ «Кольори» — кольорові квадратики.'],
+  ['Зробіть значки великими',s=>s.isz==='l','Закрийте вікно, клацніть правою кнопкою на робочому столі → «Вигляд» → «Великі значки».'],
+  ['Спробуйте контрастну тему (для людей зі слабким зором)',s=>s.f.hcTried,'Підрозділ «Контрастні теми» → перемикач. Потім можна вимкнути.']]},
+ devices:{init:{bt:false},desk:true,list:[
+  ['Вставте флешку в USB-порт',s=>s.usb!=='out'||s.f.usbIn,'Кнопка «Вставити флешку» під списком місій.'],
+  ['Перевірте флешку антивірусом перед відкриттям',s=>s.f.scanned,'У сповіщенні, що з’явилося, натисніть «Перевірити на віруси». Пропустили? Значок флешки в правому куті панелі задач.'],
+  ['Безпечно вилучіть флешку і лише потім витягніть',s=>s.f.safe,'Натисніть значок флешки в треї (праворуч на панелі задач) → «Вилучити». Дочекайтеся повідомлення, потім «Витягнути флешку».'],
+  ['Увімкніть Bluetooth і підключіть навушники',s=>s.devs.includes('hp'),'Пуск → Параметри → Пристрої. Спершу перемикач Bluetooth, потім «Додавання пристрою Bluetooth або іншого пристрою».']]},
+ repair:{init:{unstable:true,drv:false,procs:true},desk:false,list:[
+  ['Звільніть пам’ять: закрийте зайві програми в Диспетчері завдань (до 70%)',s=>ramOf(s)<=70,'Праве клацання на Пуск → «Диспетчер завдань». Знімайте завдання з найважчих програм. Системні процеси не чіпайте!'],
+  ['Оновіть драйвер Wi-Fi адаптера',s=>s.drv,'Праве клацання на Пуск → «Диспетчер пристроїв» → «Мережеві адаптери». Оберіть пристрій із жовтим знаком і натисніть «Оновити драйвер».'],
+  ['Поверніть систему до точки ДО встановлення GameBooster',s=>!s.unstable,'Пуск → Параметри → Оновлення та захист → Відновлення → «Відновлення системи». Оберіть точку, створену до 25.11.']]}};
+
+const ramOf=s=>{let t=0;PROCS.forEach((p,i)=>{if(!s.killed.includes(i))t+=p[1]});if(!s.procs)t=3.4;return Math.round(t/8*100)};
+function Sim(host,key){
+ const cfg=MISSIONS[key];
+ const fresh=()=>Object.assign({res:0,scale:100,hz:60,bright:60,night:false,wp:'sky',mode:'dark',acc:0,hc:false,isz:'m',bt:true,devs:['mouse'],usb:'out',unstable:false,drv:true,procs:false,
+   killed:[],menu:null,win:null,page:'home',ptab:'bg',dlg:null,toasts:[],boot:false,sel:null,rmb:false,f:{},done:[],hint:-1},JSON.parse(JSON.stringify(cfg.init)));
+ let s=fresh();
+ host.innerHTML=`<div class="sim"><div class="scr" tabindex="0" aria-label="Симулятор Windows"></div><aside class="side">
+   <h3>Місії</h3><ol class="ms"></ol>
+   <div class="hintbox"></div>
+   <div class="win-all">Усі місії виконано! Ви справжні техніки.</div>
+   ${cfg.desk?`<div class="desk"><b>Ваш стіл</b><div class="row" style="margin-top:8px"><button class="btn" data-x="usbin">Вставити флешку</button><button class="btn" data-x="usbout">Витягнути флешку</button></div></div>`:''}
+   <div class="row" style="margin-top:12px"><button class="btn" data-x="hint">Підказка</button><button class="btn" data-x="rmb">Режим правої кнопки</button><button class="btn" data-x="reset">Почати знову</button></div>
+   <p style="font-size:13px;color:var(--mute);margin-top:8px">«Режим правої кнопки» — для інтерактивної дошки чи планшета: наступне натискання спрацює як праве клацання.</p>
+ </aside></div>`;
+ const scr=$('.scr',host),side=$('.side',host);
+ const toast=(t,k='',btns='')=>{const id=Math.random();s.toasts.push({id,t,k,btns});if(s.toasts.length>3)s.toasts=s.toasts.slice(-3);draw();setTimeout(()=>{s.toasts=s.toasts.filter(x=>x.id!==id);draw()},btns?9000:3800)};
+ const tg=(on,a,label)=>`<button class="tg ${on?'on':''}" data-a="${a}"><i></i>${on?'Увімкнуто':'Вимкнуто'}${label?' · '+label:''}</button>`;
+ const page=()=>{
+  if(s.win==='settings'){
+   const navs=[['home','Домашня сторінка'],['display','Дисплей'],['personal','Персоналізація'],['devices','Пристрої'],['recovery','Відновлення']];
+   let c='';
+   if(s.page==='home')c=`<h4>Параметри Windows</h4><div class="thumbs" style="gap:10px">${[['display','Система'],['devices','Пристрої'],['personal','Персоналізація'],['recovery','Оновлення та захист']].map(([p,n])=>`<button class="wbtn" style="width:auto;height:auto;padding:14px 18px" data-a="nav" data-v="${p}">${n}</button>`).join('')}</div>`;
+   if(s.page==='display')c=`<h4>Дисплей</h4>
+    <h5>Яскравість і колір</h5><div>Змінення яскравості: <b data-o="br">${s.bright}%</b></div><input type="range" min="0" max="100" value="${s.bright}" data-r="bright">
+    <div>Нічне світло</div>${tg(s.night,'night')}
+    <h5>Масштаб і макет</h5><div>Змінення розміру тексту, програм та інших елементів</div>
+    <select data-k="scale">${SCALES.map(v=>`<option value="${v}" ${v===s.scale?'selected':''}>${v}%${v===100?' (рекомендовано)':''}</option>`).join('')}</select>
+    <div style="margin-top:8px">Роздільна здатність дисплея</div>
+    <select data-k="res">${RES.map((r,i)=>`<option value="${i}" ${i===s.res?'selected':''}>${r}</option>`).join('')}</select>
+    <h5>Додаткові параметри дисплея</h5><div>Частота оновлення</div>
+    <select data-k="hz">${[30,60].map(v=>`<option value="${v}" ${v===s.hz?'selected':''}>${v} Гц${v===60?' (рекомендовано)':''}</option>`).join('')}</select>`;
+   if(s.page==='personal'){
+    const tabs=[['bg','Фон'],['col','Кольори'],['hc','Контрастні теми']];
+    c=`<h4>Персоналізація</h4><div style="margin-bottom:10px">${tabs.map(([t,n])=>`<button class="wbtn ${s.ptab===t?'acc':''}" data-a="ptab" data-v="${t}">${n}</button>`).join('')}</div>`;
+    if(s.ptab==='bg')c+=`<h5>Виберіть зображення</h5><div class="thumbs">${[['sky','Небо'],['mount','Гори'],['sea','Море'],['night','Ніч']].map(([w,n])=>`<button class="${s.wp===w?'on':''}" data-a="wp" data-v="${w}" title="${n}" aria-label="${n}"><svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice">${WPS[w]}</svg></button>`).join('')}</div>`;
+    if(s.ptab==='col')c+=`<h5>Виберіть режим</h5><button class="wbtn ${s.mode==='light'?'acc':''}" data-a="mode" data-v="light">Світлий</button><button class="wbtn ${s.mode==='dark'?'acc':''}" data-a="mode" data-v="dark">Темний</button>
+      <h5>Колір акценту</h5><div class="sw">${ACC.map((a,i)=>`<button class="${s.acc===i?'on':''}" style="background:${a}" data-a="acc" data-v="${i}" aria-label="Колір ${i+1}"></button>`).join('')}</div>`;
+    if(s.ptab==='hc')c+=`<h5>Контрастні теми</h5><p style="font-size:.95em">Використовують яскраві кольори на чорному тлі, щоб текст і програми було легше бачити людям зі слабким зором.</p>${tg(s.hc,'hc','контрастна тема')}`;
+   }
+   if(s.page==='devices')c=`<h4>Пристрої Bluetooth та інші пристрої</h4>
+    <button class="wbtn" data-a="add">+ Додавання пристрою Bluetooth або іншого пристрою</button>
+    <h5>Bluetooth</h5>${tg(s.bt,'bt')}
+    <h5>Миша, клавіатура й перо</h5><div>2.4G Mouse</div>
+    ${s.devs.includes('hp')?'<h5>Аудіо</h5><div>Навушники BT-500 — <b>Підключено</b></div>':''}
+    <h5>Інші пристрої</h5>${s.usb!=='out'?`<div>STUDENT 32GB — Підключено до USB 3.0</div>`:'<div style="opacity:.6">Немає</div>'}
+    <h5>Принтери та сканери</h5><div style="opacity:.75">Налаштовуються в цьому ж розділі</div>`;
+   if(s.page==='recovery')c=`<h4>Відновлення</h4>
+    <h5>Відновлення системи</h5><p style="font-size:.95em">Захист системи: <b>Увімкнуто</b> (налаштував адміністратор). Повертає програми й налаштування до точки, коли все працювало. Особисті файли не видаляються.</p>
+    <button class="wbtn acc" data-a="rs">Відновлення системи…</button>
+    <h5>Відновлення початкового стану ПК</h5><p style="font-size:.95em;opacity:.8">Перевстановлює Windows. Це крайній захід — спершу спробуйте відновлення системи.</p><button class="wbtn" data-a="reinstall">Почати</button>`;
+   return `<div class="win"><div class="wt"><span>Параметри</span><button data-a="close" aria-label="Закрити">✕</button></div><div class="wb"><nav class="wn">${navs.map(([p,n])=>`<button class="${s.page===p?'on':''}" data-a="nav" data-v="${p}">${n}</button>`).join('')}</nav><div class="wc">${c}</div></div></div>`;
+  }
+  if(s.win==='taskmgr'){const r=ramOf(s);
+   return `<div class="win"><div class="wt"><span>Диспетчер завдань</span><button data-a="close" aria-label="Закрити">✕</button></div><div class="wc">
+    <b>Пам’ять: ${r}%</b> використано з 8 ГБ<div class="ram"><i style="width:${r}%;background:${r>80?'#e81123':r>70?'#f0a500':'#16c60c'}"></i></div>
+    <table class="tbl"><tr><th>Програма</th><th class="r">Пам’ять</th><th></th></tr>${PROCS.map((p,i)=>s.killed.includes(i)?'':`<tr><td>${p[0]}</td><td class="r">${p[1].toFixed(1)} ГБ</td><td class="r"><button class="wbtn" data-a="kill" data-v="${i}">Зняти завдання</button></td></tr>`).join('')}</table></div></div>`}
+  if(s.win==='devmgr'){
+   const g=[['Відеоадаптери',[['gpu','Intel UHD Graphics',1]]],['Миші та інші вказівні пристрої',[['ms','HID-сумісна миша',1]]],['Клавіатури',[['kb','Стандартна клавіатура PS/2',1]]],['Мережеві адаптери',[['wifi','Wi-Fi 6 AX201',s.drv]]],['Дискові пристрої',[['ssd','NVMe SSD 512 ГБ',1]]]];
+   return `<div class="win"><div class="wt"><span>Диспетчер пристроїв</span><button data-a="close" aria-label="Закрити">✕</button></div>
+    <div style="padding:6px 10px;border-bottom:1px solid #8883"><button class="wbtn" data-a="upd">Оновити драйвер</button><span style="font-size:.9em;opacity:.7">${s.sel?'Вибрано: '+g.flatMap(x=>x[1]).find(d=>d[0]===s.sel)[1]:'Спершу виберіть пристрій'}</span></div>
+    <div class="wc tree"><div><b>DESKTOP-SCHOOL</b></div>${g.map(([n,ds])=>`<div>▾ ${n}</div>${ds.map(d=>`<div class="dv ${s.sel===d[0]?'sel':''}" data-a="sel" data-v="${d[0]}">${d[2]?'':'<span class="warn">!</span>'}${d[1]}</div>`).join('')}`).join('')}</div></div>`}
+  return '';
+ };
+ const dialog=()=>{const d=s.dlg;if(!d)return'';
+  if(d.t==='add'){
+   if(d.st==='pick')return `<div class="dlg"><h5>Додавання пристрою</h5><label data-a="addbt"><b>Bluetooth</b> — миші, клавіатури, навушники, колонки</label><label data-a="addother"><b>Бездротовий дисплей</b> — телевізори, проєктори</label><label data-a="addother"><b>Усі інші</b> — контролери, DLNA</label>${d.err?`<p style="color:#e81123">${d.err}</p>`:''}<div style="text-align:right"><button class="wbtn" data-a="dlgx">Скасувати</button></div></div>`;
+   if(d.st==='search')return `<div class="dlg"><h5>Пошук пристроїв…</h5><p>Переконайтеся, що пристрій увімкнений і доступний для виявлення.</p><div class="bar"><i></i></div></div>`;
+   if(d.st==='found')return `<div class="dlg"><h5>Знайдено пристрої</h5><label data-a="pair">Навушники BT-500</label><label data-a="wrongpair">Невідомий пристрій «FREE_WIFI_GIFT»</label><div style="text-align:right"><button class="wbtn" data-a="dlgx">Скасувати</button></div></div>`;
+  }
+  if(d.t==='drv'){
+   if(d.st==='pick')return `<div class="dlg"><h5>Як шукати драйвери?</h5><label data-a="drvauto"><b>Автоматичний пошук драйверів</b> — Windows знайде найкращий драйвер з офіційного джерела</label><label data-a="drvman"><b>Знайти драйвери на цьому комп’ютері</b> — лише якщо у вас уже є файл драйвера</label><div style="text-align:right"><button class="wbtn" data-a="dlgx">Скасувати</button></div></div>`;
+   if(d.st==='search')return `<div class="dlg"><h5>Пошук драйверів…</h5><div class="bar"><i></i></div></div>`;
+  }
+  if(d.t==='rs')return `<div class="dlg" style="width:min(520px,92%)"><h5>Відновлення системи</h5><p>Виберіть точку відновлення. Програми, встановлені після неї, буде видалено.</p>${POINTS.map((p,i)=>`<label data-a="rpick" data-v="${i}" style="${d.pick===i?'background:var(--acc);color:#fff':''}"><span style="white-space:nowrap">${p[0]}</span><span>${p[1]}</span></label>`).join('')}${d.err?`<p style="color:#e81123">${d.err}</p>`:''}<div style="text-align:right"><button class="wbtn" data-a="dlgx">Скасувати</button><button class="wbtn acc" data-a="rgo">Далі — Готово</button></div></div>`;
+  if(d.t==='scan')return `<div class="dlg"><h5>Антивірус: перевірка STUDENT 32GB</h5><div class="bar"><i></i></div><p>Сканування файлів…</p></div>`;
+  return '';
+ };
+ const draw=()=>{
+  const res=[0,.25,.55,.9][s.res], z=[1,1.06,1.14,1.3][s.res];
+  scr.className='scr '+(s.mode==='dark'?'dark':'light')+(s.hc?' hc':'')+(s.unstable?' glitch':'');
+  scr.style.setProperty('--acc',ACC[s.acc]);
+  scr.style.setProperty('--fs',(12*s.scale/100)+'px');
+  scr.style.setProperty('--isz',{s:46,m:62,l:84}[s.isz]*(s.scale/100)+'px');
+  const icons=[['bin','Кошик'],['doc','Документи'],['web','Браузер']];if(s.unstable)icons.push(['game','GameBooster']);
+  const m=s.menu;
+  let menu='';
+  if(m){const st=`left:${m.x}px;${m.up?`bottom:${m.up}px`:`top:${m.y}px`}`;
+   if(m.t==='start')menu=`<div class="menu" style="${st}"><button data-a="o-devmgr">Диспетчер пристроїв</button><button data-a="o-taskmgr">Диспетчер завдань</button><button data-a="o-system">Система</button><button data-a="o-settings">Параметри</button><hr><button data-a="close-m">Робочий стіл</button></div>`;
+   if(m.t==='startL')menu=`<div class="menu" style="${st}"><button data-a="o-settings">Параметри</button><button data-a="close-m">Документи</button><button data-a="close-m">Зображення</button><hr><div style="padding:6px 12px;font-size:11px;opacity:.75">Порада: інші інструменти — праве клацання на Пуск</div></div>`;
+   if(m.t==='desk')menu=`<div class="menu" style="${st}"><button disabled style="opacity:.7">Вигляд ▸</button><button class="sub" data-a="isz" data-v="l">Великі значки${s.isz==='l'?' ✓':''}</button><button class="sub" data-a="isz" data-v="m">Звичайні значки${s.isz==='m'?' ✓':''}</button><button class="sub" data-a="isz" data-v="s">Дрібні значки${s.isz==='s'?' ✓':''}</button><hr><button data-a="close-m">Оновити</button><button data-a="o-display">Параметри дисплея</button><button data-a="o-personal">Персоналізація</button></div>`;
+   if(m.t==='tray')menu=`<div class="menu" style="${st}"><button data-a="eject">Вилучити STUDENT 32GB</button><button data-a="scan">Перевірити на віруси</button></div>`;
+  }
+  const t=new Date();
+  scr.innerHTML=`<div class="vis" style="filter:blur(${res}px) brightness(${.55+s.bright*.007});transform:scale(${z})">
+   ${wpSvg(s.wp)}
+   <div class="icons">${icons.map(([k,n])=>`<div class="ico" data-a="${k==='game'?'game':'ico'}">${IC[k]}<span>${n}</span></div>`).join('')}</div>
+   ${s.unstable&&!s.win?`<div class="err"><b>GameBooster 2.0 — програма не відповідає</b><div>Помилка 0xC0000005. Програма намагалася отримати доступ до пам’яті…</div></div>`:''}
+   ${page()}
+  </div>
+  ${menu}${dialog()}
+  <div class="task"><button class="stbtn" data-a="start" aria-label="Пуск">${IC.start}</button><span style="font-size:12px;opacity:.7">${s.rmb?'Режим правої кнопки: увімкнено':''}</span>
+   <div class="tray">${s.usb==='in'?`<button data-a="tray" title="Безпечне вилучення пристрою" aria-label="Безпечне вилучення">${IC.usb}</button>`:''}${s.bt?IC.bt:''}<span title="Wi-Fi">${IC.wifi(s.drv)}</span><span>${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}</span></div></div>
+  <div class="toasts">${s.toasts.map(x=>`<div class="toast ${x.k}">${x.t}${x.btns}</div>`).join('')}</div>
+  ${s.night?'<div class="ovl night"></div>':''}${s.hz<60?'<div class="ovl flicker"></div>':''}
+  ${s.boot?`<div class="boot"><div><div class="spin"></div>${s.boot}</div></div>`:''}`;
+  // missions
+  let first=-1;
+  cfg.list.forEach((mm,i)=>{if(!s.done[i]&&mm[1](s)){s.done[i]=true;addPts(2);setTimeout(()=>toast('Місію виконано: '+mm[0],'good'),10)}if(!s.done[i]&&first<0)first=i});
+  $('.ms',side).innerHTML=cfg.list.map((mm,i)=>`<li class="${s.done[i]?'done':''} ${i===first?'cur':''}">${mm[0]}</li>`).join('');
+  const hb=$('.hintbox',side);if(s.hint>=0&&first>=0){hb.textContent=cfg.list[first][2];hb.classList.add('show')}else hb.classList.remove('show');
+  $('.win-all',side).classList.toggle('show',first<0);
+  $('[data-x="rmb"]',side).classList.toggle('pri',s.rmb);
+ };
+ const later=(ms,fn)=>setTimeout(()=>{fn();draw()},ms);
+ const openMenu=(t,ev)=>{const r=scr.getBoundingClientRect();let x=ev.clientX-r.left-10,y=ev.clientY-r.top-10;
+  if(t==='start'||t==='startL'||t==='tray'){s.menu={t,x:t==='tray'?Math.max(4,r.width-230):4,up:44};}
+  else{x=Math.min(x,r.width-215);y=Math.min(y,r.height-240);s.menu={t,x:Math.max(4,x),y:Math.max(4,y)}}draw()};
+ const ctx=ev=>{const st=ev.target.closest('[data-a="start"]');if(st){openMenu('start',ev);return true}
+  if(!ev.target.closest('.win,.task,.menu,.dlg,.ico,.err')){openMenu('desk',ev);return true}return false};
+ scr.addEventListener('contextmenu',e=>{e.preventDefault();if(s.dlg||s.boot)return;ctx(e)});
+ scr.addEventListener('click',e=>{
+  if(s.boot)return;
+  if(s.rmb&&!e.target.closest('.menu,.dlg,.win')){s.rmb=false;if(ctx(e))return;draw();return}
+  const el=e.target.closest('[data-a]');const a=el?el.dataset.a:null,v=el?el.dataset.v:null;
+  const fromMenu=s.menu?s.menu.t:null;
+  if(!a){if(!e.target.closest('.win,.dlg')&&s.menu){s.menu=null;draw()}return}
+  if(a!=='start'&&a!=='tray')s.menu=null;
+  switch(a){
+   case'start':if(fromMenu==='startL'){s.menu=null;break}openMenu('startL',e);return;
+   case'close-m':break;
+   case'o-system':s.win='settings';s.page='display';if(fromMenu==='start')s.f.sysCtx=1;break;
+   case'o-settings':s.win='settings';s.page='home';break;
+   case'o-display':s.win='settings';s.page='display';break;
+   case'o-personal':s.win='settings';s.page='personal';if(fromMenu==='desk')s.f.persCtx=1;break;
+   case'o-devmgr':s.win='devmgr';break;
+   case'o-taskmgr':s.win='taskmgr';break;
+   case'close':s.win=null;s.dlg=null;break;
+   case'nav':s.page=v;break;
+   case'ptab':s.ptab=v;break;
+   case'night':s.night=!s.night;break;
+   case'wp':s.wp=v;break;
+   case'mode':s.mode=v;break;
+   case'acc':s.acc=+v;s.f.accent=1;break;
+   case'hc':s.hc=!s.hc;if(s.hc)s.f.hcTried=1;break;
+   case'isz':s.isz=v;break;
+   case'bt':s.bt=!s.bt;break;
+   case'add':s.dlg={t:'add',st:'pick'};break;
+   case'addbt':if(!s.bt){s.dlg.err='Bluetooth вимкнено. Спершу увімкніть його перемикачем.';break}s.dlg={t:'add',st:'search'};later(1700,()=>{if(s.dlg)s.dlg.st='found'});break;
+   case'addother':s.dlg.err='Навушники підключаються через Bluetooth. Оберіть перший пункт.';break;
+   case'pair':s.dlg=null;if(!s.devs.includes('hp'))s.devs.push('hp');toast('Навушники BT-500 підключено. Пристрій готовий до роботи.','good');break;
+   case'wrongpair':s.dlg=null;toast('Небезпечно! Не підключайте невідомі пристрої з дивними назвами.','err');break;
+   case'dlgx':s.dlg=null;break;
+   case'tray':openMenu('tray',e);return;
+   case'scan':if(s.usb!=='in'){toast('Флешку не підключено','err');break}s.dlg={t:'scan'};later(1700,()=>{s.dlg=null;s.f.scanned=1;toast('Загроз не знайдено. Флешку можна відкривати.','good')});break;
+   case'eject':s.usb='ejected';toast('Обладнання можна вилучити. Тепер витягніть флешку.','good');break;
+   case'kill':{const i=+v;if(PROCS[i][2]){toast('Це системний процес Windows! Якщо його закрити, комп’ютер може вимкнутися. Залиште його.','err');break}s.killed.push(i);toast('Завдання «'+PROCS[i][0]+'» знято');break}
+   case'sel':s.sel=v;break;
+   case'upd':if(!s.sel){toast('Спершу виберіть пристрій у списку','err');break}if(s.sel!=='wifi'||s.drv){toast('Найкращий драйвер для цього пристрою вже встановлено.');break}s.dlg={t:'drv',st:'pick'};break;
+   case'drvman':toast('Файлу драйвера на комп’ютері немає. Оберіть автоматичний пошук.','err');break;
+   case'drvauto':s.dlg={t:'drv',st:'search'};later(1700,()=>{s.dlg=null;s.drv=true;toast('Драйвер Wi-Fi 6 AX201 оновлено. Мережа працює!','good')});break;
+   case'rs':s.dlg={t:'rs',pick:null};break;
+   case'rpick':s.dlg.pick=+v;s.dlg.err='';break;
+   case'rgo':{const p=s.dlg.pick;if(p===null){s.dlg.err='Виберіть точку відновлення.';break}
+     if(POINTS[p][2]){s.dlg.err='Ця точка створена вже ПІСЛЯ встановлення GameBooster — збої залишаться. Оберіть ранішу.';break}
+     s.dlg=null;s.win=null;s.boot='Відновлення системи… Не вимикайте комп’ютер';
+     later(2600,()=>{s.boot=false;s.unstable=false;toast('Систему відновлено до '+POINTS[p][0].split(' ')[0]+'. Особисті файли збережено.','good')});break}
+   case'reinstall':toast('Стоп! Перевстановлення — крайній захід. Спершу спробуйте «Відновлення системи».','err');break;
+   case'game':toast('GameBooster 2.0 не відповідає…','err');break;
+  }
+  draw()});
+ scr.addEventListener('change',e=>{const k=e.target.dataset.k;if(k){s[k]=+e.target.value;draw()}const r=e.target.dataset.r;if(r){s[r]=+e.target.value;draw()}});
+ scr.addEventListener('input',e=>{const r=e.target.dataset.r;if(r==='bright'){const v=+e.target.value;$('.vis',scr).style.filter=`blur(${[0,.25,.55,.9][s.res]}px) brightness(${.55+v*.007})`;const o=$('[data-o="br"]',scr);if(o)o.textContent=v+'%'}});
+ side.addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(!b)return;const x=b.dataset.x;
+  if(x==='hint')s.hint=1;
+  if(x==='rmb')s.rmb=!s.rmb;
+  if(x==='reset'){s=fresh()}
+  if(x==='usbin'){if(s.usb!=='out'){toast('Флешка вже вставлена');return}s.usb='in';s.f.usbIn=1;s.f.scanned=s.f.scanned||0;
+    toast('STUDENT 32GB: виберіть дію для знімних дисків','', '<div><button data-a="scan">Перевірити на віруси</button><button data-a="openusb">Відкрити папку</button></div>')}
+  if(x==='usbout'){if(s.usb==='out'){toast('Флешки немає в порту','err');return}
+    if(s.usb==='in'){s.usb='out';toast('Флешку витягнуто без безпечного вилучення! Файли могли пошкодитися. Вставте її знову й спробуйте правильно.','err')}
+    else{s.usb='out';if(s.f.scanned)s.f.safe=1;else toast('Флешку вилучено безпечно, але спершу треба було перевірити її антивірусом.','err')}}
+  draw()});
+ scr.addEventListener('click',e=>{if(e.target.closest('[data-a="openusb"]')){if(!s.f.scanned)toast('Спершу перевірте флешку антивірусом!','err');else toast('Відкрито: STUDENT 32GB — Проєкт_інформатика.docx')}},true);
+ if(s.unstable)setInterval(()=>{if(s.unstable&&!s.boot&&!s.dlg&&Math.random()<.4&&host.getBoundingClientRect().left<innerWidth&&host.getBoundingClientRect().right>0)toast('Програма «Браузер» не відповідає…','err')},7000);
+ draw();
+}
+$$('.simhost').forEach(h=>Sim(h,h.dataset.sim));
+
+/* ---------- causes ---------- */
+const CAUSES=[
+ ['Конфлікт програм','<path d="M4 4l7 7M20 4l-7 7M4 20l7-7M20 20l-7-7" stroke="currentColor" stroke-width="2.5" fill="none"/>','Дві програми «сваряться» за спільні ресурси чи бібліотеки.','Онови всі програми до останніх версій — у нових випусках виправляють відомі конфлікти.'],
+ ['Недостатні ресурси','<rect x="3" y="7" width="18" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="5" y="9" width="12" height="6" fill="currentColor"/>','Бракує оперативної пам’яті (RAM) або стабільного інтернету для програм, яким він потрібен.','Закрий зайві програми в Диспетчері завдань, перевір інтернет-з’єднання.'],
+ ['Проблеми з ОС','<rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2.5"/>','Програма несумісна з цією версією Windows або несправна сама система.','Переглянь документацію програми: які версії ОС вона підтримує.'],
+ ['Віруси','<circle cx="12" cy="12" r="5" fill="currentColor"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3 3M16 16l3 3M19 5l-3 3M5 19l3-3" stroke="currentColor" stroke-width="2.5"/>','Шкідливі програми заважають роботі й можуть красти дані.','Перевір систему антивірусом (детальніше — у наступних класах).'],
+ ['Драйвери','<path d="M14 4l6 6-9 9H5v-6z" fill="none" stroke="currentColor" stroke-width="2.5"/>','Застарілі або неправильно встановлені драйвери пристроїв.','Праве клацання на Пуск → Диспетчер пристроїв. Жовтий знак оклику — онови драйвер.']];
+$('#flips').innerHTML=CAUSES.map((c,i)=>`<div class="flip" tabindex="0" role="button" aria-label="${c[0]}"><div class="fi"><div class="fa"><svg viewBox="0 0 24 24">${c[1]}</svg><h3 style="margin-top:10px">${c[0]}</h3><p style="font-size:14px">${c[2]}</p></div><div class="fbk"><h3>Що робити?</h3><p>${c[3]}</p></div></div></div>`).join('');
+$$('.flip').forEach(f=>{f.onclick=()=>f.classList.toggle('on');f.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f.classList.toggle('on')}}});
+const SYM=[['Два антивіруси «сваряться», і обидва аварійно закриваються',0],['Під час запуску гри все зависає, пам’ять завантажена на 95%',1],['Програма пише: «Ця версія не підтримує вашу Windows»',2],['Самі по собі відкриваються вікна з дивною рекламою',3],['Біля принтера в Диспетчері пристроїв жовтий знак оклику',4]];
+const order=[3,0,4,1,2];let sSel=null,mOkN=0;
+$('#mS').innerHTML=SYM.map((x,i)=>`<button data-s="${i}">${x[0]}</button>`).join('');
+$('#mC').innerHTML=order.map(i=>`<button data-c="${i}"><b>${CAUSES[i][0]}</b></button>`).join('');
+$('#mS').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;$$('#mS button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');sSel=+b.dataset.s};
+$('#mC').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const f=$('#matchFb');if(sSel===null){f.textContent='Спершу оберіть симптом ліворуч';f.className='fb no';return}
+ if(SYM[sSel][1]===+b.dataset.c){const sb=$(`#mS [data-s="${sSel}"]`);sb.classList.remove('sel');sb.classList.add('ok');sb.textContent+=' → '+CAUSES[+b.dataset.c][0];mOkN++;addPts(1);sSel=null;
+  f.textContent=mOkN===SYM.length?'Усі діагнози поставлено правильно!':'Правильно!';f.className='fb ok'}else{shake(b);f.textContent='Не зовсім. Подумайте ще.';f.className='fb no'}};
+
+/* ---------- timeline ---------- */
+const TL=['Можна, але ви втратите й корисні зміни після 18.11. Краще обрати найближчу точку до проблеми.','Саме так! Точка B — найближча ДО встановлення програми. Усе після неї буде скасовано.','Ні: на 26.11 програма вже встановлена, і збої залишаться.'];let tlDone=false;
+$$('#tl [data-t]').forEach(g=>g.addEventListener('click',()=>{const t=+g.dataset.t,f=$('#tlFb');f.textContent=TL[t];f.className='fb '+(t===1?'ok':'no');if(t===1&&!tlDone){tlDone=true;addPts(1)}}));
+
+/* ---------- gym ---------- */
+const EX=[['Погляд вліво — вправо',t=>[800+600*Math.sin(t*2),450,34]],['Погляд вгору — вниз',t=>[800,450+330*Math.sin(t*2),34]],['Коло за годинниковою стрілкою',t=>[800+520*Math.cos(t*1.6),450+300*Math.sin(t*1.6),34]],['Вісімка',t=>[800+560*Math.sin(t*1.4),450+260*Math.sin(t*2.8),34]],['Далеко — близько: фокусуйся на точці',t=>[800,420,34+110*(.5+.5*Math.sin(t*1.5))]],['Швидко кліпай, потім заплющ очі на 5 секунд',t=>[800,420,t%2<1?34:4]]];
+$('#gList').innerHTML=EX.map(x=>`<li>${x[0]}</li>`).join('');
+let gRaf=null,gT0=0;
+const gStop=()=>{cancelAnimationFrame(gRaf);gRaf=null;$('#gTxt').textContent='Готово! Очі відпочили.';$$('#gList li').forEach(l=>l.classList.remove('on'))};
+const gLoop=ts=>{const el=(ts-gT0)/1000,k=Math.floor(el/10);if(k>=EX.length){gStop();addPts(1);return}
+ const [x,y,r]=EX[k][1](el);const d=$('#gDot');d.setAttribute('cx',x);d.setAttribute('cy',y);d.setAttribute('r',Math.max(3,r));
+ $('#gTxt').textContent=EX[k][0]+' · '+(10-Math.floor(el%10));$$('#gList li').forEach((l,j)=>l.classList.toggle('on',j===k));gRaf=requestAnimationFrame(gLoop)};
+$('#gGo').onclick=()=>{cancelAnimationFrame(gRaf);gT0=performance.now();gRaf=requestAnimationFrame(gLoop)};
+$('#gStop').onclick=gStop;
+
+/* ---------- support cases ---------- */
+const CASES=[
+ ['Бабуся','Онучку, літери на екрані такі дрібні, що я нічого не бачу!',['Відкрий Система → Дисплей і збільш масштаб (наприклад, до 125–150%)','Купи новий, більший монітор','Сядь ближче до екрана'],0,'Масштаб збільшує текст і значки — і нічого купувати не треба.'],
+ ['Старший брат','Увечері від монітора дуже болять очі. Що робити?',['Встановити максимальну яскравість, щоб краще бачити','Увімкнути нічне світло, зменшити яскравість і робити перерви','Працювати з вимкненим світлом у кімнаті'],1,'Ввечері екран має бути теплішим і не яскравішим за кімнату, а очам потрібні паузи.'],
+ ['Однокласниця','Я ввімкнула бездротові навушники, а комп’ютер їх не бачить(',['Перевстановити Windows','Пуск → Налаштування → Пристрої: увімкнути Bluetooth і натиснути «Додати пристрій»','Підключити їх до USB-порту дротом від зарядки'],1,'Найчастіше Bluetooth просто вимкнений.'],
+ ['Тато','Після встановлення нової програми комп’ютер почав зависати.',['Відновити систему до точки перед встановленням програми','Видалити всі документи, щоб звільнити місце','Вимикати комп’ютер з розетки, коли зависає'],0,'Відновлення системи скасує зміни, а особисті файли залишаться.'],
+ ['Друг','Відкрив 40 вкладок, гру і відеоредактор — усе страшенно гальмує!',['Змінити фон робочого стола','Закрити зайві програми в Диспетчері завдань','Купити новий комп’ютер'],1,'Бракує оперативної пам’яті — звільніть її.'],
+ ['Вчителька','Принтер підключений, але не друкує. У Диспетчері пристроїв біля нього жовтий знак оклику.',['Оновити або перевстановити драйвер принтера','Увімкнути контрастну тему','Купити новий папір'],0,'Жовтий знак у Диспетчері пристроїв — проблема з драйвером.']];
+let ci=0;const chat=$('#chat');
+const caseShow=()=>{const c=CASES[ci];const w=document.createElement('div');w.className='chat';
+ w.innerHTML=`<div class="who">${c[0]} · запит ${ci+1} з ${CASES.length}</div><div class="bub">${c[1]}</div><div class="opts">${c[2].map((o,i)=>`<button data-o="${i}">${o}</button>`).join('')}</div><div class="fb"></div>`;
+ chat.appendChild(w);let done=false;
+ w.querySelector('.opts').onclick=e=>{const b=e.target.closest('[data-o]');if(!b||done)return;const ok=+b.dataset.o===c[3];const f=w.querySelector('.fb');
+  if(ok){done=true;b.classList.add('ok');f.textContent='Чудова порада! '+c[4];f.className='fb ok';addPts(1);
+   if(ci<CASES.length-1){const n=document.createElement('button');n.className='btn pri';n.textContent='Наступний запит';n.style.marginTop='8px';n.onclick=()=>{n.remove();ci++;caseShow();w.nextElementSibling.scrollIntoView({behavior:'smooth',block:'nearest'})};w.appendChild(n)}
+   else{const d=document.createElement('p');d.innerHTML='<b>Усі запити закрито! Служба підтримки працює на «відмінно».</b>';w.appendChild(d)}}
+  else{b.classList.add('no');f.textContent='Ця порада не допоможе. Спробуйте інший варіант.';f.className='fb no'}}};
+caseShow();
+
+/* ---------- order ---------- */
+const ORD=(el,title,steps)=>{const sh=steps.map((s,i)=>[s,i]).sort(()=>Math.random()-.5);let n=0;
+ el.innerHTML=`<h3>${title}</h3>${sh.map(([s,i])=>`<button data-i="${i}"><b></b>${s}</button>`).join('')}<div class="fb"></div>`;
+ el.onclick=e=>{const b=e.target.closest('[data-i]');if(!b||b.classList.contains('ok'))return;const f=$('.fb',el);
+  if(+b.dataset.i===n){b.classList.add('ok');b.querySelector('b').textContent=++n;if(n===steps.length){f.textContent='Правильно! Послідовність зібрано.';f.className='fb ok';addPts(2)}else{f.textContent=''}}
+  else{shake(b);f.textContent='Цей крок має бути пізніше';f.className='fb no'}}};
+ORD($('#ordA'),'Як налаштувати екран',['Праве клацання на кнопці Пуск','Обрати «Система»','Перейти до розділу «Дисплей»','Змінити потрібний параметр','Якщо стало гірше — обрати «рекомендовано»']);
+ORD($('#ordB'),'Як підключити Bluetooth-пристрій',['Пуск → Налаштування','Розділ «Пристрої»','«Bluetooth та інші пристрої», увімкнути Bluetooth','«Додавання пристрою Bluetooth або іншого пристрою»','Вибрати пристрій зі списку й дотримуватися вказівок']);
+
+/* ---------- quiz ---------- */
+const QZ=[
+ ['Як швидко відкрити налаштування дисплея?',['Праве клацання на Пуск → Система → Дисплей','Двічі клацнути на годиннику','Відкрити Кошик'],0],
+ ['Нові налаштування екрана погіршили роботу. Що обрати?',['Найбільші значення','Параметри з позначкою «рекомендовано»','Найменші значення'],1],
+ ['Яка відстань від очей до монітора правильна?',['20–30 см','50–70 см','1,5 метра'],1],
+ ['Що допомагає людям зі слабким зором?',['Контрастні теми','Зменшення масштабу','Частота 30 Гц'],0],
+ ['Що зробити, перш ніж витягнути флешку?',['Нічого, можна просто тягнути','Вимкнути монітор','Безпечне вилучення пристрою'],2],
+ ['Коли можна скористатися відновленням системи?',['Завжди, навіть якщо захист вимкнено','Якщо адміністратор заздалегідь увімкнув захист системи','Лише за наявності інтернету'],1],
+ ['Де перевірити, чи правильно працюють драйвери?',['Персоналізація','Диспетчер пристроїв','Кошик'],1],
+ ['Програма «гальмує» під час запуску великої гри. Найімовірніша причина?',['Недостатньо оперативної пам’яті','Неправильний фон робочого стола','Темний режим'],0]];
+let qi=0,qok=0;
+const qShow=()=>{const q=$('#qz');if(qi>=QZ.length){q.innerHTML=`<div class="big">${qok} / ${QZ.length}</div><h3 style="margin-top:12px">${qok===QZ.length?'Бездоганно! Ви — сертифіковані техніки.':qok>=6?'Чудовий результат!':'Непогано! Перегляньте теорію ще раз.'}</h3><button class="btn" id="qAgain">Пройти ще раз</button>`;$('#qAgain').onclick=()=>{qi=0;qok=0;qShow()};return}
+ const c=QZ[qi];q.innerHTML=`<div class="row" style="justify-content:space-between"><b>Питання ${qi+1} з ${QZ.length}</b><span class="kick" style="margin:0">Правильно: ${qok}</span></div><h3 style="font-size:24px;margin:14px 0">${c[0]}</h3><div class="opts">${c[1].map((o,i)=>`<button data-q="${i}">${o}</button>`).join('')}</div><div class="fb"></div>`;
+ let done=false;$('.opts',q).onclick=e=>{const b=e.target.closest('[data-q]');if(!b||done)return;done=true;const ok=+b.dataset.q===c[2];
+  $$('[data-q]',q).forEach(x=>{if(+x.dataset.q===c[2])x.classList.add('ok')});if(!ok)b.classList.add('no');else{qok++;addPts(1)}
+  const f=$('.fb',q);f.textContent=ok?'Правильно!':'Правильна відповідь підсвічена.';f.className='fb '+(ok?'ok':'no');
+  const n=document.createElement('button');n.className='btn pri';n.style.marginTop='10px';n.textContent=qi<QZ.length-1?'Наступне питання':'Результат';n.onclick=()=>{qi++;qShow()};q.appendChild(n)}};
+qShow();
+
+/* ---------- reflection ---------- */
+const LET=['Що нового ти сьогодні дізнався/дізналася?','Яке завдання в симуляторі було найцікавішим і чому?','Яку пораду для здоров’я очей ти точно використовуватимеш?','Що зробиш перед тим, як витягнути флешку?','Що залишилося незрозумілим? Сформулюй питання.','Кому з рідних ти допоможеш налаштувати комп’ютер і як?'];
+const envSvg='<svg viewBox="0 0 150 100" preserveAspectRatio="none"><rect width="150" height="100" fill="currentColor" opacity=".08"/><path d="M0 0 L75 55 L150 0" fill="none" stroke="#e8251a" stroke-width="4"/><path d="M0 100 L60 45M150 100 L90 45" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/></svg>';
+$('#envs').innerHTML=LET.map((_,i)=>`<button class="env" data-e="${i}" aria-label="Лист ${i+1}">${envSvg}<span>${i+1}</span></button>`).join('');
+$('#envs').onclick=e=>{const b=e.target.closest('[data-e]');if(!b)return;b.classList.add('open');$('#letter').textContent=LET[+b.dataset.e]};
+$('#stars').innerHTML=[1,2,3,4,5].map(i=>`<button data-st="${i}" aria-label="${i} з 5">★</button>`).join('');
+$('#stars').onclick=e=>{const b=e.target.closest('[data-st]');if(!b)return;const v=+b.dataset.st;$$('#stars button').forEach((x,j)=>x.classList.toggle('on',j<v))};
+}
+</script>
+</body>
+</html>
