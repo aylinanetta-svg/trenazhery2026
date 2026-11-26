@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Звук і відео у презентації</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning for 11-12-year-olds: bright, playful, clear steps
+   IDEA a media studio: the lesson behaves like a PowerPoint window you actually drive
+   PICTURE a big live slide with a speaker, waves and a play button; simulators are the real pictures below
+   COLOUR Ukrainian blue dominant, sunflower yellow support, coral accent for mistakes and "record"
+   TYPE Unbounded display + Nunito text (both Cyrillic)
+   LAYOUT laptop: title + name card left, slide picture right; phone: title, picture, form */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0c1426);--soft:light-dark(#eef4ff,#14203a);--ink:light-dark(#101935,#eef2ff);--mute:light-dark(#4a5578,#a9b4d6);--blue:#0057b7;--blue2:light-dark(#0057b7,#4d93ff);--yel:#ffd500;--cor:#ff5b4f;--ok:#14a05a;--line:light-dark(#d6deef,#2a3a5e);--card:light-dark(#ffffff,#111c33)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Unbounded,Nunito,sans-serif;line-height:1.08;letter-spacing:-.02em;margin:0 0 .4em;text-wrap:balance}
+h1{font-size:clamp(30px,4.6vw,52px)}h2{font-size:clamp(25px,3.2vw,38px)}h3{font-size:19px}
+p{margin:.3em 0 .8em}
+.band{padding:clamp(30px,4.5vw,64px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.blue{background:var(--blue);color:#fff}.blue .mute{color:#d4e3ff}
+.soft{background:var(--soft)}
+.mute{color:var(--mute)}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{min-height:46px;padding:10px 20px;border-radius:14px;border:0;background:var(--yel);color:#101935;font-weight:800;cursor:pointer;box-shadow:0 4px 0 #c9a800;transition:transform .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #c9a800}
+.btn.b2{background:var(--blue);color:#fff;box-shadow:0 4px 0 #003d80}
+.btn.ghost{background:transparent;border:2px solid currentColor;box-shadow:none}
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--cor);outline-offset:2px}
+input[type=text],select,textarea{font-size:16px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);width:100%}
+textarea{resize:vertical;min-height:84px}
+label{font-weight:700;font-size:15px;display:block;margin:10px 0 4px}
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:2px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:6px;padding:8px max(2vw,12px);overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;padding:8px 12px;border-radius:999px}
+nav a:hover{background:var(--soft)}
+nav .pts{margin-left:auto;flex:none;background:var(--yel);color:#101935;border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px;white-space:nowrap}
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(20px,4vw,56px);align-items:center}
+.tag{display:inline-block;background:var(--yel);color:#101935;font-weight:800;border-radius:10px;padding:4px 12px;font-size:14px;margin-bottom:14px}
+.namecard{background:var(--card);color:var(--ink);border-radius:20px;padding:18px;margin-top:18px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:0 12px}
+.namecard .full{grid-column:1/-1}
+.route{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.route a{color:#fff;text-decoration:none;font-weight:700;font-size:14px;border:2px solid #ffffff66;border-radius:999px;padding:6px 12px}
+.route a.done{background:var(--yel);color:#101935;border-color:var(--yel)}
+.heroart svg{width:100%;height:auto;display:block}
+@media(max-width:820px){.hero{grid-template-columns:1fr}.heroart{order:-1;max-width:520px}}
+/* cards */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media(max-width:860px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.grid3{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px}
+.card .num{font-family:Unbounded;font-size:34px;color:var(--blue2);font-weight:800}
+.flip{perspective:900px;min-height:190px;cursor:pointer;border:0;background:none;padding:0;text-align:left}
+.flip .in{position:relative;width:100%;height:100%;min-height:190px;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;border-radius:20px;padding:18px;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
+.flip .f{background:var(--blue);color:#fff}
+.flip .f b{font-family:Unbounded;font-size:20px;line-height:1.15}
+.flip .f small{margin-top:10px;color:#cfe0ff;font-size:14px}
+.flip .b{background:var(--yel);color:#101935;transform:rotateY(180deg);font-size:15.5px;font-weight:600}
+/* learn */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}
+.tabs button{min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--card);padding:8px 16px;font-weight:800;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px}
+.steps li::before{content:counter(s);width:40px;height:40px;border-radius:50%;background:var(--yel);color:#101935;font:800 18px Unbounded;display:grid;place-items:center}
+.kbd{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:0 7px;font-weight:800;white-space:nowrap}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,3vw,36px)}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);vertical-align:top}
+th{background:var(--blue);color:#fff;font-weight:800}
+.tip{border-left:6px solid var(--yel);background:var(--soft);border-radius:0 14px 14px 0;padding:12px 16px;margin-top:14px}
+/* simulator */
+.sim{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media(max-width:900px){.sim{grid-template-columns:1fr}}
+.pp{border-radius:14px;overflow:hidden;border:2px solid #b7472a;background:#f3f2f1;color:#222;font-size:13px;user-select:none;box-shadow:0 10px 30px #0b1a4a22}
+.pp .tb{background:#b7472a;color:#fff;padding:7px 12px;font-weight:700;display:flex;gap:10px;align-items:center}
+.pp .tb i{width:11px;height:11px;border-radius:50%;background:#ffffff88;display:inline-block}
+.pp .tabsr{display:flex;background:#b7472a;padding:0 6px;overflow-x:auto;scrollbar-width:none}
+.pp .tabsr button{flex:none;border:0;background:none;color:#fff;padding:8px 11px;font-size:13px;cursor:pointer;border-radius:6px 6px 0 0}
+.pp .tabsr button.on{background:#f3f2f1;color:#b7472a;font-weight:800}
+.pp .tabsr button.ctx{color:#ffe08a;font-weight:800}
+.pp .tabsr button.ctx.on{color:#b7472a}
+.rib{display:flex;gap:4px;padding:8px;min-height:104px;overflow-x:auto;border-bottom:1px solid #d6d6d6;background:#f3f2f1;position:relative}
+.grp{display:flex;flex-direction:column;border-right:1px solid #d0d0d0;padding:0 6px;flex:none}
+.grp .row{display:flex;gap:2px;flex:1;align-items:flex-start}
+.grp .gl{font-size:11px;color:#666;text-align:center;margin-top:2px;white-space:nowrap}
+.rb{border:1px solid transparent;background:none;border-radius:6px;padding:4px 6px;min-width:54px;min-height:62px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-size:12px;color:#222;position:relative}
+.rb:hover{background:#e1dfdd;border-color:#c8c6c4}
+.rb svg{width:28px;height:28px}
+.rb.sm{min-height:26px;flex-direction:row;font-size:12px;min-width:0;padding:3px 6px}
+.rb.sm svg{width:16px;height:16px}
+.rb.act{background:#d6d4d2;border-color:#a19f9d}
+.colw{display:flex;flex-direction:column;gap:2px}
+.drop{position:absolute;z-index:5;background:#fff;border:1px solid #bbb;box-shadow:0 6px 18px #0003;border-radius:6px;padding:4px;min-width:200px}
+.drop button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:4px;cursor:pointer;font-size:13px;color:#222}
+.drop button:hover{background:#e8f0fe}
+.stagep{display:grid;grid-template-columns:90px minmax(0,1fr);background:#e6e6e6;min-height:300px}
+.thumbs{background:#f3f2f1;border-right:1px solid #ccc;padding:8px}
+.thumbs div{aspect-ratio:16/9;background:#fff;border:2px solid #b7472a;border-radius:3px;font-size:9px;padding:3px;color:#555}
+.canvasp{padding:16px;display:grid;place-items:center;position:relative}
+.slide{width:100%;max-width:560px;aspect-ratio:16/9;background:linear-gradient(135deg,#0057b7 0 62%,#ffd500 62%);border-radius:4px;position:relative;box-shadow:0 2px 10px #0003;color:#fff;overflow:hidden}
+.slide h4{font:800 clamp(16px,3vw,26px)/1.1 Unbounded;margin:0;position:absolute;left:6%;top:12%;right:30%}
+.slide p{position:absolute;left:6%;top:42%;right:40%;font-size:clamp(11px,1.8vw,14px)}
+.mediaobj{position:absolute;right:8%;bottom:10%;border:2px dashed #fff;border-radius:6px;padding:6px;background:#00000033;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mediaobj svg{width:44px;height:44px}
+.bar{display:flex;align-items:center;gap:4px;background:#222;color:#fff;border-radius:4px;padding:2px 6px;font-size:10px}
+.vidobj{position:absolute;right:5%;bottom:8%;width:48%;aspect-ratio:16/9;border:2px solid #fff;background:#000;border-radius:4px;overflow:hidden}
+.vidobj canvas{width:100%;height:100%;display:block}
+.vidobj.full{inset:0;width:auto;right:0;bottom:0;border:0;border-radius:0}
+.dlgw{position:absolute;inset:0;background:#0005;display:grid;place-items:center;z-index:6;padding:10px}
+.dlg{background:#fff;border-radius:8px;width:min(440px,100%);box-shadow:0 10px 30px #0006;color:#222}
+.dlg .dh{padding:10px 14px;border-bottom:1px solid #ddd;font-weight:800;display:flex;justify-content:space-between}
+.dlg .db{padding:12px 14px}
+.dlg .df{padding:10px 14px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #eee}
+.dlg .df button{min-height:36px;padding:6px 16px;border-radius:4px;border:1px solid #999;background:#fff;cursor:pointer;font-size:13px}
+.dlg .df .pri{background:#b7472a;color:#fff;border-color:#b7472a}
+.files{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.files button{border:2px solid transparent;background:#f5f5f5;border-radius:6px;padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#222;word-break:break-word}
+.files button.sel{border-color:#b7472a;background:#fdeee9}
+.files svg{width:34px;height:34px}
+.trimv{height:34px;background:linear-gradient(90deg,#ccd 0 100%);border-radius:4px;position:relative;margin:8px 0}
+.trimv span{position:absolute;top:0;bottom:0;background:#b7472a55;border-left:3px solid #2a9d3a;border-right:3px solid #d02020}
+.trimrow{display:grid;grid-template-columns:110px minmax(0,1fr) 50px;gap:8px;align-items:center;font-size:13px}
+.trimrow input{width:100%;accent-color:#b7472a}
+.nope{animation:shake .4s;outline:3px solid var(--cor)!important;outline-offset:1px}
+.glow{animation:glow 1s 3;outline:3px solid var(--yel)!important;outline-offset:2px;border-radius:6px}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes glow{50%{outline-color:var(--cor)}}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;position:sticky;top:76px}
+.panel ol{padding-left:0;list-style:none;margin:8px 0;display:grid;gap:4px}
+.panel li{font-size:14.5px;padding:6px 8px 6px 30px;border-radius:10px;position:relative;color:var(--mute)}
+.panel li::before{content:"";position:absolute;left:8px;top:11px;width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
+.panel li.cur{background:var(--soft);color:var(--ink);font-weight:800}
+.panel li.cur::before{border-color:var(--blue2);background:var(--yel)}
+.panel li.ok{color:var(--ok)}
+.panel li.ok::before{background:var(--ok);border-color:var(--ok)}
+.msg{min-height:48px;border-radius:12px;padding:10px 12px;font-size:14.5px;font-weight:700;background:var(--soft)}
+.msg.bad{background:#ffe3e0;color:#8a1c12}
+.msg.good{background:#dcf5e7;color:#0d5a33}
+.score{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin:10px 0}
+.score b{font:800 26px Unbounded;color:var(--blue2)}
+.prow{display:flex;gap:8px;flex-wrap:wrap}
+.prow .btn{min-height:42px;padding:8px 14px;font-size:15px}
+.eq{display:inline-flex;gap:2px;align-items:flex-end;height:16px}
+.eq i{width:3px;background:#ffd500;animation:eq .6s infinite alternate}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}
+@keyframes eq{from{height:3px}to{height:16px}}
+/* eyes */
+.eyes{position:relative;height:300px;border-radius:24px;background:var(--blue);overflow:hidden}
+.eyes .dot{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--yel);box-shadow:0 0 0 10px #ffd50044;left:50%;top:50%}
+.eyes .lab{position:absolute;left:16px;top:14px;color:#fff;font-weight:800;font-size:18px}
+/* quiz */
+.quiz{max-width:820px}
+.qopts{display:grid;gap:10px;margin:14px 0}
+.qopts button{min-height:52px;text-align:left;border-radius:14px;border:2px solid var(--line);background:var(--card);padding:10px 16px;font-weight:700;cursor:pointer}
+.qopts button:hover{border-color:var(--blue2)}
+.qopts button.r{background:#dcf5e7;border-color:var(--ok);color:#0d5a33}
+.qopts button.w{background:#ffe3e0;border-color:var(--cor);color:#8a1c12}
+.qbar{height:10px;border-radius:9px;background:var(--line);overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--yel)}
+/* project */
+.proj{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(16px,3vw,32px);align-items:start}
+@media(max-width:900px){.proj{grid-template-columns:1fr}}
+.choice{display:flex;flex-wrap:wrap;gap:8px}
+.choice button{min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--card);padding:6px 14px;font-weight:700;cursor:pointer;font-size:15px}
+.choice button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.sl{border:2px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:12px;background:var(--card)}
+.sl h3{font-size:16px;margin:0}
+.chk{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.chk li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:12px;background:var(--soft);font-size:15px}
+.chk li b{white-space:nowrap}
+.chk li.ok{background:#dcf5e7;color:#0d5a33}
+.mini{aspect-ratio:16/9;border-radius:12px;overflow:hidden;position:relative;margin-bottom:12px}
+.show{position:fixed;inset:0;background:#000d;z-index:50;display:none;place-items:center;padding:14px}
+.show.on{display:grid}
+.show .box{width:min(1000px,100%)}
+.pslide{aspect-ratio:16/9;border-radius:10px;overflow:hidden;position:relative;color:#fff}
+.pslide .ttl{position:absolute;left:6%;top:9%;right:6%;font:800 clamp(18px,4vw,40px)/1.1 Unbounded}
+.pslide .txt{position:absolute;left:6%;top:32%;right:38%;font-size:clamp(12px,2vw,20px);white-space:pre-wrap;overflow-wrap:anywhere}
+.pslide .sym{position:absolute;right:6%;top:30%;width:28%}
+.pslide .vid{position:absolute;right:4%;bottom:6%;width:44%;aspect-ratio:16/9;border-radius:6px;overflow:hidden;border:3px solid #fff}
+.pslide .vid.full{inset:0;width:auto;border:0;border-radius:0}
+.pslide .vid canvas{width:100%;height:100%;display:block}
+.pslide .foot{position:absolute;left:6%;bottom:6%;font-size:clamp(11px,1.6vw,15px);opacity:.85}
+.show .btn.ghost{color:#fff}
+.score span{font-size:14px}
+.showbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;color:#fff;flex-wrap:wrap}
+/* cert */
+.certimg{width:100%;max-width:900px;border-radius:12px;box-shadow:0 12px 40px #0004;display:block;margin:16px auto 8px}
+.parts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+@media(max-width:700px){.parts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.parts div{background:#ffffff1a;border-radius:16px;padding:14px}
+.parts b{display:block;font:800 28px Unbounded;color:var(--yel)}
+/* letters */
+.env{min-height:150px;border:0;border-radius:18px;cursor:pointer;background:var(--yel);color:#101935;font-weight:800;font-size:16px;padding:16px;position:relative;overflow:hidden;text-align:left}
+.env::before{content:"";position:absolute;left:0;right:0;top:0;height:60%;background:linear-gradient(to bottom right,transparent 49.5%,#e6bf00 50%) left/50.2% 100% no-repeat,linear-gradient(to bottom left,transparent 49.5%,#e6bf00 50%) right/50.2% 100% no-repeat;transition:transform .4s;transform-origin:top}
+.env.on{background:var(--card);border:2px solid var(--line);color:var(--ink);font-weight:700}
+.env.on::before{transform:scaleY(0)}
+.env span{position:relative}
+footer{padding:24px max(5vw,16px);font-size:14px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+<a href="#start">Старт</a><a href="#recall">Пригадай</a><a href="#learn">Вивчаємо</a><a href="#sim-audio">Симулятор: звук</a><a href="#sim-video">Симулятор: відео</a><a href="#eyes">Для очей</a><a href="#quiz">Квіз</a><a href="#project">Проєкт</a><a href="#cert">Сертифікат</a><a href="#reflect">Рефлексія</a>
+<span class="pts" id="navpts">0 / 100 балів</span>
+</div></nav>
+
+<header class="band blue" id="start"><div class="wrap hero">
+<div>
+<span class="tag">Інформатика · 6 клас · Урок №17</span>
+<h1>Оживи свою презентацію: звук, відео і «Наші герої»</h1>
+<p class="mute">Сьогодні ти станеш режисером слайдів. Пройди маршрут, тренуйся у симуляторах PowerPoint, створи проєкт і отримай сертифікат з оцінкою.</p>
+<div class="namecard">
+<div><label for="pname">Як тебе звати?</label><input type="text" id="pname" placeholder="Ім'я та прізвище" autocomplete="off"></div>
+<div><label for="pform">Я —</label><select id="pform"><option value="m">учень</option><option value="f">учениця</option></select></div>
+<div class="full"><label for="pclass">Клас</label><input type="text" id="pclass" placeholder="наприклад, 6-А" autocomplete="off"></div>
+</div>
+<div class="route" id="route"></div>
+</div>
+<div class="heroart" aria-hidden="true">
+<svg viewBox="0 0 560 380">
+<defs><linearGradient id="hg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#1b6fd1"/><stop offset="1" stop-color="#003f8a"/></linearGradient></defs>
+<rect x="30" y="40" width="500" height="300" rx="22" fill="#00306b"/>
+<rect x="30" y="34" width="500" height="300" rx="22" fill="#f3f2f1"/>
+<rect x="30" y="34" width="500" height="34" rx="16" fill="#b7472a"/><rect x="30" y="52" width="500" height="16" fill="#b7472a"/>
+<circle cx="54" cy="51" r="6" fill="#ffffff88"/><circle cx="74" cy="51" r="6" fill="#ffffff88"/><circle cx="94" cy="51" r="6" fill="#ffffff88"/>
+<rect x="60" y="88" width="440" height="226" rx="8" fill="url(#hg)"/>
+<path d="M60 250 L500 160 V306 a8 8 0 0 1 -8 8 H68 a8 8 0 0 1 -8 -8z" fill="#ffd500"/>
+<rect x="88" y="116" width="200" height="22" rx="6" fill="#fff"/><rect x="88" y="148" width="140" height="12" rx="6" fill="#ffffff99"/><rect x="88" y="168" width="170" height="12" rx="6" fill="#ffffff99"/>
+<g transform="translate(330 120)"><rect width="140" height="90" rx="10" fill="#0b1a3a"/><circle cx="70" cy="45" r="26" fill="#ff5b4f"/><path d="M62 32 L84 45 L62 58z" fill="#fff"/></g>
+<g transform="translate(110 210)"><path d="M0 24 h18 l22 -18 v60 l-22 -18 h-18z" fill="#101935"/>
+<g fill="none" stroke="#101935" stroke-width="7" stroke-linecap="round"><path class="w1" d="M54 18 q12 18 0 36"/><path class="w2" d="M70 6 q24 30 0 60"/><path class="w3" d="M86 -6 q36 42 0 84"/></g></g>
+<g transform="translate(250 268)"><rect width="200" height="26" rx="13" fill="#101935"/><circle cx="16" cy="13" r="7" fill="#ffd500"/><rect x="34" y="11" width="150" height="4" rx="2" fill="#ffffff55"/><rect x="34" y="11" width="70" height="4" rx="2" fill="#ffd500"/></g>
+<circle cx="520" cy="40" r="30" fill="#ffd500"/><path d="M510 26 v28 l22 -14z" fill="#101935"/>
+</svg>
+</div>
+</div></header>
+
+<section class="band" id="goal"><div class="wrap">
+<h2>Сьогодні на уроці ми з тобою</h2>
+<div class="grid3">
+<div class="card"><div class="num">1</div><h3>Пригадаємо</h3><p>як за допомогою спеціальних програм відтворювати на комп'ютері аудіо- та відеофайли.</p></div>
+<div class="card"><div class="num">2</div><h3>Навчимося</h3><p>вбудовувати звук і відео у слайди та налаштовувати, як вони відтворюються.</p></div>
+<div class="card"><div class="num">3</div><h3>Створимо</h3><p>проєкт «Наші герої» з музикою та відео і покажемо його класу.</p></div>
+</div>
+</div></section>
+
+<section class="band soft" id="recall"><div class="wrap">
+<h2>Пригадай</h2>
+<p class="mute">Спершу відповідай уголос, а потім натисни на картку, щоб перевірити себе.</p>
+<div class="grid4" id="flips"></div>
+</div></section>
+
+<section class="band" id="learn"><div class="wrap">
+<h2>Вивчаємо: як вбудувати звук у слайд</h2>
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" data-tab="ms">Microsoft PowerPoint</button>
+<button role="tab" aria-selected="false" data-tab="lo">LibreOffice Impress</button>
+</div>
+<div id="tab-ms">
+<ol class="steps">
+<li><div>На вкладці <span class="kbd">Вставлення</span> у групі <span class="kbd">Мультимедіа</span> обери інструмент <span class="kbd">Аудіо</span>. Поруч живуть <span class="kbd">Відео</span> і <span class="kbd">Запис екрана</span>.</div></li>
+<li><div>Обери спосіб: <span class="kbd">Аудіо на моєму ПК…</span>, щоб вставити готовий файл, або <span class="kbd">Записати аудіо…</span>, щоб записати свій голос через мікрофон.</div></li>
+<li><div>Для файлу: знайди його у вікні та натисни <span class="kbd">Вставити</span>. Для запису: натисни червону кнопку, говори, потім <span class="kbd">OK</span>.</div></li>
+<li><div>На слайді з'явиться значок динаміка з панеллю: її можна відтворити, перемотати й змінити гучність.</div></li>
+</ol>
+</div>
+<div id="tab-lo" hidden>
+<ol class="steps">
+<li><div>На вкладці (у меню) <span class="kbd">Вставка</span> обери <span class="kbd">Звук або відео…</span></div></li>
+<li><div>У вікні додавання файлу знайди потрібний і натисни <span class="kbd">Відкрити</span> (<span class="kbd">Вставити</span>).</div></li>
+<li><div>На слайді з'явиться об'єкт. Його відтворюють панеллю <span class="kbd">Медіапрогравач</span>: кнопки «Відтворити», «Пауза», «Стоп», «Повтор» і гучність.</div></li>
+</ol>
+</div>
+<div class="two" style="margin-top:28px">
+<div>
+<h3>Вкладка «Відтворення» у PowerPoint</h3>
+<p class="mute">Вона з'являється, лише коли на слайді виділено звук або відео.</p>
+<div class="scroll"><table>
+<thead><tr><th>Що потрібно</th><th>Інструмент</th></tr></thead>
+<tbody>
+<tr><td>Послухати до показу</td><td><span class="kbd">Відтворити</span> (попередній перегляд)</td></tr>
+<tr><td>Залишити лише потрібний шматок</td><td><span class="kbd">Обрізати аудіо</span> / <span class="kbd">Обрізати відео</span></td></tr>
+<tr><td>Плавно почати й закінчити</td><td><span class="kbd">Наростання</span> і <span class="kbd">Затухання</span></td></tr>
+<tr><td>Тихіше чи гучніше</td><td><span class="kbd">Гучність</span></td></tr>
+<tr><td>Коли почнеться звук</td><td><span class="kbd">Початок</span>: «Коли клацають будь-де», «Автоматично», «Коли клацають цей елемент»</td></tr>
+<tr><td>Музика на всіх слайдах</td><td><span class="kbd">Фонове відтворення</span>: звук грає на всіх слайдах, безперервно, а значок ховається</td></tr>
+</tbody></table></div>
+</div>
+<div>
+<h3>Працюємо разом: відео проти аудіо</h3>
+<p>Відео додають так само: <span class="kbd">Вставлення</span> → <span class="kbd">Відео</span> → <span class="kbd">Це пристрій…</span> → обрати файл → <span class="kbd">Вставити</span>. Чим це відрізняється?</p>
+<div class="scroll"><table>
+<thead><tr><th></th><th>Аудіо</th><th>Відео</th></tr></thead>
+<tbody>
+<tr><td>На слайді видно</td><td>значок динаміка</td><td>вікно з кадром фільму</td></tr>
+<tr><td>Можна сховати</td><td>так, під час показу</td><td>ні, це частина слайда</td></tr>
+<tr><td>Особливе</td><td>фонове відтворення на всіх слайдах</td><td>показ на весь екран, обкладинка-кадр</td></tr>
+<tr><td>Розмір файлу</td><td>зазвичай невеликий</td><td>великий: презентація стає «важкою»</td></tr>
+</tbody></table></div>
+<div class="tip"><b>Порада авторові.</b> Бери музику й відео, які можна використовувати вільно, або записуй власні. На останньому слайді завжди вказуй джерела.</div>
+</div>
+</div>
+</div></section>
+
+<section class="band soft" id="sim-audio"><div class="wrap">
+<h2>Симулятор 1: додай музику на титульний слайд</h2>
+<p class="mute">Це тренажер, схожий на PowerPoint. Клацай так, як робив би у справжній програмі. Кожна помилка коштує 2 бали, підказка — 1 бал.</p>
+<div id="simA"></div>
+</div></section>
+
+<section class="band" id="sim-video"><div class="wrap">
+<h2>Симулятор 2: вставити й обрізати відео</h2>
+<p class="mute">Тепер працюємо з відео. Тут є нове вміння: обрізати фрагмент, щоб на слайді лишилося лише найважливіше.</p>
+<div id="simV"></div>
+</div></section>
+
+<section class="band blue" id="eyes"><div class="wrap two" style="align-items:center">
+<div>
+<h2>Гімнастика для очей</h2>
+<p class="mute">Сядь рівно, голову тримай нерухомо. Стеж за жовтою кулькою лише очима. Після вправи кілька разів швидко поморгай і подивись у вікно вдалину.</p>
+<button class="btn" id="eyego">Почати вправу (40 с)</button>
+</div>
+<div class="eyes" id="eyebox"><div class="lab" id="eyelab">Готові?</div><div class="dot" id="eyedot"></div></div>
+</div></section>
+
+<section class="band" id="quiz"><div class="wrap quiz">
+<h2>Квіз: перевір себе</h2>
+<p class="mute">10 запитань, кожна правильна відповідь — 3 бали.</p>
+<div id="qbox"></div>
+</div></section>
+
+<section class="band soft" id="project"><div class="wrap">
+<h2>Проєкт «Наші герої»</h2>
+<p>Героями ми називаємо тих, хто захищає, рятує, лікує, допомагає іншим. Створи презентацію з п'яти слайдів про свого героя чи героїню. Додай фонову музику і відео, а потім запусти показ. Праворуч видно, за що нараховуються бали.</p>
+<div class="proj">
+<div>
+<div class="sl"><h3>Крок 1. Про кого твій проєкт?</h3>
+<div class="choice" id="pcat"></div>
+<label for="phero">Ім'я героя або героїні</label><input type="text" id="phero" placeholder="наприклад, мій дідусь Микола — рятувальник">
+</div>
+<div class="sl"><h3>Крок 2. Слайди з розповіддю</h3>
+<p class="mute" style="font-size:15px">Для кожного слайда напиши заголовок і хоча б 2 речення (від 40 символів).</p>
+<div id="pslides"></div>
+</div>
+<div class="sl"><h3>Крок 3. Оформлення</h3>
+<div class="choice" id="ptheme"></div>
+</div>
+<div class="sl"><h3>Крок 4. Звук</h3>
+<div class="choice" id="ptrack"></div>
+<label><input type="checkbox" id="pauto"> Початок: Автоматично</label>
+<label><input type="checkbox" id="pbg"> Фонове відтворення (на всіх слайдах)</label>
+</div>
+<div class="sl"><h3>Крок 5. Відео</h3>
+<div class="choice" id="pclip"></div>
+<label for="pclipslide">На якому слайді показати відео?</label>
+<select id="pclipslide"><option value="1">Слайд 2</option><option value="2">Слайд 3</option><option value="3" selected>Слайд 4</option></select>
+<label><input type="checkbox" id="pfull"> Відтворити на весь екран</label>
+</div>
+<div class="sl"><h3>Крок 6. Останній слайд: джерела</h3>
+<label for="psrc">Звідки інформація, музика, відео?</label>
+<textarea id="psrc" placeholder="наприклад: розповідь бабусі; підручник с. 95–99; музика — бібліотека вільних звуків"></textarea>
+</div>
+</div>
+<div class="panel" style="top:76px">
+<div class="mini" id="pmini"></div>
+<div class="score"><span>Бали за проєкт</span><b id="pscore">0/30</b></div>
+<ul class="chk" id="pchk"></ul>
+<div class="prow" style="margin-top:14px"><button class="btn b2" id="pshow">▶ Показ слайдів</button></div>
+</div>
+</div>
+</div></section>
+
+<div class="show" id="show" role="dialog" aria-modal="true" aria-label="Показ слайдів"><div class="box">
+<div class="pslide" id="showslide"></div>
+<div class="showbar"><button class="btn ghost" id="sprev">← Назад</button><span id="snum"></span><button class="btn" id="snext">Далі →</button><button class="btn ghost" id="sclose">Завершити показ</button></div>
+</div></div>
+
+<section class="band blue" id="cert"><div class="wrap">
+<h2>Твій сертифікат</h2>
+<p class="mute">Сертифікат рахує всі бали уроку і переводить їх у 12-бальну оцінку. Можна покращити результат і створити його знову.</p>
+<div class="parts" id="parts"></div>
+<button class="btn" id="mkcert">Створити сертифікат</button>
+<p id="certwarn" class="mute"></p>
+<img id="certimg" class="certimg" alt="Сертифікат" hidden>
+<p id="certhint" class="mute" hidden>Щоб зберегти: натисни на сертифікат правою кнопкою миші й обери «Зберегти зображення як…» (на телефоні — довго втримуй палець).</p>
+</div></section>
+
+<section class="band" id="reflect"><div class="wrap">
+<h2>Рефлексія «Загадкові листи»</h2>
+<p class="mute">Обери лист, відкрий його і продовж речення.</p>
+<div class="grid3" id="letters"></div>
+<div class="two" style="margin-top:28px">
+<div class="card"><h3>Підсумок</h3>
+<p>Яких типів дані ти навчився використовувати для створення інформаційних продуктів?</p>
+<p>Опиши алгоритм запису, відтворення та використання відео та звуку.</p>
+<p>Як додати аудіо та відео в презентацію чи розмістити їх в інтернеті?</p></div>
+<div class="card" style="border-color:var(--yel)"><h3>Домашнє завдання</h3>
+<p>Опрацювати у підручнику с. 95–99. Доробити проєкт «Наші герої» у середовищі презентацій: перенести свої тексти у PowerPoint або Impress, додати справжні фото, музику й відео.</p>
+<button class="btn ghost" id="reset" style="font-size:14px;min-height:40px">Почати урок заново</button></div>
+</div>
+</div></section>
+<footer class="soft mute">Урок №17 · Інформатика, 6 клас · Звуки і відео в цьому уроці створюються самою сторінкою, тож вони вільні для використання.</footer>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={name:'',form:'m',cls:'',simA:null,simV:null,quiz:null,proj:{cat:'',hero:'',slides:[{t:'',x:'',sym:'shield'},{t:'',x:'',sym:'heart'},{t:'',x:'',sym:'star'}],theme:'ua',track:'',auto:false,bg:false,clip:'',clipSlide:3,full:false,src:'',shown:false}};
+try{const d=JSON.parse(localStorage.getItem('les17')||'null');if(d)S=Object.assign(S,d,{proj:Object.assign(S.proj,d.proj||{})})}catch(e){}
+const save=()=>{try{localStorage.setItem('les17',JSON.stringify(S))}catch(e){}upd()};
+
+/* ---------- sound ---------- */
+let AC=null;
+const ac=()=>{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC};
+const NN={C:-9,D:-7,E:-5,F:-4,G:-2,A:0,B:2};
+const fq=n=>{const m=n.match(/([A-G])(#|b)?(\d)/);let k=NN[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0)+(+m[3]-4)*12;return 440*2**(k/12)};
+const TR={
+solemn:{n:'Урочиста',bpm:76,w:'triangle',s:'D4:2 F#4:1 A4:1 D5:3 C#5:1 B4:2 A4:2 G4:2 F#4:1 E4:1 F#4:4 A4:2 B4:1 C#5:1 D5:3 E5:1 D5:2 C#5:2 B4:2 A4:2 D5:4'},
+memory:{n:'Світла пам\'ять',bpm:60,w:'sine',s:'A4:2 C5:2 E5:4 D5:2 C5:2 B4:4 A4:2 B4:2 C5:2 E5:2 A4:6 R:2 E4:2 A4:2 C5:4 B4:2 G4:2 A4:6'},
+hope:{n:'Натхнення',bpm:108,w:'square',s:'C5:1 E5:1 G5:2 E5:1 G5:1 A5:2 G5:2 E5:2 C5:1 D5:1 E5:2 D5:2 C5:4 E5:1 G5:1 C6:2 B5:2 A5:2 G5:2 E5:1 D5:1 C5:4'}};
+let curStop=null;
+function playTrack(id,loop,onEnd){
+  stopAll();const a=ac(),t=TR[id],b=60/t.bpm,out=a.createGain();out.gain.value=.16;out.connect(a.destination);
+  let timers=[],alive=true;
+  const run=()=>{if(!alive)return;let tm=a.currentTime+.05;
+    t.s.split(' ').forEach(p=>{const[nm,d]=p.split(':');const dur=+d*b/2;
+      if(nm!=='R'){[1,2].forEach(h=>{const o=a.createOscillator(),g=a.createGain();o.type=h===1?t.w:'sine';o.frequency.value=fq(nm)*(h===2?.5:1);
+        g.gain.setValueAtTime(0,tm);g.gain.linearRampToValueAtTime(h===1?.7:.35,tm+.03);g.gain.exponentialRampToValueAtTime(.001,tm+dur*.95);
+        o.connect(g);g.connect(out);o.start(tm);o.stop(tm+dur)})}
+      tm+=dur});
+    const len=(tm-a.currentTime)*1000;timers.push(setTimeout(()=>{if(loop)run();else{stop();onEnd&&onEnd()}},len))};
+  const stop=()=>{alive=false;timers.forEach(clearTimeout);try{out.gain.setTargetAtTime(0,a.currentTime,.05);setTimeout(()=>out.disconnect(),300)}catch(e){}};
+  run();curStop=stop;return stop}
+function stopAll(){if(curStop){curStop();curStop=null}}
+
+/* ---------- video clips on canvas ---------- */
+const CL={candle:'Свічка пам\'яті',flag:'Прапор майорить',dawn:'Світанок над полем'};
+function clip(cv,id){
+  let raf,st=performance.now();const x=cv.getContext('2d');
+  const fit=()=>{const r=cv.getBoundingClientRect();cv.width=Math.max(160,r.width*devicePixelRatio);cv.height=Math.max(90,r.height*devicePixelRatio)};fit();
+  const fr=()=>{const t=(performance.now()-st)/1000,W=cv.width,H=cv.height;x.clearRect(0,0,W,H);
+    if(id==='flag'){const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#7cc4ff');g.addColorStop(1,'#d8efff');x.fillStyle=g;x.fillRect(0,0,W,H);
+      x.fillStyle='#555';x.fillRect(W*.14,H*.1,W*.015,H*.9);
+      const fx=W*.155,fw=W*.62,fh=H*.42,fy=H*.14;
+      for(let i=0;i<fw;i+=2){const dy=Math.sin(i/fw*7-t*4)*H*.03*(i/fw);x.fillStyle='#0057b7';x.fillRect(fx+i,fy+dy,2.5,fh/2);x.fillStyle='#ffd500';x.fillRect(fx+i,fy+fh/2+dy,2.5,fh/2)}}
+    else if(id==='candle'){x.fillStyle='#0b0f1e';x.fillRect(0,0,W,H);
+      const cx=W/2,fl=1+Math.sin(t*9)*.06+Math.sin(t*23)*.04;
+      const gl=x.createRadialGradient(cx,H*.42,0,cx,H*.42,H*.6);gl.addColorStop(0,'rgba(255,200,80,.45)');gl.addColorStop(1,'rgba(255,200,80,0)');x.fillStyle=gl;x.fillRect(0,0,W,H);
+      x.fillStyle='#f5ecd7';x.fillRect(cx-W*.05,H*.5,W*.1,H*.45);x.fillStyle='#e2d6ba';x.fillRect(cx+W*.02,H*.5,W*.03,H*.45);
+      x.save();x.translate(cx+Math.sin(t*5)*2,H*.48);x.scale(1,fl);
+      const f=x.createRadialGradient(0,-H*.05,1,0,-H*.06,H*.13);f.addColorStop(0,'#fff8d0');f.addColorStop(.5,'#ffc23a');f.addColorStop(1,'rgba(255,90,20,0)');
+      x.fillStyle=f;x.beginPath();x.ellipse(0,-H*.07,W*.03,H*.12,0,0,7);x.fill();x.restore()}
+    else{const p=Math.min(1,t/8);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,`hsl(${210-p*20},70%,${30+p*35}%)`);g.addColorStop(1,`hsl(${30+p*10},90%,${55+p*20}%)`);x.fillStyle=g;x.fillRect(0,0,W,H);
+      x.fillStyle='#fff4b0';x.beginPath();x.arc(W*.6,H*(.75-p*.4),H*.12,0,7);x.fill();
+      x.fillStyle='#e8b400';x.fillRect(0,H*.7,W,H*.3);
+      x.strokeStyle='#b88a00';x.lineWidth=Math.max(1,W/300);
+      for(let i=0;i<W;i+=W/60){const s=Math.sin(t*2+i*.05)*H*.02;x.beginPath();x.moveTo(i,H);x.quadraticCurveTo(i+s,H*.82,i+s*1.5,H*.68);x.stroke()}}
+    x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,H-H*.1,W,H*.1);x.fillStyle='#ffd500';x.fillRect(0,H-H*.1,W*((t%10)/10),H*.025);
+    raf=requestAnimationFrame(fr)};
+  fr();return()=>cancelAnimationFrame(raf)}
+
+/* ---------- icons ---------- */
+const I={
+audio:'<svg viewBox="0 0 28 28"><path d="M4 11h5l7-6v18l-7-6H4z" fill="#555"/><path d="M19 9q4 5 0 10M22 6q7 8 0 16" stroke="#b7472a" stroke-width="2" fill="none"/></svg>',
+video:'<svg viewBox="0 0 28 28"><rect x="3" y="6" width="22" height="16" rx="2" fill="none" stroke="#555" stroke-width="2"/><path d="M3 10h22M3 18h22" stroke="#555"/><path d="M12 11l5 3-5 3z" fill="#b7472a"/></svg>',
+rec:'<svg viewBox="0 0 28 28"><rect x="4" y="5" width="20" height="14" rx="2" fill="none" stroke="#555" stroke-width="2" stroke-dasharray="3 2"/><circle cx="20" cy="20" r="5" fill="#2a9d3a"/></svg>',
+pic:'<svg viewBox="0 0 28 28"><rect x="3" y="5" width="22" height="18" rx="2" fill="none" stroke="#555" stroke-width="2"/><circle cx="10" cy="11" r="2.5" fill="#e0a800"/><path d="M4 21l7-7 5 5 3-3 5 5" stroke="#2a7fd1" stroke-width="2" fill="none"/></svg>',
+shape:'<svg viewBox="0 0 28 28"><circle cx="10" cy="11" r="6" fill="none" stroke="#555" stroke-width="2"/><rect x="13" y="13" width="11" height="11" fill="none" stroke="#b7472a" stroke-width="2"/></svg>',
+text:'<svg viewBox="0 0 28 28"><rect x="3" y="5" width="22" height="18" fill="none" stroke="#555" stroke-dasharray="3 2"/><path d="M9 10h10M14 10v10" stroke="#555" stroke-width="2.5"/></svg>',
+table:'<svg viewBox="0 0 28 28"><rect x="4" y="5" width="20" height="18" fill="none" stroke="#555" stroke-width="2"/><path d="M4 11h20M4 17h20M11 5v18M17 5v18" stroke="#555"/></svg>',
+newsl:'<svg viewBox="0 0 28 28"><rect x="3" y="7" width="20" height="15" fill="#fff" stroke="#555" stroke-width="2"/><path d="M22 2v8M18 6h8" stroke="#2a9d3a" stroke-width="2.5"/></svg>',
+play:'<svg viewBox="0 0 28 28"><path d="M8 5l15 9-15 9z" fill="none" stroke="#2a9d3a" stroke-width="2.5"/></svg>',
+trim:'<svg viewBox="0 0 28 28"><rect x="3" y="9" width="22" height="10" fill="none" stroke="#555" stroke-width="2"/><path d="M9 6v16M19 6v16" stroke="#b7472a" stroke-width="2.5"/></svg>',
+vol:'<svg viewBox="0 0 28 28"><path d="M4 11h4l6-5v16l-6-5H4z" fill="#555"/><path d="M18 20v-3M21 20v-6M24 20v-9" stroke="#2a7fd1" stroke-width="2.5"/></svg>',
+bg:'<svg viewBox="0 0 28 28"><path d="M4 11h4l6-5v16l-6-5H4z" fill="#555"/><path d="M17 8a8 8 0 1 1 0 12" stroke="#2a9d3a" stroke-width="2" fill="none"/><path d="M15 6l3 2-2 3" stroke="#2a9d3a" stroke-width="2" fill="none"/></svg>',
+nost:'<svg viewBox="0 0 28 28"><path d="M4 11h4l6-5v16l-6-5H4z" fill="#555"/><path d="M18 10l6 8M24 10l-6 8" stroke="#888" stroke-width="2"/></svg>',
+file:c=>`<svg viewBox="0 0 34 34"><path d="M7 3h14l7 7v21H7z" fill="#fff" stroke="#888"/><rect x="5" y="16" width="20" height="10" rx="2" fill="${c}"/></svg>`,
+fade:'<svg viewBox="0 0 28 28"><path d="M4 22L14 8M14 8h10" stroke="#2a7fd1" stroke-width="2.5" fill="none"/></svg>'};
+
+/* ---------- simulator engine ---------- */
+function Sim(root,cfg,key){
+  const st={i:0,tab:'home',menu:null,dlg:null,file:null,ins:false,start:'click',bg:false,full:false,trim:[0,30],mist:0,hint:0,done:false,playing:false};
+  const prev=S[key];if(prev&&prev.done){Object.assign(st,{done:true,i:cfg.steps.length,mist:prev.mist,hint:prev.hint,ins:true,tab:'play',bg:cfg.kind==='audio',start:'auto',full:cfg.kind==='video'})}
+  let msg={c:'',t:prev&&prev.done?'Завдання вже виконано! Можеш пройти ще раз.':'Почнімо! Дивись на крок, підсвічений праворуч.'};
+  let stopper=null;
+  const score=()=>st.done?Math.max(8,20-st.mist*2-st.hint):0;
+  const V=cfg.kind==='video';
+  const rb=(a,ic,l,cls='')=>`<button class="rb ${cls}" data-a="${a}">${ic}<span>${l}</span></button>`;
+  const sm=(a,ic,l,on)=>`<button class="rb sm ${on?'act':''}" data-a="${a}">${ic}<span>${l}</span></button>`;
+  const ribbon=()=>{
+    if(st.tab==='insert')return `<div class="grp"><div class="row">${rb('x:new',I.newsl,'Створити<br>слайд')}</div><div class="gl">Слайди</div></div>
+      <div class="grp"><div class="row">${rb('x:table',I.table,'Таблиця')}</div><div class="gl">Таблиці</div></div>
+      <div class="grp"><div class="row">${rb('x:pic',I.pic,'Зображення')}${rb('x:shape',I.shape,'Фігури')}</div><div class="gl">Ілюстрації</div></div>
+      <div class="grp"><div class="row">${rb('x:text',I.text,'Напис')}</div><div class="gl">Текст</div></div>
+      <div class="grp" style="position:relative"><div class="row">${rb('btn:video',I.video,'Відео ▾',st.menu==='video'?'act':'')}${rb('btn:audio',I.audio,'Аудіо ▾',st.menu==='audio'?'act':'')}${rb('x:rec',I.rec,'Запис<br>екрана')}</div><div class="gl">Мультимедіа</div></div>`;
+    if(st.tab==='play')return `<div class="grp"><div class="row">${rb('btn:play',I.play,'Відтворити')}</div><div class="gl">Попередній перегляд</div></div>
+      <div class="grp"><div class="row">${rb('btn:trim',I.trim,V?'Обрізати<br>відео':'Обрізати<br>аудіо')}<div class="colw">${sm('x:fadein',I.fade,'Наростання')}${sm('x:fadeout',I.fade,'Затухання')}</div></div><div class="gl">Редагування</div></div>
+      <div class="grp" style="position:relative"><div class="row">${rb('x:vol',I.vol,'Гучність')}<div class="colw">${sm('btn:start',I.play,'Початок: '+(st.start==='auto'?'Автоматично':'Коли клацають…')+' ▾')}${V?sm('chk:full',I.video,(st.full?'☑':'☐')+' Відтворити на весь екран',st.full):sm('x:all',I.audio,(st.bg?'☑':'☐')+' Відтворювати на всіх слайдах',st.bg)}${sm('x:loop',I.bg,(st.bg?'☑':'☐')+' Безперервно',st.bg)}</div></div><div class="gl">Параметри</div></div>
+      ${V?'':`<div class="grp"><div class="row">${rb('x:nostyle',I.nost,'Без<br>стилю')}${rb('btn:bg',I.bg,'Фонове<br>відтворення',st.bg?'act':'')}</div><div class="gl">Стилі аудіовідтворення</div></div>`}`;
+    const nm={home:'Основне',design:'Дизайн',trans:'Переходи',anim:'Анімація',show:'Показ слайдів'}[st.tab]||'';
+    return `<div style="padding:30px 12px;color:#777">Інструменти вкладки «${nm}». Тут немає того, що нам потрібно.</div>`};
+  const menu=()=>{
+    if(st.menu==='audio')return `<div class="drop" style="right:8px;top:72px">${'<button data-a="menu:pc">'+I.audio.replace('viewBox','width="18" height="18" viewBox')+' Аудіо на моєму ПК…</button><button data-a="x:recaudio">● Записати аудіо…</button>'}</div>`;
+    if(st.menu==='video')return `<div class="drop" style="right:70px;top:72px"><button data-a="menu:pc">Це пристрій…</button><button data-a="x:stock">Стокові відео…</button><button data-a="x:online">Онлайнові відео…</button></div>`;
+    if(st.menu==='start')return `<div class="drop" style="left:180px;top:60px"><button data-a="x:click">Коли клацають будь-де</button><button data-a="start:auto">Автоматично</button><button data-a="x:clickthis">Коли клацають цей елемент</button></div>`;
+    return ''};
+  const files=V?[['Вогонь_памʼяті.mp4','#b7472a','good'],['Фото_героя.jpg','#2a7fd1','bad'],['Мелодія.mp3','#2a9d3a','bad'],['Реферат.docx','#2b579a','bad'],['Кліп_про_котів.mp4','#b7472a','bad2'],['Музика.wav','#2a9d3a','bad']]
+    :[['Фото_героя.jpg','#2a7fd1','bad'],['Мелодія_героїв.mp3','#2a9d3a','good'],['Вогонь_памʼяті.mp4','#b7472a','bad'],['Реферат.docx','#2b579a','bad'],['Смішний_звук.wav','#2a9d3a','bad2'],['Таблиця.xlsx','#217346','bad']];
+  const dialog=()=>{
+    if(st.dlg==='file')return `<div class="dlgw"><div class="dlg"><div class="dh"><span>${V?'Вставлення відео':'Вставлення аудіо'}</span><span>✕</span></div>
+      <div class="db"><div style="font-size:12px;color:#666;margin-bottom:8px">Цей ПК › Документи › Проєкт «Наші герої»</div><div class="files">${files.map((f,k)=>`<button data-a="file:${f[2]}" data-k="${k}" class="${st.file===k?'sel':''}">${I.file(f[1])}<span>${f[0]}</span></button>`).join('')}</div></div>
+      <div class="df"><button data-a="dlg:cancel">Скасувати</button><button class="pri" data-a="dlg:insert">Вставити</button></div></div></div>`;
+    if(st.dlg==='trim'){const[a,b]=st.trim;return `<div class="dlgw"><div class="dlg"><div class="dh"><span>Обтинання відео</span><span>Тривалість: ${b-a} с</span></div>
+      <div class="db"><div style="font-size:13px;margin-bottom:6px"><b>Завдання:</b> залиш фрагмент <b>від 00:05 до 00:15</b>.</div>
+      <div class="trimv"><span id="trs" style="left:${a/30*100}%;right:${100-b/30*100}%"></span></div>
+      <div class="trimrow"><span>Час початку</span><input type="range" min="0" max="30" value="${a}" id="tr0" aria-label="Час початку"><b id="tl0">00:${String(a).padStart(2,'0')}</b></div>
+      <div class="trimrow"><span>Час завершення</span><input type="range" min="0" max="30" value="${b}" id="tr1" aria-label="Час завершення"><b id="tl1">00:${String(b).padStart(2,'0')}</b></div></div>
+      <div class="df"><button data-a="dlg:cancel">Скасувати</button><button class="pri" data-a="trim:ok">OK</button></div></div></div>`}
+    return ''};
+  const obj=()=>{
+    if(!st.ins)return '';
+    if(V)return `<div class="vidobj ${st.full&&st.playing?'full':''}" data-a="x:obj"><canvas id="${key}cv"></canvas></div>`;
+    return `<div class="mediaobj" data-a="x:obj">${I.audio.replace('fill="#555"','fill="#fff"')}<div class="bar">▶ ${st.playing?'<span class="eq"><i></i><i></i><i></i></span>':'━━━━'} 00:${st.playing?'..':'00'} 🔈</div></div>`};
+  const tabs=[['file','Файл'],['home','Основне'],['insert','Вставлення'],['design','Дизайн'],['trans','Переходи'],['anim','Анімація'],['show','Показ слайдів']];
+  const render=()=>{
+    const s=cfg.steps;
+    root.innerHTML=`<div class="sim"><div class="pp" role="application" aria-label="Тренажер PowerPoint">
+      <div class="tb"><i></i><i></i><i></i><span>${V?'Наші герої — слайд 3':'Наші герої — слайд 1'}.pptx — PowerPoint</span></div>
+      <div class="tabsr">${tabs.map(t=>`<button data-a="tab:${t[0]}" class="${st.tab===t[0]?'on':''}">${t[1]}</button>`).join('')}${st.ins?`<button data-a="tab:play" class="ctx ${st.tab==='play'?'on':''}">Відтворення</button>`:''}</div>
+      <div class="rib">${ribbon()}${menu()}</div>
+      <div class="stagep"><div class="thumbs"><div>${V?'3':'1'}</div></div><div class="canvasp"><div class="slide">
+        <h4>${V?'Пам\'ятаємо':'Наші герої'}</h4><p>${V?'Вогонь пам\'яті горить для кожного, хто віддав життя за Україну.':'Проєкт учнів 6 класу'}</p>${obj()}</div>${dialog()}</div></div></div>
+      <div class="panel"><h3>${V?'Завдання: відео':'Завдання: звук'}</h3>
+      <ol>${s.map((x,k)=>`<li class="${k<st.i?'ok':k===st.i?'cur':''}">${x.t}</li>`).join('')}</ol>
+      <div class="msg ${msg.c}" aria-live="polite">${msg.t}</div>
+      <div class="score"><span>Помилок: ${st.mist} · Підказок: ${st.hint}</span><b>${st.done?score():'…'}/20</b></div>
+      <div class="prow"><button class="btn ghost" data-h="1" ${st.done?'disabled':''}>Підказка</button><button class="btn ghost" data-r="1">Заново</button></div></div></div>`;
+    if(V&&st.ins){const cv=root.querySelector('canvas');if(st.playing){stopper&&stopper();stopper=clip(cv,'candle')}else{const c=clip(cv,'candle');setTimeout(c,60)}}
+    const r0=root.querySelector('#tr0');if(r0){const r1=root.querySelector('#tr1');const u=()=>{let a=+r0.value,b=+r1.value;if(b<a){b=a;r1.value=b}st.trim=[a,b];root.querySelector('#trs').style.cssText=`left:${a/30*100}%;right:${100-b/30*100}%`;root.querySelector('#tl0').textContent='00:'+String(a).padStart(2,'0');root.querySelector('#tl1').textContent='00:'+String(b).padStart(2,'0');root.querySelector('.dh span:last-child').textContent='Тривалість: '+(b-a)+' с'};r0.oninput=u;r1.oninput=u}
+  };
+  const wrong=(el,t)=>{st.mist++;msg={c:'bad',t:t||('Не туди. '+cfg.steps[st.i].h)};render();const e=root.querySelector(`[data-a="${el.dataset.a}"]`+(el.dataset.k?`[data-k="${el.dataset.k}"]`:''));if(e)e.classList.add('nope')};
+  const next=t=>{st.i++;msg={c:'good',t:t||'Чудово!'};if(st.i>=cfg.steps.length){st.done=true;msg={c:'good',t:'Супер! Завдання виконано. Ти отримуєш '+score()+' з 20 балів.'};S[key]={done:true,mist:st.mist,hint:st.hint,score:score()};save()}render()};
+  root.addEventListener('click',e=>{
+    if(e.target.closest('[data-r]')){stopper&&stopper();stopAll();Object.assign(st,{i:0,tab:'home',menu:null,dlg:null,file:null,ins:false,start:'click',bg:false,full:false,trim:[0,30],mist:0,hint:0,done:false,playing:false});msg={c:'',t:'Нова спроба. Удачі!'};render();return}
+    if(e.target.closest('[data-h]')){st.hint++;msg={c:'',t:'Підказка: '+cfg.steps[st.i].h};render();const exp=cfg.steps[st.i].a;let el=root.querySelector(`[data-a="${exp}"]`);if(el)el.classList.add('glow');return}
+    const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+    if(st.done){if(a==='btn:play'){play()}return}
+    const exp=cfg.steps[st.i].a;
+    if(a.startsWith('tab:')&&a!==exp){if(a==='tab:'+st.tab)return;st.tab=a.slice(4);st.menu=null;if(exp.startsWith('tab:')){wrong(el,'Ця вкладка не підходить. '+cfg.steps[st.i].h)}else{msg={c:'',t:'Ти перейшов на іншу вкладку. '+cfg.steps[st.i].h};render()}return}
+    if(a==='file:bad'||a==='file:bad2'){wrong(el,a==='file:bad2'?'Це не той файл: потрібен саме файл для проєкту.':'Цей файл не '+(V?'відео':'аудіо')+'. Подивись на розширення: '+(V?'.mp4':'.mp3')+'.');return}
+    if(a!==exp){wrong(el);return}
+    switch(a.split(':')[0]){
+      case 'tab':st.tab=a.slice(4);st.menu=null;next();break;
+      case 'btn':
+        if(a==='btn:audio'||a==='btn:video'){st.menu=V?'video':'audio';next('Відкрилось меню. Обери спосіб додавання.')}
+        else if(a==='btn:start'){st.menu='start';next()}
+        else if(a==='btn:bg'){st.bg=true;next('Тепер музика гратиме на всіх слайдах, а значок сховається під час показу.')}
+        else if(a==='btn:trim'){st.dlg='trim';next('Пересувай повзунки, щоб виділити фрагмент.')}
+        else if(a==='btn:play'){play();next()}
+        break;
+      case 'menu':st.menu=null;st.dlg='file';next('Відкрилось вікно вибору файлу.');break;
+      case 'file':st.file=+el.dataset.k;next('Файл виділено. Тепер натисни «Вставити».');break;
+      case 'dlg':st.dlg=null;st.ins=true;st.tab='insert';next('Готово! '+(V?'Відео':'Звук')+' на слайді. Зверни увагу: з\'явилась нова вкладка «Відтворення».');break;
+      case 'start':st.start='auto';st.menu=null;next('Звук почнеться сам, щойно з\'явиться слайд.');break;
+      case 'trim':{const[x,y]=st.trim;if(Math.abs(x-5)<=1&&Math.abs(y-15)<=1){st.dlg=null;next('Обрізано точно! Тепер відео триває '+(y-x)+' с.')}else{st.mist++;msg={c:'bad',t:`Зараз фрагмент 00:${String(x).padStart(2,'0')}–00:${String(y).padStart(2,'0')}. Потрібно 00:05–00:15.`};render()}break}
+      case 'chk':st.full=true;next('Під час показу відео розгорнеться на весь екран.');break;
+    }
+  });
+  function play(){stopper&&stopper();stopAll();st.playing=true;render();
+    if(V){setTimeout(()=>{stopper&&stopper();st.playing=false;render()},6000)}
+    else{stopper=playTrack('solemn',false,()=>{st.playing=false;stopper=null;render()})}}
+  render();return{score}}
+
+const simA=Sim($('#simA'),{kind:'audio',steps:[
+{a:'tab:insert',t:'Відкрий вкладку «Вставлення»',h:'Потрібна вкладка «Вставлення» вгорі вікна.'},
+{a:'btn:audio',t:'У групі «Мультимедіа» натисни «Аудіо»',h:'Праворуч на стрічці є група «Мультимедіа», у ній кнопка «Аудіо».'},
+{a:'menu:pc',t:'Обери «Аудіо на моєму ПК…»',h:'Ми вставляємо готовий файл з комп\'ютера.'},
+{a:'file:good',t:'Знайди файл «Мелодія_героїв.mp3»',h:'Звукові файли мають розширення .mp3 або .wav. Шукай «Мелодія_героїв».'},
+{a:'dlg:insert',t:'Натисни «Вставити»',h:'Кнопка «Вставити» внизу вікна.'},
+{a:'tab:play',t:'Перейди на вкладку «Відтворення»',h:'Нова вкладка «Відтворення» з\'явилась праворуч від інших.'},
+{a:'btn:start',t:'Відкрий список «Початок»',h:'У групі «Параметри» є список «Початок».'},
+{a:'start:auto',t:'Обери «Автоматично»',h:'Щоб звук почався сам, обери «Автоматично».'},
+{a:'btn:bg',t:'Увімкни «Фонове відтворення»',h:'Група «Стилі аудіовідтворення», кнопка «Фонове відтворення».'},
+{a:'btn:play',t:'Послухай результат: «Відтворити»',h:'Кнопка «Відтворити» ліворуч на стрічці.'}]},'simA');
+
+const simV=Sim($('#simV'),{kind:'video',steps:[
+{a:'tab:insert',t:'Відкрий вкладку «Вставлення»',h:'Відео, як і звук, додають через вкладку «Вставлення».'},
+{a:'btn:video',t:'Натисни «Відео»',h:'У групі «Мультимедіа» перша кнопка — «Відео».'},
+{a:'menu:pc',t:'Обери «Це пристрій…»',h:'Файл лежить на нашому комп\'ютері, тож обираємо «Це пристрій…».'},
+{a:'file:good',t:'Знайди «Вогонь_памʼяті.mp4»',h:'Відеофайли мають розширення .mp4. Потрібен «Вогонь_памʼяті».'},
+{a:'dlg:insert',t:'Натисни «Вставити»',h:'Кнопка «Вставити» внизу вікна.'},
+{a:'tab:play',t:'Перейди на вкладку «Відтворення»',h:'Шукай нову вкладку «Відтворення».'},
+{a:'btn:trim',t:'Натисни «Обрізати відео»',h:'Група «Редагування», кнопка «Обрізати відео».'},
+{a:'trim:ok',t:'Залиш фрагмент 00:05–00:15 і натисни OK',h:'Перший повзунок постав на 5, другий на 15.'},
+{a:'chk:full',t:'Увімкни «Відтворити на весь екран»',h:'Група «Параметри», прапорець «Відтворити на весь екран».'},
+{a:'btn:play',t:'Переглянь: «Відтворити»',h:'Кнопка «Відтворити» ліворуч на стрічці.'}]},'simV');
+
+/* ---------- flips ---------- */
+const FL=[['Що таке медіа?','Засоби подання інформації: текст, звук, зображення, відео.'],['Що таке мультимедіа?','Поєднання кількох видів медіа в одному продукті, часто з можливістю керувати ним.'],['Мультимедійні продукти — це…','Презентації, відеоролики, комп\'ютерні ігри, сайти, електронні енциклопедії.'],['Програми Windows для мультимедіа','Медіапрогравач, Фотографії, Звукозапис, відеоредактор Clipchamp.']];
+$('#flips').innerHTML=FL.map(f=>`<button class="flip" aria-label="${esc(f[0])}"><div class="in"><div class="f"><b>${f[0]}</b><small>Натисни, щоб перевернути</small></div><div class="b">${f[1]}</div></div></button>`).join('');
+$('#flips').onclick=e=>{const b=e.target.closest('.flip');if(b)b.classList.toggle('on')};
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));$('#tab-ms').hidden=b.dataset.tab!=='ms';$('#tab-lo').hidden=b.dataset.tab!=='lo'});
+
+/* ---------- eyes ---------- */
+let eyeRaf;
+$('#eyego').onclick=()=>{cancelAnimationFrame(eyeRaf);const box=$('#eyebox'),d=$('#eyedot'),L=$('#eyelab'),t0=performance.now();
+  const P=[['Вліво — вправо',t=>[.5+.4*Math.sin(t*1.6),.5]],['Вгору — вниз',t=>[.5,.5+.38*Math.sin(t*1.6)]],['По колу',t=>[.5+.35*Math.cos(t*1.4),.5+.35*Math.sin(t*1.4)]],['Вісімка',t=>[.5+.38*Math.sin(t*1.2),.5+.3*Math.sin(t*2.4)]]];
+  const f=n=>{const t=(n-t0)/1000;if(t>40){L.textContent='Молодець! Поморгай і подивись удалину.';d.style.left='50%';d.style.top='50%';return}
+    const k=Math.floor(t/10),[nm,fn]=P[k],[x,y]=fn(t);L.textContent=nm+' · '+Math.ceil(40-t)+' с';d.style.left=x*100+'%';d.style.top=y*100+'%';eyeRaf=requestAnimationFrame(f)};eyeRaf=requestAnimationFrame(f)};
+
+/* ---------- quiz ---------- */
+const Q=[
+['Що таке мультимедіа?',['Поєднання тексту, звуку, зображень, відео й анімації','Лише відеофайли','Програма для створення презентацій','Будь-яка музика в інтернеті']],
+['На якій вкладці PowerPoint є група «Мультимедіа»?',['Вставлення','Основне','Дизайн','Переходи']],
+['Що обрати, щоб додати музику з комп\'ютера?',['Аудіо → Аудіо на моєму ПК…','Аудіо → Записати аудіо…','Відео → Стокові відео…','Зображення → Цей пристрій…']],
+['Яка вкладка з\'являється, коли на слайді виділено звук?',['Відтворення','Анімація','Рецензування','Вигляд']],
+['Як зробити, щоб музика звучала на всіх слайдах під час показу?',['Увімкнути «Фонове відтворення»','Вставити звук на кожен слайд окремо','Натиснути «Затухання»','Обрати «Без стилю»']],
+['Навіщо інструмент «Обрізати відео»?',['Щоб залишити лише потрібний фрагмент','Щоб зменшити рамку відео','Щоб змінити колір кадру','Щоб видалити звук з відео']],
+['Як вставити звук у LibreOffice Impress?',['Вставка → Звук або відео…','Файл → Зберегти як…','Формат → Символ…','Показ → Почати з першого слайда']],
+['Чим вставлене відео відрізняється від аудіо на слайді?',['Відео видно на слайді як вікно з кадром, а аудіо — як значок динаміка','Нічим, вони виглядають однаково','Аудіо не можна відтворити під час показу','Відео не можна обрізати']],
+['Звук має почати грати одразу, щойно з\'явився слайд. Що обрати в списку «Початок»?',['Автоматично','Коли клацають будь-де','Коли клацають цей елемент','Нічого, так буде завжди']],
+['Що треба обов\'язково додати на останній слайд проєкту?',['Джерела інформації, музики й відео','Номер телефону','Рекламу','Нічого, останній слайд порожній']]];
+let qs=S.quiz&&S.quiz.done?S.quiz:{i:0,right:0,done:false,order:null};
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function quiz(){const b=$('#qbox');
+  if(qs.done){const p=qs.right*3;b.innerHTML=`<div class="card"><h3>Результат: ${qs.right} з 10 правильних</h3><div class="score"><span>Бали за квіз</span><b>${p}/30</b></div><p>${qs.right>=9?'Блискуче! Ти справжній медіаексперт.':qs.right>=6?'Добре! Повтори теми, де помилився, і спробуй ще.':'Перечитай розділ «Вивчаємо» і пройди квіз ще раз.'}</p><button class="btn b2" id="qre">Пройти ще раз</button></div>`;$('#qre').onclick=()=>{qs={i:0,right:0,done:false};quiz()};return}
+  const q=Q[qs.i],opts=shuf(q[1].map((t,k)=>({t,k})));
+  b.innerHTML=`<div class="qbar"><i style="width:${qs.i*10}%"></i></div><p class="mute" style="margin-top:10px">Запитання ${qs.i+1} з 10 · правильних: ${qs.right}</p><h3 style="font-size:21px">${q[0]}</h3><div class="qopts">${opts.map(o=>`<button data-k="${o.k}">${o.t}</button>`).join('')}</div><div id="qnext"></div>`;
+  b.querySelector('.qopts').onclick=e=>{const x=e.target.closest('button');if(!x||b.querySelector('.r'))return;const ok=x.dataset.k==='0';if(ok)qs.right++;
+    b.querySelectorAll('.qopts button').forEach(y=>{if(y.dataset.k==='0')y.classList.add('r')});if(!ok)x.classList.add('w');
+    $('#qnext').innerHTML=`<p style="font-weight:800;color:${ok?'var(--ok)':'var(--cor)'}">${ok?'Правильно!':'Не зовсім. Правильну відповідь позначено зеленим.'}</p><button class="btn b2">${qs.i<9?'Далі':'Результат'}</button>`;
+    $('#qnext button').onclick=()=>{qs.i++;if(qs.i>=10){qs.done=true;S.quiz={done:true,right:qs.right};save()}quiz()}}}
+quiz();
+
+/* ---------- project ---------- */
+const P=S.proj;
+const CATS=['Захисники й захисниці України','Рятувальники','Медики','Волонтери','Герой моєї родини'];
+const THEMES={ua:['Синьо-жовта',`linear-gradient(135deg,#0057b7 0 60%,#ffd500 60%)`,'#fff'],dusk:['Вечірня',`linear-gradient(160deg,#1d1b4b,#7b3f8c 70%,#ff8a5c)`,'#fff'],field:['Пшеничне поле',`linear-gradient(180deg,#5aa9e6 0 55%,#f2c230 55%)`,'#10213f']};
+const SYM={shield:'<svg viewBox="0 0 100 110"><path d="M50 5 L90 20 V55 C90 80 70 98 50 105 C30 98 10 80 10 55 V20z" fill="#ffd500" stroke="#fff" stroke-width="4"/><path d="M50 30 v45 M35 45 h30" stroke="#0057b7" stroke-width="8"/></svg>',
+heart:'<svg viewBox="0 0 100 100"><path d="M50 88 C10 60 5 35 20 22 C33 11 45 18 50 30 C55 18 67 11 80 22 C95 35 90 60 50 88z" fill="#ff5b4f" stroke="#fff" stroke-width="4"/></svg>',
+star:'<svg viewBox="0 0 100 100"><path d="M50 6 L62 38 L96 38 L68 58 L79 92 L50 71 L21 92 L32 58 L4 38 L38 38z" fill="#ffd500" stroke="#fff" stroke-width="4"/></svg>',
+sun:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="22" fill="#ffd500"/><g stroke="#ffd500" stroke-width="7" stroke-linecap="round">'+[0,45,90,135,180,225,270,315].map(a=>`<line x1="50" y1="14" x2="50" y2="4" transform="rotate(${a} 50 50)"/>`).join('')+'</g></svg>'};
+const SYMN={shield:'Щит',heart:'Серце',star:'Зірка',sun:'Сонце'};
+const choice=(el,items,val,cb)=>{el.innerHTML=items.map(([k,l])=>`<button data-k="${esc(k)}" class="${k===val?'on':''}">${esc(l)}</button>`).join('');el.onclick=e=>{const b=e.target.closest('button');if(b)cb(b.dataset.k)}};
+function projUI(){
+  choice($('#pcat'),CATS.map(c=>[c,c]),P.cat,k=>{P.cat=k;projUI();save()});
+  choice($('#ptheme'),Object.entries(THEMES).map(([k,v])=>[k,v[0]]),P.theme,k=>{P.theme=k;projUI();save()});
+  choice($('#ptrack'),[['','Без звуку'],...Object.entries(TR).map(([k,v])=>[k,'♪ '+v.n])],P.track,k=>{P.track=k;projUI();save();if(k)playTrack(k,false);else stopAll()});
+  choice($('#pclip'),[['','Без відео'],...Object.entries(CL)],P.clip,k=>{P.clip=k;projUI();save()});
+  $('#pauto').checked=P.auto;$('#pbg').checked=P.bg;$('#pfull').checked=P.full;$('#pclipslide').value=P.clipSlide;
+  mini();}
+$('#pslides').innerHTML=P.slides.map((s,i)=>`<div style="margin-top:12px;padding-top:10px;border-top:2px dashed var(--line)"><b>Слайд ${i+2}</b>
+  <label for="pt${i}">Заголовок</label><input type="text" id="pt${i}" placeholder="${['Хто наш герой','Його подвиг або справа','Чому ми пишаємось'][i]}">
+  <label for="px${i}">Текст</label><textarea id="px${i}" placeholder="${['Розкажи, хто ця людина, звідки вона, чим займається.','Що вона зробила? Як допомогла людям чи країні?','Чого ми вчимося від нашого героя? Як можемо подякувати?'][i]}"></textarea>
+  <label for="py${i}">Символ на слайді</label><select id="py${i}">${Object.entries(SYMN).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>`).join('');
+P.slides.forEach((s,i)=>{$('#pt'+i).value=s.t;$('#px'+i).value=s.x;$('#py'+i).value=s.sym;
+  $('#pt'+i).oninput=e=>{s.t=e.target.value;save()};$('#px'+i).oninput=e=>{s.x=e.target.value;save()};$('#py'+i).onchange=e=>{s.sym=e.target.value;save()}});
+$('#phero').value=P.hero;$('#phero').oninput=e=>{P.hero=e.target.value;save();mini()};
+$('#psrc').value=P.src;$('#psrc').oninput=e=>{P.src=e.target.value;save()};
+$('#pauto').onchange=e=>{P.auto=e.target.checked;save()};$('#pbg').onchange=e=>{P.bg=e.target.checked;save()};$('#pfull').onchange=e=>{P.full=e.target.checked;save()};
+$('#pclipslide').onchange=e=>{P.clipSlide=+e.target.value;save()};
+function mini(){const th=THEMES[P.theme];$('#pmini').innerHTML=`<div class="pslide" style="background:${th[1]};color:${th[2]};height:100%"><div class="ttl" style="font-size:clamp(16px,2.6vw,28px)">Наші герої</div><div class="txt" style="top:38%">${esc(P.hero||'Ім\'я героя')}${P.cat?'\n'+esc(P.cat):''}</div><div class="sym" style="width:24%">${SYM.shield}</div></div>`}
+function projItems(){const ok3=P.slides.map(s=>s.t.trim().length>1&&s.x.trim().length>=40);
+  return [['Обрано тему',!!P.cat,2],['Вказано героя',P.hero.trim().length>2,2],...ok3.map((o,i)=>[`Слайд ${i+2}: заголовок і текст`,o,4]),['Додано музику',!!P.track,3],['Музика: автоматично + фон',!!P.track&&P.auto&&P.bg,3],['Додано відео',!!P.clip,3],['Джерела на останньому слайді',P.src.trim().length>5,2],['Запущено показ слайдів',P.shown,1]]}
+const projScore=()=>projItems().reduce((a,x)=>a+(x[1]?x[2]:0),0);
+function projChk(){$('#pchk').innerHTML=projItems().map(x=>`<li class="${x[1]?'ok':''}"><span>${x[1]?'✓ ':''}${x[0]}</span><b>${x[1]?'+':''}${x[2]}</b></li>`).join('');$('#pscore').textContent=projScore()+'/30'}
+/* slideshow */
+let si=0,vStop=null,bgPlaying=false;
+function slides(){const nm=S.name?esc(S.name):'Автор проєкту';
+  return [{t:'Наші герої',x:(P.hero?esc(P.hero):'')+(P.cat?'\n'+esc(P.cat):'')+'\n\nАвтор: '+nm+(S.cls?', '+esc(S.cls):''),sym:'shield'},...P.slides.map(s=>({t:esc(s.t||'Без заголовка'),x:esc(s.x),sym:s.sym})),{t:'Дякуємо героям!',x:'Джерела:\n'+(esc(P.src)||'—'),sym:'heart'}]}
+function showSlide(){if(vStop){vStop();vStop=null}const L=slides(),s=L[si],th=THEMES[P.theme],hasV=P.clip&&si===P.clipSlide;
+  $('#showslide').style.background=th[1];$('#showslide').style.color=th[2];
+  $('#showslide').innerHTML=`<div class="ttl">${s.t}</div><div class="txt">${s.x}</div>${hasV?`<div class="vid ${P.full?'full':''}"><canvas></canvas></div>`:`<div class="sym">${SYM[s.sym]}</div>`}<div class="foot">${si+1} / ${L.length}</div>`;
+  if(hasV)vStop=clip($('#showslide canvas'),P.clip);
+  $('#snum').textContent='Слайд '+(si+1)+' з '+L.length;
+  if(P.track&&!P.bg&&si!==0&&!bgPlaying){stopAll()}
+  if(P.track&&!P.bg&&si===0&&P.auto)playTrack(P.track,false)}
+$('#pshow').onclick=()=>{si=0;$('#show').classList.add('on');bgPlaying=false;if(P.track&&P.auto&&P.bg){playTrack(P.track,true);bgPlaying=true}showSlide();P.shown=true;save();$('#snext').focus()};
+const go=d=>{const n=slides().length;si=Math.max(0,Math.min(n-1,si+d));showSlide()};
+$('#snext').onclick=()=>go(1);$('#sprev').onclick=()=>go(-1);
+const closeShow=()=>{$('#show').classList.remove('on');stopAll();if(vStop){vStop();vStop=null}};
+$('#sclose').onclick=closeShow;
+document.addEventListener('keydown',e=>{if(!$('#show').classList.contains('on'))return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key==='Escape')closeShow()});
+
+/* ---------- name ---------- */
+$('#pname').value=S.name;$('#pform').value=S.form;$('#pclass').value=S.cls;
+$('#pname').oninput=e=>{S.name=e.target.value;save()};$('#pform').onchange=e=>{S.form=e.target.value;save()};$('#pclass').oninput=e=>{S.cls=e.target.value;save()};
+
+/* ---------- totals ---------- */
+const parts=()=>[['Симулятор «Звук»',S.simA?S.simA.score:0,20],['Симулятор «Відео»',S.simV?S.simV.score:0,20],['Квіз',S.quiz?S.quiz.right*3:0,30],['Проєкт',projScore(),30]];
+const total=()=>parts().reduce((a,p)=>a+p[1],0);
+const grade=t=>Math.max(1,Math.round(t*12/100));
+const level=g=>g>=10?'високий':g>=7?'достатній':g>=4?'середній':'початковий';
+function upd(){projChk();const t=total();$('#navpts').textContent=t+' / 100 балів';
+  $('#parts').innerHTML=parts().map(p=>`<div><span>${p[0]}</span><b>${p[1]}<small style="font-size:15px;color:#cfe0ff">/${p[2]}</small></b></div>`).join('');
+  const done=[1,S.simA,S.simV,S.quiz,projScore()>=20];
+  $('#route').innerHTML=[['#recall','Пригадай',1],['#sim-audio','Звук',S.simA],['#sim-video','Відео',S.simV],['#quiz','Квіз',S.quiz],['#project','Проєкт',projScore()>=20],['#cert','Сертифікат',0]].map(r=>`<a href="${r[0]}" class="${r[2]?'done':''}">${r[2]?'✓ ':''}${r[1]}</a>`).join('')}
+upd();projUI();
+
+/* ---------- certificate ---------- */
+$('#mkcert').onclick=async()=>{
+  const miss=parts().filter(p=>p[1]===0).map(p=>p[0]);
+  $('#certwarn').textContent=(!S.name.trim()?'Впиши своє ім\'я на початку сторінки. ':'')+(miss.length?'Ще не виконано: '+miss.join(', ')+'. Сертифікат створено з тим, що є.':'');
+  try{await document.fonts.ready}catch(e){}
+  const c=document.createElement('canvas'),W=1600,H=1130;c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  x.fillStyle='#0057b7';x.fillRect(0,0,W,150);x.fillStyle='#ffd500';x.fillRect(0,150,W,22);
+  x.strokeStyle='#0057b7';x.lineWidth=6;x.strokeRect(40,210,W-80,H-250);x.strokeStyle='#ffd500';x.lineWidth=3;x.strokeRect(54,224,W-108,H-278);
+  x.fillStyle='#fff';x.font='800 64px Unbounded, sans-serif';x.textAlign='center';x.fillText('СЕРТИФІКАТ',W/2,100);
+  x.fillStyle='#4a5578';x.font='600 30px Nunito, sans-serif';x.fillText('Інформатика · 6 клас · Урок №17',W/2,280);
+  x.fillText('засвідчує, що',W/2,340);
+  x.fillStyle='#101935';x.font='800 60px Unbounded, sans-serif';let nm=S.name.trim()||'Учень / учениця';while(x.measureText(nm).width>1100)nm=nm.slice(0,-2);x.fillText(nm+(S.cls?', '+S.cls.slice(0,10):''),W/2,425);
+  const f=S.form==='f';x.font='600 30px Nunito, sans-serif';x.fillStyle='#101935';
+  x.fillText(`${f?'опанувала':'опанував'} тему «Додавання звуку та відео у презентацію»`,W/2,490);
+  x.fillText(`і ${f?'виконала':'виконав'} проєкт «Наші герої»`,W/2,532);
+  const P2=parts(),bx=150,bw=760;x.textAlign='left';
+  P2.forEach((p,i)=>{const y=610+i*72;x.fillStyle='#101935';x.font='700 28px Nunito, sans-serif';x.fillText(p[0],bx,y);
+    x.fillStyle='#e7eefc';x.fillRect(bx+330,y-24,330,26);x.fillStyle='#0057b7';x.fillRect(bx+330,y-24,330*p[1]/p[2],26);
+    x.fillStyle='#101935';x.textAlign='right';x.fillText(p[1]+' / '+p[2],bx+bw,y);x.textAlign='left'});
+  const t=total(),g=grade(t);
+  x.fillStyle='#ffd500';x.beginPath();x.arc(1200,720,170,0,7);x.fill();x.fillStyle='#0057b7';x.beginPath();x.arc(1200,720,150,0,7);x.fill();
+  x.fillStyle='#fff';x.textAlign='center';x.font='800 120px Unbounded, sans-serif';x.fillText(g,1200,750);x.font='700 30px Nunito, sans-serif';x.fillText('балів з 12',1200,800);
+  x.fillStyle='#101935';x.font='800 30px Nunito, sans-serif';x.fillText('Рівень: '+level(g),1200,935);x.font='600 26px Nunito, sans-serif';x.fillStyle='#4a5578';x.fillText('Загалом '+t+' зі 100 балів',1200,975);
+  x.textAlign='left';x.fillStyle='#4a5578';x.font='600 26px Nunito, sans-serif';x.fillText('Дата: '+new Date().toLocaleDateString('uk-UA'),bx,1010);
+  x.fillText('Підпис учителя: ____________________',bx,1050);
+  $('#certimg').src=c.toDataURL('image/png');$('#certimg').hidden=false;$('#certhint').hidden=false;$('#certimg').scrollIntoView({block:'center'})};
+
+/* ---------- letters ---------- */
+const LET=['Сьогодні я дізнався / дізналася…','Найцікавішим на уроці було…','Мені було складно…','Я можу навчити друга…','Я пишаюся тим, що…','Наступного разу я хочу…'];
+$('#letters').innerHTML=LET.map((l,i)=>`<button class="env" data-l="${i}"><span>Лист №${i+1}</span></button>`).join('');
+$('#letters').onclick=e=>{const b=e.target.closest('.env');if(!b||b.classList.contains('on'))return;b.classList.add('on');b.querySelector('span').textContent=LET[b.dataset.l]};
+$('#reset').onclick=()=>{try{localStorage.removeItem('les17')}catch(e){}location.reload()};
+}
+</script>
+</body>
+</html>
