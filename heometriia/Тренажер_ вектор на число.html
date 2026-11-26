@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажер: вектор на число</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* VOICE everyday learning: calm, clear, encouraging, for 9th graders at home
+   IDEA a squared-paper school notebook: blue ballpoint for the given vector, teacher's red pen for the answer
+   PICTURE large live coordinate grid drawing a, the chain a+a+a and k·a once solved
+   COLOUR paper white, notebook-grid blue, ballpoint blue #1f45b5, red pen #d2381f, green for "correct"
+   TYPE Rubik for headings and numbers + Nunito for text (both with Cyrillic)
+   LAYOUT laptop: grid picture left, task card right, formulas strip below; phone: title, picture, task */
+:root{color-scheme:light dark;
+--bg:light-dark(#f4f1e8,#0f1524);--paper:light-dark(#fffefa,#141c30);--grid:light-dark(#d3dff1,#22304c);--axis:light-dark(#7d93b8,#5f7399);
+--ink:light-dark(#1b2440,#e8ecf6);--soft:light-dark(#545f78,#aab4ca);--line:light-dark(#dcd5c4,#2b3756);
+--pen:light-dark(#1f45b5,#86a6ff);--res:light-dark(#c8341b,#ff8f75);--ok:light-dark(#12745a,#62d6a9);--okbg:light-dark(#e3f4ec,#123227);
+--bad:light-dark(#a3271a,#ff9a8a);--badbg:light-dark(#fbe7e3,#3a1d1b);--hl:light-dark(#fff1b8,#3b3418);--hlink:light-dark(#4d3d00,#f3e3a6)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 Nunito,Verdana,sans-serif;overflow-x:clip}
+.wrap{max-width:1240px;margin:0 auto;padding:clamp(20px,3vw,40px) max(4vw,16px)}
+h1{font:700 clamp(30px,4vw,44px)/1.05 Rubik,Verdana,sans-serif;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h2{font:600 22px/1.2 Rubik,Verdana,sans-serif;margin:0 0 8px}
+.v{font-style:italic;font-weight:800;color:var(--pen)}
+.top{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.top p{margin:6px 0 0;color:var(--soft)}
+.me{min-width:260px;flex:0 1 380px}
+.me .lab{font-size:15px;color:var(--soft);display:flex;justify-content:space-between;gap:8px}
+.me .lab b{color:var(--ink);font-family:Rubik,Verdana,sans-serif;white-space:nowrap}
+.track{height:28px;position:relative;margin-top:4px}
+.track i{position:absolute;left:0;top:12px;height:5px;border-radius:3px;background:var(--res);transition:width .5s ease}
+.track i::after{content:"";position:absolute;right:-12px;top:-7px;border:9.5px solid transparent;border-left:14px solid var(--res)}
+.track .zero{position:absolute;left:0;top:8px;width:13px;height:13px;border-radius:50%;background:var(--res)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.tabs button{font:600 16px/1.2 Nunito,Verdana,sans-serif;min-height:44px;padding:10px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--pen);border-color:var(--pen);color:var(--paper)}
+.tabs button .c{font-family:Rubik,Verdana,sans-serif;margin-left:6px;opacity:.8}
+button:focus-visible,input:focus-visible{outline:3px solid var(--res);outline-offset:2px}
+.main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.fig{position:relative;min-height:440px;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;overflow:hidden}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.fig svg text{paint-order:stroke;stroke:var(--paper);stroke-width:5px}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.q{font-size:19px;margin:0}
+.fields{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.fields label{display:flex;align-items:center;gap:8px;font:600 18px Rubik,Verdana,sans-serif;white-space:nowrap}
+.fields input{font:600 18px Rubik,Verdana,sans-serif;width:5.2em;min-height:44px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--axis);background:var(--bg);color:var(--ink)}
+.fields input.ok{border-color:var(--ok);background:var(--okbg)}
+.fields input.no{border-color:var(--bad);background:var(--badbg)}
+.paren{font:600 22px Rubik,Verdana,sans-serif;color:var(--soft)}
+.dir{display:flex;flex-wrap:wrap;gap:8px}
+.dir button{font:600 16px Nunito,Verdana,sans-serif;min-height:44px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--axis);background:var(--bg);color:var(--ink);cursor:pointer}
+.dir button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dir button.ok{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.dir button.no{background:var(--bad);border-color:var(--bad);color:var(--paper)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btns button{font:700 16px Nunito,Verdana,sans-serif;min-height:46px;padding:10px 18px;border-radius:12px;cursor:pointer;border:1.5px solid var(--ink);background:transparent;color:var(--ink)}
+.btns .main-b{background:var(--ink);color:var(--paper)}
+.btns button:disabled{opacity:.45;cursor:default}
+.fb{border-radius:12px;padding:12px 14px;margin:0;display:none}
+.fb.ok{display:block;background:var(--okbg);color:var(--ok)}
+.fb.no{display:block;background:var(--badbg);color:var(--bad)}
+.fb b{font-family:Rubik,Verdana,sans-serif}
+.sol{display:none;border-left:4px solid var(--res);padding:4px 0 4px 14px}
+.sol.on{display:block}
+.sol p{margin:4px 0}
+.hints{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.hints li{background:var(--hl);color:var(--hlink);border-radius:10px;padding:10px 14px;font-size:16px}
+.hints li b{font-family:Rubik,Verdana,sans-serif}
+.alg{font-size:15px;color:var(--soft);margin:0}
+.cheat{margin-top:20px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cheat div{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
+.cheat h3{font:600 15px Nunito,Verdana,sans-serif;color:var(--soft);margin:0 0 4px}
+.cheat p{font:600 18px/1.35 Rubik,Verdana,sans-serif;margin:0}
+.note{font-size:14px;color:var(--soft);margin:16px 0 0}
+@media(max-width:860px){.main{grid-template-columns:minmax(0,1fr)}.fig{min-height:340px}.cheat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.cheat{grid-template-columns:minmax(0,1fr)}.card{padding:18px}.fields input{width:4.6em}}
+@media(prefers-reduced-motion:reduce){.track i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+<div>
+<h1>Тренажер: множення вектора на число</h1>
+<p>Домашнє завдання · 9 клас · Розв’язуй, відкривай підказки по одній, перевіряй себе</p>
+</div>
+<div class="me" aria-live="polite">
+<div class="lab"><span>Твій вектор зараз</span><b id="meLab">0·a — нульовий, почнімо!</b></div>
+<div class="track"><span class="zero" id="meZero"></span><i id="meBar" style="width:0"></i></div>
+</div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Тип завдань" id="tabs"></nav>
+
+<div class="main">
+<div class="fig" id="fig"><svg id="svg" role="img" aria-label="Координатна сітка з векторами завдання"></svg></div>
+<section class="card" aria-live="polite">
+<div>
+<h2 id="mTitle"></h2>
+<p class="alg" id="mAlg"></p>
+</div>
+<p class="q" id="q"></p>
+<div class="fields" id="fields"></div>
+<div class="btns">
+<button class="main-b" id="bCheck" type="button">Перевірити</button>
+<button id="bHint" type="button">Підказка</button>
+<button id="bNext" type="button">Нове завдання</button>
+</div>
+<p class="fb" id="fb"></p>
+<ol class="hints" id="hints"></ol>
+<div class="sol" id="sol"></div>
+</section>
+</div>
+
+<div class="cheat">
+<div><h3>Сума однакових векторів</h3><p><span class="v">a</span> + <span class="v">a</span> + <span class="v">a</span> = 3<span class="v">a</span></p></div>
+<div><h3>У координатах</h3><p>k · (x; y) = (kx; ky)</p></div>
+<div><h3>Довжина</h3><p>|k<span class="v">a</span>| = |k| · |<span class="v">a</span>|</p></div>
+<div><h3>Напрям</h3><p>k &gt; 0 — в один бік, k &lt; 0 — у протилежний</p></div>
+</div>
+<p class="note">Відповіді вводь цілими числами, десятковими дробами через кому (2,5) або звичайними дробами (1/2). Мінус можна писати звичайним дефісом.</p>
+</div>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const M='−';
+const fmt=n=>{if(Math.abs(n-Math.round(n))<1e-9)n=Math.round(n);const s=String(+n.toFixed(4)).replace('.',',');return s.startsWith('-')?M+s.slice(1):s};
+const fr=(n,d)=>{if(d===1)return fmt(n);const map={'1/2':'½','1/3':'⅓','2/3':'⅔','3/2':'3/2','1/4':'¼'};const k=Math.abs(n)+'/'+d;return (n<0?M:'')+(map[k]||k)};
+const co=(n,d)=>d===1&&Math.abs(n)===1?(n<0?M:''):fr(n,d);
+const par=v=>v<0?'('+fmt(v)+')':fmt(v);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const nz=(a,b)=>{let v=0;while(v===0)v=rnd(a,b);return v};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const vec=(x,y)=>'('+fmt(x)+'; '+fmt(y)+')';
+const A='<span class="v">a</span>',B='<span class="v">b</span>';
+const parse=s=>{s=String(s).trim().replace(/\s/g,'').replace(/[−–]/g,'-').replace(',','.');if(s==='')return NaN;const m=s.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);if(m)return +m[1]/+m[2];return /^-?\d+(\.\d+)?$/.test(s)?+s:NaN};
+const same=(u,v)=>Math.abs(u-v)<1e-6;
+
+const MODES=[
+{id:'sum',tab:'Додай сам до себе',title:'Вектор, доданий сам до себе',alg:'Алгоритм: порахуй, скільки разів записано a → це число k → помнож на k кожну координату.',
+gen(){const n=pick([2,3,4]),x=nz(-3,3),y=nz(-3,3);return {n,x,y,ans:{k:n,x:n*x,y:n*y}}},
+q:t=>`Дано ${A}${vec(t.x,t.y)}. Запиши суму ${Array(t.n).fill(A).join(' + ')} як k·${A} і знайди її координати.`,
+fields:[['k','k ='],['x','x ='],['y','y =']],
+hints:t=>[`Скільки разів записано ${A}? Саме це число і є k: ${Array(t.n).fill(A).join(' + ')} = ${t.n}${A}.`,
+`Додаємо x-координати: ${Array(t.n).fill(par(t.x)).join(' + ')} = ${t.n} · ${par(t.x)}.`,
+`x = ${t.n} · ${par(t.x)} = ${fmt(t.n*t.x)}. Тепер так само порахуй y: ${t.n} · ${par(t.y)}.`],
+sol:t=>[`${Array(t.n).fill(A).join(' + ')} = ${t.n}${A}`,`${t.n}${A} = (${t.n}·${par(t.x)}; ${t.n}·${par(t.y)}) = <b>${vec(t.n*t.x,t.n*t.y)}</b>`,`Довжина зросла в ${t.n} рази, напрям не змінився.`],
+vecs:(t,done)=>{const v=[];for(let i=0;i<t.n;i++)v.push({p:[i*t.x,i*t.y],q:[(i+1)*t.x,(i+1)*t.y],c:'pen',l:'a'});if(done)v.push({p:[0,0],q:[t.n*t.x,t.n*t.y],c:'res',l:t.n+'a',sh:14});return v}},
+{id:'coord',tab:'Множення в координатах',title:'Множимо вектор на число',alg:'Алгоритм: k·(x; y) = (kx; ky) — кожну координату множимо на те саме число, стежимо за знаками.',
+gen(){const [n,d]=pick([[2,1],[3,1],[-2,1],[-3,1],[-1,1],[1,2],[-1,2],[1,3],[-1,3],[3,2]]);const m=d===1?1:d;const r=d===1?3:(d===2?3:2);const x=m*nz(-r,r),y=m*nz(-r,r);const k=n/d;return {n,d,k,x,y,ans:{x:k*x,y:k*y}}},
+q:t=>`Дано ${A}${vec(t.x,t.y)}. Знайди координати вектора ${co(t.n,t.d)}${A}.`,
+fields:[['x','x ='],['y','y =']],
+hints:t=>[`Формула: k · (x; y) = (kx; ky). Тут k = ${fr(t.n,t.d)}.`,
+t.k<0?`k від’ємне, тож кожна координата змінить знак. Мінус на мінус дає плюс!`:`k додатне, тож знаки координат не зміняться.`,
+`x = ${fr(t.n,t.d)} · ${par(t.x)} = ${fmt(t.k*t.x)}. Тепер так само знайди y.`],
+sol:t=>[`${co(t.n,t.d)}${A} = (${fr(t.n,t.d)}·${par(t.x)}; ${fr(t.n,t.d)}·${par(t.y)}) = <b>${vec(t.k*t.x,t.k*t.y)}</b>`,
+`${Math.abs(t.k)>1?'Вектор розтягнувся у '+fr(Math.abs(t.n),t.d)+' рази':Math.abs(t.k)<1?'Вектор стиснувся':'Довжина не змінилась'}${t.k<0?', а напрям змінився на протилежний.':', напрям той самий.'}`],
+vecs:(t,done)=>{const v=[{p:[0,0],q:[t.x,t.y],c:'pen',l:'a'}];if(done)v.push({p:[0,0],q:[t.k*t.x,t.k*t.y],c:'res',l:co(t.n,t.d)+'a',sh:t.k>0?14:0});return v}},
+{id:'len',tab:'Довжина і напрям',title:'Довжина і напрям вектора k·a',alg:'Алгоритм: знайди |a| = √(x² + y²) → помнож на модуль k → напрям визначає знак k.',
+gen(){let [x,y]=pick([[3,4],[4,3],[6,8],[8,6],[0,5],[5,0],[0,4],[4,0],[0,3],[3,0]]);if(Math.random()<.5)x=-x;if(Math.random()<.5)y=-y;const L=Math.hypot(x,y);const [n,d]=pick([[2,1],[3,1],[-2,1],[-3,1],[-1,1],[1,2],[-1,2]]);const k=n/d;return {x,y,L,n,d,k,ans:{len:Math.abs(k)*L,dir:k>0?'co':'op'}}},
+q:t=>`Дано ${A}${vec(t.x,t.y)}. Знайди довжину вектора ${co(t.n,t.d)}${A} і визнач його напрям відносно ${A}.`,
+fields:[['len','|k·a| =']],dir:true,
+hints:t=>[`Спершу довжина ${A}: |${A}| = √(x² + y²) = √(${par(t.x)}² + ${par(t.y)}²) = ${fmt(t.L)}.`,
+`|k${A}| = |k| · |${A}|. Модуль числа завжди невід’ємний: |${fr(t.n,t.d)}| = ${fr(Math.abs(t.n),t.d)}.`,
+`Напрям дивимось за знаком k: k ${t.k>0?'&gt; 0':'&lt; 0'}. Що це означає?`],
+sol:t=>[`|${A}| = √(${par(t.x)}² + ${par(t.y)}²) = ${fmt(t.L)}`,`|${co(t.n,t.d)}${A}| = ${fr(Math.abs(t.n),t.d)} · ${fmt(t.L)} = <b>${fmt(Math.abs(t.k)*t.L)}</b>`,`k ${t.k>0?'&gt; 0 → <b>співнапрямлений</b> з ':'&lt; 0 → <b>протилежно напрямлений</b> до '}${A}`],
+vecs:(t,done)=>{const v=[{p:[0,0],q:[t.x,t.y],c:'pen',l:'a'}];if(done)v.push({p:[0,0],q:[t.k*t.x,t.k*t.y],c:'res',l:co(t.n,t.d)+'a',sh:t.k>0?14:0});return v}},
+{id:'k',tab:'Знайди число k',title:'На яке число помножили вектор?',alg:'Алгоритм: b = k·a, тож k = x<sub>b</sub> : x<sub>a</sub> → перевір другою координатою: y<sub>b</sub> : y<sub>a</sub> має дати те саме.',
+gen(){const [n,d]=pick([[2,1],[3,1],[-2,1],[-3,1],[-1,1],[1,2],[-1,2],[3,2]]);const k=n/d,m=d===1?1:2,r=d===1?3:2;const x=m*nz(-r,r),y=m*nz(-r,r);return {n,d,k,x,y,bx:k*x,by:k*y,ans:{k}}},
+q:t=>`Вектор ${B}${vec(t.bx,t.by)} отримали множенням ${A}${vec(t.x,t.y)} на число k, тобто ${B} = k${A}. Знайди k.`,
+fields:[['k','k =']],
+hints:t=>[`${B} = k${A} означає, що кожна координата ${B} у k разів більша за відповідну координату ${A}: x<sub>b</sub> = k · x<sub>a</sub>.`,
+`Тоді k = x<sub>b</sub> : x<sub>a</sub> = ${fmt(t.bx)} : ${par(t.x)}.`,
+`Перевір другою координатою: ${fmt(t.by)} : ${par(t.y)} має дати те саме число. Якщо ділення не націло — запиши дріб, наприклад 1/2.`],
+sol:t=>[`k = ${fmt(t.bx)} : ${par(t.x)} = <b>${fr(t.n,t.d)}</b>`,`Перевірка: ${fmt(t.by)} : ${par(t.y)} = ${fmt(t.k)} ✓`,`k ${t.k>0?'&gt; 0 — вектори співнапрямлені':'&lt; 0 — вектори протилежно напрямлені'}.`],
+vecs:(t,done)=>[{p:[0,0],q:[t.x,t.y],c:'pen',l:'a'},{p:[0,0],q:[t.bx,t.by],c:'res',l:'b',sh:t.k>0?14:0}]}
+];
+
+let S={mode:0,score:0,streak:0,per:[0,0,0,0]};
+try{const s=JSON.parse(localStorage.getItem('vecTrainer')||'null');if(s&&Array.isArray(s.per))S={...S,...s}}catch(e){}
+const save=()=>{try{localStorage.setItem('vecTrainer',JSON.stringify(S))}catch(e){}};
+let T=null,hint=0,tries=0,done=false,dirSel=null;
+
+function tabs(){$('tabs').innerHTML=MODES.map((m,i)=>`<button type="button" role="tab" id="tab-${m.id}" aria-selected="${i===S.mode}">${m.tab}<span class="c">${S.per[i]?'✓'+S.per[i]:''}</span></button>`).join('');
+MODES.forEach((m,i)=>$('tab-'+m.id).onclick=()=>{S.mode=i;save();newTask()})}
+
+function meter(){const s=S.score;$('meLab').textContent=s===0?'0·a — нульовий, почнімо!':s+'·a'+(S.streak>=3?' · серія '+S.streak+'!':'');$('meBar').style.width=Math.min(s,20)/20*92+'%';$('meZero').style.display=s?'none':'block'}
+
+function newTask(){const m=MODES[S.mode];T=m.gen();hint=0;tries=0;done=false;dirSel=null;tabs();
+$('mTitle').textContent=m.title;$('mAlg').innerHTML=m.alg.replace(/\ba\b/g,A).replace(/\bb\b/g,B);$('q').innerHTML=m.q(T);
+$('fields').innerHTML=(m.id==='sum'||m.id==='coord'?'<span class="paren">(</span>':'')+m.fields.map(([id,l])=>`<label for="f-${id}">${l}<input id="f-${id}" inputmode="decimal" autocomplete="off"></label>`).join('')+(m.id==='sum'||m.id==='coord'?'<span class="paren">)</span>':'')+
+(m.dir?`<div class="dir" role="group" aria-label="Напрям"><button type="button" id="d-co" aria-pressed="false">співнапрямлений</button><button type="button" id="d-op" aria-pressed="false">протилежно напрямлений</button></div>`:'');
+if(m.dir)['co','op'].forEach(d=>$('d-'+d).onclick=()=>{if(done)return;dirSel=d;['co','op'].forEach(e=>{const b=$('d-'+e);b.setAttribute('aria-pressed',e===d);b.classList.remove('ok','no')})});
+$('fields').querySelectorAll('input').forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter')check()}));
+$('fb').className='fb';$('fb').innerHTML='';$('hints').innerHTML='';$('sol').className='sol';$('sol').innerHTML='';
+$('bCheck').disabled=false;$('bHint').disabled=false;$('bHint').textContent='Підказка 1 з 3';draw();
+const f=$('fields').querySelector('input');if(f&&document.activeElement&&document.activeElement.tagName!=='BODY')f.focus({preventScroll:true})}
+
+function showHint(){const h=MODES[S.mode].hints(T);if(hint>=h.length)return;$('hints').insertAdjacentHTML('beforeend',`<li><b>Крок ${hint+1}.</b> ${h[hint]}</li>`);hint++;
+$('bHint').textContent=hint<h.length?`Підказка ${hint+1} з ${h.length}`:'Підказки закінчились';$('bHint').disabled=hint>=h.length}
+
+function solution(){$('sol').innerHTML='<h2>Розв’язання</h2>'+MODES[S.mode].sol(T).map(s=>`<p>${s}</p>`).join('');$('sol').className='sol on'}
+
+function check(){if(done)return;const m=MODES[S.mode];let all=true,empty=false;
+m.fields.forEach(([id])=>{const inp=$('f-'+id),v=parse(inp.value);if(inp.value.trim()==='')empty=true;const ok=same(v,T.ans[id]);inp.classList.toggle('ok',ok);inp.classList.toggle('no',!ok&&inp.value.trim()!=='');if(!ok)all=false});
+if(m.dir){if(!dirSel)empty=true;const ok=dirSel===T.ans.dir;if(dirSel)$('d-'+dirSel).classList.add(ok?'ok':'no');if(!ok)all=false}
+const fb=$('fb');
+if(empty&&!all){fb.className='fb no';fb.innerHTML='Заповни всі поля, а тоді перевіряй.';return}
+if(all){done=true;S.score++;S.streak++;S.per[S.mode]++;save();meter();tabs();
+fb.className='fb ok';fb.innerHTML=`<b>Правильно!</b> ${hint===0?'І без жодної підказки.':'Підказки зробили свою справу.'} Твій вектор подовшав.`;
+solution();$('bCheck').disabled=true;$('bHint').disabled=true;draw();$('bNext').focus({preventScroll:true});return}
+tries++;S.streak=0;save();meter();fb.className='fb no';
+fb.innerHTML=tries===1?'<b>Майже.</b> Червоним позначено, де помилка. Відкрий підказку і спробуй ще раз.':tries===2?'<b>Ще не те.</b> Звір кожен крок із підказками — особливо знаки.':'<b>Нічого страшного.</b> Подивись розв’язання нижче і візьми нове завдання — наступне вийде!';
+if(hint===0&&tries===1)showHint();
+if(tries>=3){done=true;solution();$('bCheck').disabled=true;draw()}}
+
+$('bCheck').onclick=check;$('bHint').onclick=showHint;$('bNext').onclick=newTask;
+
+const s=$('svg');
+function draw(){if(!T)return;const W=s.clientWidth,H=s.clientHeight;if(!W||!H)return;const vs=MODES[S.mode].vecs(T,done);
+let xs=[0],ys=[0];vs.forEach(v=>{xs.push(v.p[0],v.q[0]);ys.push(v.p[1],v.q[1])});
+let x0=Math.floor(Math.min(...xs))-1,x1=Math.ceil(Math.max(...xs))+1,y0=Math.floor(Math.min(...ys))-1,y1=Math.ceil(Math.max(...ys))+1;
+const pad=36;let sc=Math.min((W-2*pad)/(x1-x0),(H-2*pad)/(y1-y0));sc=Math.min(sc,70);
+const cx=Math.ceil((W/sc-(x1-x0))/2),cy=Math.ceil((H/sc-(y1-y0))/2);x0-=cx;x1+=cx;y0-=cy;y1+=cy;
+const ox=W/2-((x0+x1)/2)*sc,oy=H/2+((y0+y1)/2)*sc;const X=x=>ox+x*sc,Y=y=>oy-y*sc;
+let g='';for(let i=x0;i<=x1;i++)g+=`<line x1="${X(i)}" y1="0" x2="${X(i)}" y2="${H}" stroke="var(--grid)" stroke-width="1"/>`;
+for(let j=y0;j<=y1;j++)g+=`<line x1="0" y1="${Y(j)}" x2="${W}" y2="${Y(j)}" stroke="var(--grid)" stroke-width="1"/>`;
+g+=`<line x1="0" y1="${Y(0)}" x2="${W}" y2="${Y(0)}" stroke="var(--axis)" stroke-width="2"/><line x1="${X(0)}" y1="0" x2="${X(0)}" y2="${H}" stroke="var(--axis)" stroke-width="2"/>`;
+const step=sc<26?(sc<14?5:2):1;let t='';
+for(let i=x0;i<=x1;i++)if(i&&i%step===0)t+=`<text x="${X(i)}" y="${Y(0)+18}" text-anchor="middle" font-size="13" fill="var(--soft)" font-family="Rubik,Verdana">${fmt(i)}</text>`;
+for(let j=y0;j<=y1;j++)if(j&&j%step===0)t+=`<text x="${X(0)-7}" y="${Y(j)+4}" text-anchor="end" font-size="13" fill="var(--soft)" font-family="Rubik,Verdana">${fmt(j)}</text>`;
+t+=`<text x="${X(0)-7}" y="${Y(0)+18}" text-anchor="end" font-size="13" fill="var(--soft)" font-family="Rubik,Verdana">0</text>`;
+let a='';vs.forEach(v=>{let px=X(v.p[0]),py=Y(v.p[1]),qx=X(v.q[0]),qy=Y(v.q[1]);const dx=qx-px,dy=qy-py,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;const sh=v.sh||0;px+=nx*sh;py+=ny*sh;qx+=nx*sh;qy+=ny*sh;
+const col=`var(--${v.c})`,hl=Math.min(18,L*.45),ux=dx/L,uy=dy/L,bx=qx-ux*hl,by=qy-uy*hl;
+a+=`<line x1="${px}" y1="${py}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="${v.c==='res'?5:4}" stroke-linecap="round"/>`;
+a+=`<polygon points="${qx},${qy} ${bx+nx*8},${by+ny*8} ${bx-nx*8},${by-ny*8}" fill="${col}"/>`;
+const side=sh?1:-1,mx=(px+qx)/2+nx*20*side*(sh?1.2:1),my=(py+qy)/2+ny*20*side*(sh?1.2:1);
+a+=`<text x="${mx}" y="${my+6}" text-anchor="middle" font-size="19" font-weight="700" font-style="italic" fill="${col}" font-family="Rubik,Verdana">${v.l}</text>`});
+s.innerHTML=g+`<line x1="22" y1="0" x2="22" y2="${H}" stroke="var(--res)" stroke-opacity=".45" stroke-width="2"/>`+t+a;
+s.setAttribute('aria-label',vs.map(v=>`вектор ${v.l} від (${fmt(v.p[0])}; ${fmt(v.p[1])}) до (${fmt(v.q[0])}; ${fmt(v.q[1])})`).join(', '))}
+const ro=new ResizeObserver(draw);ro.observe(s);
+
+meter();newTask();
+}
+</script>
+</body>
+</html>
