@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Квадратична функція — 9 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning: calm, clear, friendly for 14-year-olds
+   IDEA a math exercise book in squares with a yellow sticky-note cheat sheet clipped beside it
+   PICTURE live parabolas on graph paper that react to sliders, clicks and answers
+   COLOUR white squared paper, ink blue, red margin line as accent, sticky-note yellow
+   TYPE Rubik for everything, Caveat for handwritten notes in the cheat sheet
+   LAYOUT laptop: lesson page left + sticky cheat sheet right; phone: one column, cheat sheet as a pull-up drawer */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0e1524);--grid:light-dark(#e3ebf7,#1a2540);--ink:light-dark(#14213d,#e7edf8);--mute:light-dark(#4d5b78,#a9b6cf);
+--blue:light-dark(#1d4ed8,#7ea6ff);--red:light-dark(#d62839,#ff6f7d);--note:light-dark(#fff1a8,#3a3311);--noteink:light-dark(#2b2405,#fbefb9);
+--ok:light-dark(#127a3a,#5fd38d);--okbg:light-dark(#e3f6ea,#123322);--bad:light-dark(#b3261e,#ff8a80);--badbg:light-dark(#fdeceb,#3a1716);
+--panel:light-dark(#f4f7fc,#152038);--line:light-dark(#c9d5ea,#2a3a5e)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Rubik,system-ui,sans-serif;overflow-x:clip;
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+i.v{font-family:Georgia,'Times New Roman',serif;font-style:italic}
+.m{font-family:Georgia,'Times New Roman',serif;white-space:nowrap}
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:2px solid var(--red);padding:10px max(16px,3vw)}
+.hrow{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand{font-weight:700;font-size:17px}
+.who{color:var(--mute);font-size:14px}
+.prog{display:flex;gap:4px;margin-top:8px}
+.prog button{flex:1;height:10px;border:0;border-radius:5px;background:var(--line);padding:0;cursor:pointer}
+.prog button.v{background:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.prog button.d{background:var(--ok)}
+.prog button.cur{background:var(--blue);outline:2px solid color-mix(in srgb,var(--blue) 40%,transparent);outline-offset:2px}
+.prog button:disabled{cursor:default}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;max-width:1280px;margin:0 auto;padding:22px max(16px,3vw) 110px}
+main{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,3vw,34px);border-left:6px solid var(--red)}
+.slide{display:none}.slide.on{display:block}
+.tag{display:inline-block;font-size:14px;font-weight:500;color:var(--red);margin-bottom:4px}
+h1,h2{font-weight:700;line-height:1.08;letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
+h1{font-size:clamp(30px,4.6vw,46px)}h2{font-size:clamp(26px,3.6vw,36px)}
+h3{font-size:19px;margin:22px 0 8px}
+p{max-width:68ch;margin:0 0 12px}
+.lead{font-size:18px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.fig{position:relative;min-height:320px;border:1px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
+.fig.tall{min-height:380px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.fig.click svg{cursor:crosshair}
+svg text{font:13px Rubik,sans-serif;fill:var(--mute);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+svg .gl{stroke:var(--grid);stroke-width:1}
+svg .ax{stroke:var(--ink);stroke-width:1.5}
+svg .c1{stroke:var(--blue);stroke-width:3;fill:none}
+svg .c2{stroke:var(--red);stroke-width:2.5;fill:none}
+svg .sym{stroke:var(--red);stroke-width:1.5;stroke-dasharray:6 5}
+svg .p1{fill:var(--blue)}svg .p2{fill:var(--red)}svg .p3{fill:var(--ok)}
+svg .pl{fill:var(--ink);font-weight:500}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.def{border-left:5px solid var(--blue);font-size:18px}
+.ctl{display:grid;gap:10px;margin:12px 0}
+.ctl label{display:grid;grid-template-columns:5.5em minmax(0,1fr) 3.6em;gap:10px;align-items:center;font-weight:500}
+.ctl output{font-variant-numeric:tabular-nums;text-align:right}
+input[type=range]{width:100%;accent-color:var(--blue);height:32px}
+.live{display:grid;gap:4px;font-size:15px}
+.live b{color:var(--blue)}
+button,.btn{font:500 16px Rubik,sans-serif;min-height:44px;padding:10px 18px;border-radius:10px;border:2px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--blue)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 55%,transparent);outline-offset:2px}
+input[type=text],select,textarea{font:16px Rubik,sans-serif;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;min-height:44px}
+input.n{width:5.2em;text-align:center}
+textarea{width:100%;min-height:84px;resize:vertical}
+.field{display:grid;gap:6px;margin:12px 0;max-width:460px}
+.field span{font-weight:500}
+.task{counter-reset:none}
+.tnum{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--red)}
+.state{font-size:14px;font-weight:500;color:var(--mute);margin-left:6px}
+.state.ok{color:var(--ok)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(13em,1fr));gap:10px;margin:12px 0}
+.opt{display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:48px;cursor:pointer;background:var(--bg)}
+.opt input{width:20px;height:20px;accent-color:var(--blue);flex:none}
+.opt:has(input:checked){border-color:var(--blue);background:color-mix(in srgb,var(--blue) 8%,var(--bg))}
+.rows{display:grid;gap:10px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.row .fx{min-width:9.5em;font-size:17px}
+.scroll{overflow-x:auto}
+table.vt{border-collapse:collapse;margin:10px 0;font-variant-numeric:tabular-nums}
+table.vt th,table.vt td{border:1px solid var(--line);padding:6px 8px;text-align:center;background:var(--bg)}
+table.vt th{background:var(--panel)}
+.fb{display:none;margin:12px 0;padding:12px 14px;border-radius:10px;font-weight:500}
+.fb.ok{display:block;background:var(--okbg);color:var(--ok)}
+.fb.bad{display:block;background:var(--badbg);color:var(--bad)}
+.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.hint{background:none;border:0;color:var(--blue);padding:6px 0;min-height:44px;text-decoration:underline;text-underline-offset:3px}
+.sol{display:none;border-left:5px solid var(--ok);background:var(--panel);border-radius:10px;padding:12px 16px;margin-top:12px}
+.sol.on{display:block}
+.sol p{margin:4px 0}
+.steps{display:grid;gap:8px;padding:0;margin:12px 0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:2em minmax(0,1fr);gap:8px;align-items:start;opacity:.28;transition:opacity .3s}
+.steps li.on{opacity:1}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:1.8em;height:1.8em;border-radius:50%;background:var(--blue);color:#fff;font-weight:700;font-size:14px}
+nav.pager{display:flex;justify-content:space-between;gap:12px;margin-top:26px;padding-top:16px;border-top:1px dashed var(--line)}
+.lockmsg{font-size:14px;color:var(--mute);align-self:center;text-align:center}
+aside{position:sticky;top:96px;align-self:start;max-height:calc(100vh - 112px);overflow:auto;background:var(--note);color:var(--noteink);border-radius:4px 4px 14px 4px;padding:18px 18px 20px;box-shadow:0 2px 0 color-mix(in srgb,var(--noteink) 18%,transparent);transform:rotate(.4deg)}
+aside h2{font-family:Caveat,cursive;font-size:34px;margin:0 0 6px;letter-spacing:0}
+aside section{padding:10px 8px;border-radius:8px;border-bottom:1px dashed color-mix(in srgb,var(--noteink) 25%,transparent);transition:background .3s}
+aside section.hl{background:color-mix(in srgb,var(--red) 18%,transparent)}
+aside h4{font-family:Caveat,cursive;font-size:24px;margin:0 0 2px;line-height:1.1}
+aside p,aside li{font-size:15px;margin:2px 0}
+aside ol{margin:4px 0;padding-left:1.3em}
+.f{font-family:Georgia,serif;font-size:17px;white-space:nowrap}
+.csbtn,.csclose{display:none}
+.rate{display:grid;gap:8px;margin:10px 0}
+.report{border:2px solid var(--blue);border-radius:14px;padding:18px;background:var(--bg)}
+.report dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 16px;margin:8px 0}
+.report dt{color:var(--mute)}.report dd{margin:0;font-weight:500}
+.code{font:14px/1.4 ui-monospace,Consolas,monospace;overflow-wrap:anywhere;background:var(--panel);border:1px dashed var(--line);border-radius:8px;padding:10px;user-select:all}
+.big{font-size:clamp(40px,7vw,64px);font-weight:700;line-height:1;color:var(--blue)}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:14px;font-weight:500}
+.pill.ok{background:var(--okbg);color:var(--ok)}.pill.bad{background:var(--badbg);color:var(--bad)}.pill.mid{background:var(--note);color:var(--noteink)}
+.overlay{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,#000 45%,transparent);display:none;place-items:center;padding:16px}
+.overlay.on{display:grid}
+.dlg{background:var(--bg);border-radius:14px;padding:22px;max-width:640px;width:100%;max-height:90vh;overflow:auto}
+footer{max-width:1280px;margin:0 auto;padding:0 max(16px,3vw) 30px;color:var(--mute);font-size:14px}
+footer button{min-height:44px}
+@media(max-width:980px){
+.wrap{grid-template-columns:minmax(0,1fr)}
+aside{position:fixed;left:8px;right:8px;bottom:8px;top:auto;max-height:72vh;z-index:40;transform:translateY(110%);transition:transform .3s;box-shadow:0 -6px 30px color-mix(in srgb,#000 25%,transparent)}
+aside.open{transform:none}
+.csbtn{display:block;position:fixed;right:14px;bottom:14px;z-index:30;background:var(--note);color:var(--noteink);border-color:color-mix(in srgb,var(--noteink) 40%,transparent);font-weight:700;box-shadow:0 4px 14px color-mix(in srgb,#000 20%,transparent)}
+.csclose{display:block;position:sticky;top:0;margin-left:auto;background:var(--noteink);color:var(--note);border:0;min-height:40px;padding:6px 14px}
+}
+@media(max-width:640px){.two{grid-template-columns:minmax(0,1fr)}main{border-left-width:4px}.ctl label{grid-template-columns:4.2em minmax(0,1fr) 3.2em}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow"><div class="brand">Алгебра · 9 клас · Квадратична функція</div><div class="who" id="who">Самостійна робота з теми</div></div>
+  <div class="prog" id="prog"></div>
+</header>
+
+<div class="wrap">
+<main id="main">
+
+<!-- 0 START -->
+<section class="slide" data-t="Початок">
+  <span class="tag">Урок самостійного опрацювання · 27 листопада 2026</span>
+  <h1>Функція <span class="m">y = ax² + bx + c</span>, її графік і властивості</h1>
+  <p class="lead">Сьогодні ти сам(а) розберешся, що таке квадратична функція, як знайти вершину параболи і як швидко побудувати графік.</p>
+  <div class="box">
+    <p><b>Як працювати:</b></p>
+    <ol style="margin:0;padding-left:1.3em">
+      <li>Прочитай 4 сторінки теорії й покрути інтерактивні графіки.</li>
+      <li>Виконай 7 завдань. Кожне перевіряється одразу. Наступне відкривається, коли розв'язане попереднє.</li>
+      <li>Застрягнув(-ла)? Відкривай <b>шпаргалку</b> (жовтий листок праворуч або кнопка внизу на телефоні).</li>
+      <li>Пройди міні-тест (8 питань, одна спроба) і заповни рефлексію.</li>
+      <li>Наприкінці отримаєш <b>звіт із кодом</b>. Надішли його вчителеві.</li>
+    </ol>
+  </div>
+  <div class="field"><span>Прізвище та ім'я</span><input type="text" id="sname" autocomplete="name" placeholder="Наприклад: Коваленко Марія"></div>
+  <div class="field"><span>Клас</span><input type="text" id="sclass" placeholder="9-А"></div>
+  <div class="fb" id="startfb"></div>
+  <div class="acts" id="resume" hidden><span>Є збережений прогрес на цьому пристрої.</span><button class="ghost" id="restart">Почати заново</button></div>
+</section>
+
+<!-- 1 DEFINITION -->
+<section class="slide" data-t="Теорія 1">
+  <span class="tag">Теорія · 1 з 4</span>
+  <h2>Що таке квадратична функція</h2>
+  <div class="box def">Функцію виду <span class="m"><i class="v">y</i> = <i class="v">a</i><i class="v">x</i>² + <i class="v">b</i><i class="v">x</i> + <i class="v">c</i></span>, де <i class="v">x</i> — змінна, <i class="v">a</i>, <i class="v">b</i>, <i class="v">c</i> — числа і <b><i class="v">a</i> ≠ 0</b>, називають <b>квадратичною функцією</b>.</div>
+  <p>Головна ознака: найвищий степінь змінної <i class="v">x</i> дорівнює <b>2</b>. Коефіцієнти <i class="v">b</i> і <i class="v">c</i> можуть дорівнювати нулю, а <i class="v">a</i> — ніколи (інакше зникне <i class="v">x</i>² і вийде лінійна функція).</p>
+  <div class="scroll"><table class="vt">
+    <tr><th>Функція</th><th>a</th><th>b</th><th>c</th></tr>
+    <tr><td class="m">y = 3x² − 5x + 2</td><td>3</td><td>−5</td><td>2</td></tr>
+    <tr><td class="m">y = −x² + 4</td><td>−1</td><td>0</td><td>4</td></tr>
+    <tr><td class="m">y = 0,5x² − x</td><td>0,5</td><td>−1</td><td>0</td></tr>
+    <tr><td class="m">y = 7x²</td><td>7</td><td>0</td><td>0</td></tr>
+  </table></div>
+  <p>Графік будь-якої квадратичної функції — <b>парабола</b>. Найпростіша парабола — графік <span class="m">y = x²</span>.</p>
+  <div class="box">
+    <b>Перевір себе (без оцінки):</b> для функції <span class="m">y = 4 − 2x² + x</span> визнач коефіцієнти.
+    <div class="row" style="margin-top:8px;border:0;padding:0;background:none">
+      <label>a = <input type="text" class="n" id="q0a" inputmode="decimal"></label>
+      <label>b = <input type="text" class="n" id="q0b" inputmode="decimal"></label>
+      <label>c = <input type="text" class="n" id="q0c" inputmode="decimal"></label>
+      <button class="ghost" id="q0">Перевірити</button>
+    </div>
+    <div class="fb" id="q0fb"></div>
+  </div>
+</section>
+
+<!-- 2 y=ax^2 -->
+<section class="slide" data-t="Теорія 2">
+  <span class="tag">Теорія · 2 з 4</span>
+  <h2>Функція <span class="m">y = ax²</span>: як <i class="v">a</i> змінює параболу</h2>
+  <div class="two">
+    <div>
+      <div class="fig tall" id="fa"><svg></svg></div>
+      <div class="ctl"><label>a <input type="range" id="ra" min="-3" max="3" step="0.1" value="1"><output id="oa">1</output></label></div>
+    </div>
+    <div>
+      <p>Рухай повзунок і стеж, що відбувається.</p>
+      <div class="box live" id="la"></div>
+      <h3>Запам'ятай</h3>
+      <p>Вершина параболи <span class="m">y = ax²</span> завжди в точці <b>(0; 0)</b>, вісь симетрії — вісь <i class="v">Oy</i>.</p>
+      <p><b>a &gt; 0</b> — гілки вгору; <b>a &lt; 0</b> — гілки вниз.</p>
+      <p>Чим більше <span class="m">|a|</span>, тим «вужча» парабола; чим ближче <i class="v">a</i> до нуля, тим вона «ширша».</p>
+      <p>Значення функції в точках <i class="v">x</i> і −<i class="v">x</i> однакові, бо <span class="m">(−x)² = x²</span>. Тому таблицю значень можна рахувати лише для додатних <i class="v">x</i>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 y=ax^2+bx+c -->
+<section class="slide" data-t="Теорія 3">
+  <span class="tag">Теорія · 3 з 4</span>
+  <h2>Парабола <span class="m">y = ax² + bx + c</span> і її вершина</h2>
+  <div class="two">
+    <div>
+      <div class="fig tall" id="fb3"><svg></svg></div>
+      <div class="ctl">
+        <label>a <input type="range" id="r3a" min="-2" max="2" step="0.5" value="1"><output id="o3a"></output></label>
+        <label>b <input type="range" id="r3b" min="-6" max="6" step="1" value="-4"><output id="o3b"></output></label>
+        <label>c <input type="range" id="r3c" min="-6" max="6" step="1" value="-5"><output id="o3c"></output></label>
+      </div>
+    </div>
+    <div>
+      <p>Графік — та сама парабола, лише <b>зсунута</b>. Щоб її побудувати, спочатку знаходимо вершину:</p>
+      <div class="box def"><span class="m">x₀ = −b / (2a)</span>, &nbsp; <span class="m">y₀ = y(x₀)</span></div>
+      <p>Пряма <span class="m">x = x₀</span> — вісь симетрії параболи (червона пунктирна).</p>
+      <div class="box live" id="l3"></div>
+      <p style="font-size:14px;color:var(--mute)">Синя точка — вершина, червоні — нулі функції, зелена — перетин з віссю Oy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 algorithm + example -->
+<section class="slide" data-t="Теорія 4">
+  <span class="tag">Теорія · 4 з 4 · Розібраний приклад</span>
+  <h2>Будуємо графік <span class="m">y = x² − 4x − 5</span> крок за кроком</h2>
+  <div class="two">
+    <div><div class="fig tall" id="f4"><svg></svg></div>
+      <div class="acts"><button id="st4">Наступний крок</button><button class="ghost" id="st4r">Спочатку</button></div></div>
+    <div>
+      <ol class="steps" id="steps4">
+        <li><div><b>Напрям гілок.</b> a = 1 &gt; 0, отже гілки напрямлені вгору.</div></li>
+        <li><div><b>Вершина.</b> x₀ = −(−4) / (2·1) = 2; &nbsp; y₀ = 2² − 4·2 − 5 = −9. Вершина (2; −9).</div></li>
+        <li><div><b>Вісь симетрії:</b> пряма x = 2.</div></li>
+        <li><div><b>Нулі функції:</b> x² − 4x − 5 = 0, D = 16 + 20 = 36, x = −1 або x = 5. Точки (−1; 0) і (5; 0).</div></li>
+        <li><div><b>Перетин з Oy:</b> x = 0, y = −5, точка (0; −5). Симетрична їй відносно x = 2 — точка (4; −5).</div></li>
+        <li><div><b>Проводимо</b> плавну лінію через усі точки. Готово!</div></li>
+      </ol>
+      <div class="box" id="props4" hidden>
+        <b>Властивості за графіком:</b>
+        <p style="margin:4px 0">1) D(y) = (−∞; +∞); &nbsp;2) E(y) = [−9; +∞);</p>
+        <p style="margin:4px 0">3) нулі: x = −1 і x = 5;</p>
+        <p style="margin:4px 0">4) y &gt; 0 при x &lt; −1 або x &gt; 5; &nbsp;y &lt; 0 при −1 &lt; x &lt; 5;</p>
+        <p style="margin:4px 0">5) спадає на (−∞; 2], зростає на [2; +∞);</p>
+        <p style="margin:4px 0">6) найменше значення y = −9 (при x = 2).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 TASK 1 -->
+<section class="slide task" data-t="Завдання 1" data-task="t1">
+  <span class="tnum">Завдання 1 з 7 <span class="state" id="st_t1"></span></span>
+  <h2>Які з функцій є квадратичними?</h2>
+  <p>Познач <b>усі</b> правильні варіанти.</p>
+  <div class="opts" id="t1o"></div>
+  <div class="fb" id="fb_t1"></div>
+  <div class="acts"><button data-check="t1">Перевірити</button><button class="hint" data-cs="cs-def">Підказка в шпаргалці</button><button class="ghost" data-sol="t1" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t1"><p>Квадратичні: y = 3x² − 2x + 1; y = 7 − x² (a = −1); y = 0,5x²; y = (x + 2)², бо (x + 2)² = x² + 4x + 4.</p><p>Не квадратичні: y = 5x − 4 (лінійна); y = 2/x² + 1 (x у знаменнику); y = x³ − x² (є x³).</p></div>
+</section>
+
+<!-- 6 TASK 2 -->
+<section class="slide task" data-t="Завдання 2" data-task="t2">
+  <span class="tnum">Завдання 2 з 7 <span class="state" id="st_t2"></span></span>
+  <h2>Чи є графік параболою? Куди напрямлені гілки?</h2>
+  <p>Для кожної функції обери відповідь.</p>
+  <div class="rows" id="t2r"></div>
+  <div class="fb" id="fb_t2"></div>
+  <div class="acts"><button data-check="t2">Перевірити</button><button class="hint" data-cs="cs-dir">Підказка в шпаргалці</button><button class="ghost" data-sol="t2" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t2"><p>Дивимось на коефіцієнт при x²: якщо він додатний — гілки вгору, якщо від'ємний — вниз. Якщо x² немає (або є x³, 1/x) — це не парабола.</p><p>1) вгору (a = 2); 2) вниз (a = −1); 3) не парабола; 4) вгору (a = 0,1); 5) вниз (a = −½); 6) не парабола.</p></div>
+</section>
+
+<!-- 7 TASK 3 -->
+<section class="slide task" data-t="Завдання 3" data-task="t3">
+  <span class="tnum">Завдання 3 з 7 <span class="state" id="st_t3"></span></span>
+  <h2>Таблиця значень функції <span class="m">f(x) = 0,2x²</span></h2>
+  <div class="two">
+    <div>
+      <p>Заповни таблицю (для −x значення такі самі, як для x).</p>
+      <div class="scroll"><table class="vt"><tr><th>x</th><th>0</th><th>±1</th><th>±2</th><th>±3</th><th>±4</th><th>±5</th></tr>
+      <tr><th>f(x)</th><td><input class="n" id="t3_0" inputmode="decimal"></td><td><input class="n" id="t3_1" inputmode="decimal"></td><td><input class="n" id="t3_2" inputmode="decimal"></td><td><input class="n" id="t3_3" inputmode="decimal"></td><td><input class="n" id="t3_4" inputmode="decimal"></td><td><input class="n" id="t3_5" inputmode="decimal"></td></tr></table></div>
+      <p>Обчисли також:</p>
+      <div class="row" style="border:0;padding:0;background:none"><label>f(−1,5) = <input class="n" id="t3_a" inputmode="decimal"></label><label>f(2,5) = <input class="n" id="t3_b" inputmode="decimal"></label></div>
+    </div>
+    <div class="fig" id="f3t"><svg></svg></div>
+  </div>
+  <div class="fb" id="fb_t3"></div>
+  <div class="acts"><button data-check="t3">Перевірити</button><button class="hint" data-cs="cs-input">Як вводити дроби</button><button class="ghost" data-sol="t3" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t3"><p>0,2·0² = 0; 0,2·1 = 0,2; 0,2·4 = 0,8; 0,2·9 = 1,8; 0,2·16 = 3,2; 0,2·25 = 5.</p><p>f(−1,5) = 0,2·2,25 = 0,45; f(2,5) = 0,2·6,25 = 1,25.</p></div>
+</section>
+
+<!-- 8 TASK 4 -->
+<section class="slide task" data-t="Завдання 4" data-task="t4">
+  <span class="tnum">Завдання 4 з 7 <span class="state" id="st_t4"></span></span>
+  <h2>Точки перетину графіка <span class="m">y = −2x²</span> з прямою</h2>
+  <p>Не будуючи графіків, знайди координати точок перетину. Порядок точок неважливий. Якщо перетину немає — постав позначку.</p>
+  <div class="rows" id="t4r"></div>
+  <div class="fb" id="fb_t4"></div>
+  <div class="acts"><button data-check="t4">Перевірити</button><button class="hint" data-cs="cs-cross">Підказка в шпаргалці</button><button class="ghost" data-sol="t4" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t4"><p>Прирівнюємо праві частини.</p><p>1) −2x² = −8 → x² = 4 → x = ±2; y = −8. Точки (−2; −8), (2; −8).</p><p>2) −2x² = 10 → x² = −5 — коренів немає, графіки не перетинаються.</p><p>3) −2x² = 4x → x(x + 2) = 0 → x = 0 або x = −2; y = 4x: (0; 0), (−2; −8).</p></div>
+</section>
+
+<!-- 9 TASK 5 -->
+<section class="slide task" data-t="Завдання 5" data-task="t5">
+  <span class="tnum">Завдання 5 з 7 <span class="state" id="st_t5"></span></span>
+  <h2>Дослідимо параболу <span class="m">y = x² − 8x + 7</span></h2>
+  <div class="two">
+    <div class="rows">
+      <div class="row"><span class="fx">Гілки напрямлені</span><select id="t5_d"><option value="">— обери —</option><option value="up">вгору</option><option value="down">вниз</option></select></div>
+      <div class="row"><span class="fx">Вершина (x₀; y₀)</span>( <input class="n" id="t5_x" inputmode="decimal"> ; <input class="n" id="t5_y" inputmode="decimal"> )</div>
+      <div class="row"><span class="fx">Вісь симетрії</span>x = <input class="n" id="t5_s" inputmode="decimal"></div>
+      <div class="row"><span class="fx">Нулі функції</span>x₁ = <input class="n" id="t5_r1" inputmode="decimal"> x₂ = <input class="n" id="t5_r2" inputmode="decimal"></div>
+      <div class="row"><span class="fx">Перетин з Oy</span>(0 ; <input class="n" id="t5_c" inputmode="decimal"> )</div>
+    </div>
+    <div class="fig" id="f5t"><svg></svg></div>
+  </div>
+  <div class="fb" id="fb_t5"></div>
+  <div class="acts"><button data-check="t5">Перевірити</button><button class="hint" data-cs="cs-vertex">Підказка в шпаргалці</button><button class="ghost" data-sol="t5" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t5"><p>a = 1 &gt; 0 — гілки вгору. x₀ = −(−8)/(2·1) = 4; y₀ = 16 − 32 + 7 = −9. Вершина (4; −9), вісь x = 4.</p><p>x² − 8x + 7 = 0: D = 64 − 28 = 36, x₁ = 1, x₂ = 7. Перетин з Oy: (0; 7).</p></div>
+</section>
+
+<!-- 10 TASK 6 -->
+<section class="slide task" data-t="Завдання 6" data-task="t6">
+  <span class="tnum">Завдання 6 з 7 <span class="state" id="st_t6"></span></span>
+  <h2>Точки перетину з осями координат</h2>
+  <p>Не будуючи графіка, знайди нулі функції (перетин з Ox) і точку перетину з Oy. Нулі можна вводити в будь-якому порядку.</p>
+  <div class="rows">
+    <div class="row"><span class="fx">1) y = x² − 7x + 10</span>з Ox: x = <input class="n" id="t6_a1" inputmode="decimal"> і x = <input class="n" id="t6_a2" inputmode="decimal"> &nbsp; з Oy: (0; <input class="n" id="t6_ac" inputmode="decimal">)</div>
+    <div class="row"><span class="fx">2) y = 2x² − x − 3</span>з Ox: x = <input class="n" id="t6_b1" inputmode="decimal"> і x = <input class="n" id="t6_b2" inputmode="decimal"> &nbsp; з Oy: (0; <input class="n" id="t6_bc" inputmode="decimal">)</div>
+  </div>
+  <div class="fb" id="fb_t6"></div>
+  <div class="acts"><button data-check="t6">Перевірити</button><button class="hint" data-cs="cs-zeros">Підказка в шпаргалці</button><button class="ghost" data-sol="t6" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t6"><p>1) x² − 7x + 10 = 0: D = 49 − 40 = 9, x = (7 ± 3)/2 → x = 2, x = 5. При x = 0: y = 10 → (0; 10).</p><p>2) 2x² − x − 3 = 0: D = 1 + 24 = 25, x = (1 ± 5)/4 → x = 1,5, x = −1. При x = 0: y = −3 → (0; −3).</p></div>
+</section>
+
+<!-- 11 TASK 7 -->
+<section class="slide task" data-t="Завдання 7" data-task="t7">
+  <span class="tnum">Завдання 7 з 7 <span class="state" id="st_t7"></span></span>
+  <h2>Побудуй графік <span class="m">y = x² − 2x</span></h2>
+  <div class="two">
+    <div><div class="fig tall click" id="f7t"><svg></svg></div>
+    <div class="acts"><button class="ghost" id="t7clr">Очистити точки</button><span id="t7n" style="color:var(--mute)">Точок: 0</span></div></div>
+    <div>
+      <p><b>Клацай по клітинках</b>, щоб поставити точки параболи (повторне клацання прибирає точку). Потрібно щонайменше <b>5 точок</b>, серед них — <b>вершина</b>.</p>
+      <p>Потім за графіком дай відповіді:</p>
+      <div class="rows">
+        <div class="row"><span class="fx">Область значень E(y)</span><select id="t7_e"><option value="">— обери —</option><option value="a">(−∞; +∞)</option><option value="b">[−1; +∞)</option><option value="c">(−∞; −1]</option><option value="d">[1; +∞)</option></select></div>
+        <div class="row"><span class="fx">Функція зростає на</span><select id="t7_g"><option value="">— обери —</option><option value="a">(−∞; 1]</option><option value="b">[−1; +∞)</option><option value="c">[1; +∞)</option><option value="d">[0; +∞)</option></select></div>
+      </div>
+    </div>
+  </div>
+  <div class="fb" id="fb_t7"></div>
+  <div class="acts"><button data-check="t7">Перевірити</button><button class="hint" data-cs="cs-algo">Підказка в шпаргалці</button><button class="ghost" data-sol="t7" hidden>Показати розв'язання</button></div>
+  <div class="sol" id="sol_t7"><p>a = 1 &gt; 0, гілки вгору. x₀ = 2/2 = 1, y₀ = 1 − 2 = −1, вершина (1; −1).</p><p>Точки: (0; 0) і (2; 0); (−1; 3) і (3; 3); (−2; 8) і (4; 8).</p><p>E(y) = [−1; +∞); зростає на [1; +∞), спадає на (−∞; 1].</p></div>
+</section>
+
+<!-- 12 TEST -->
+<section class="slide" data-t="Міні-тест">
+  <span class="tag">Міні-тест · 8 питань · одна спроба</span>
+  <h2>Перевір, як ти засвоїв(-ла) тему</h2>
+  <p>Відповідай уважно: після натискання «Завершити тест» змінити відповіді не можна. Шпаргалкою користуватися можна.</p>
+  <div id="testq"></div>
+  <div class="fb" id="testfb"></div>
+  <div class="acts"><button id="testgo">Завершити тест</button></div>
+</section>
+
+<!-- 13 REFLECTION -->
+<section class="slide" data-t="Рефлексія">
+  <span class="tag">Рефлексія</span>
+  <h2>Як пройшов урок?</h2>
+  <p><b>Наскільки ти зрозумів(-ла) тему?</b></p>
+  <div class="rate" id="rate">
+    <label class="opt"><input type="radio" name="rate" value="4"> Усе зрозуміло, можу пояснити іншим</label>
+    <label class="opt"><input type="radio" name="rate" value="3"> Зрозумів(-ла), але потрібно ще потренуватися</label>
+    <label class="opt"><input type="radio" name="rate" value="2"> Розібрався(-лась) лише частково</label>
+    <label class="opt"><input type="radio" name="rate" value="1"> Потрібна допомога вчителя</label>
+  </div>
+  <div class="field" style="max-width:none"><span>Що нового я дізнався(-лась)?</span><textarea id="r_new"></textarea></div>
+  <div class="field" style="max-width:none"><span>Що було найскладнішим?</span><textarea id="r_hard"></textarea></div>
+  <div class="field" style="max-width:none"><span>Яке питання хочу поставити вчителеві? (можна залишити порожнім)</span><textarea id="r_q"></textarea></div>
+  <div class="ctl"><label>Моя оцінка своєї роботи <input type="range" id="r_self" min="1" max="12" step="1" value="8"><output id="r_selfo">8</output></label></div>
+  <div class="fb" id="reflfb"></div>
+</section>
+
+<!-- 14 REPORT -->
+<section class="slide" data-t="Звіт">
+  <span class="tag">Звіт для вчителя</span>
+  <h2>Готово! Надішли звіт учителеві</h2>
+  <div id="repbody"></div>
+</section>
+
+<nav class="pager"><button class="ghost" id="prev">Назад</button><span class="lockmsg" id="lock"></span><button id="next">Далі</button></nav>
+</main>
+
+<aside id="cs" aria-label="Шпаргалка">
+  <button class="csclose" id="csclose">Закрити</button>
+  <h2>Шпаргалка</h2>
+  <section id="cs-def"><h4>Квадратична функція</h4><p class="f">y = ax² + bx + c, a ≠ 0</p><p>Найвищий степінь x — другий. Розкрий дужки, якщо вони є: (x + 2)² = x² + 4x + 4.</p></section>
+  <section id="cs-dir"><h4>Куди дивляться гілки</h4><p><b>a &gt; 0</b> — вгору ∪ &nbsp; <b>a &lt; 0</b> — вниз ∩</p><p>a — число перед x², з його знаком.</p></section>
+  <section id="cs-vertex"><h4>Вершина і вісь</h4><p class="f">x₀ = −b / (2a)</p><p>y₀ — підстав x₀ у формулу функції.</p><p>Вісь симетрії: пряма <span class="f">x = x₀</span>.</p><p>Для y = ax² вершина (0; 0).</p></section>
+  <section id="cs-zeros"><h4>Нулі (перетин з Ox)</h4><p>Розв'яжи ax² + bx + c = 0:</p><p class="f">D = b² − 4ac, &nbsp;x = (−b ± √D) / (2a)</p><p>D &gt; 0 — 2 точки, D = 0 — 1, D &lt; 0 — жодної.</p></section>
+  <section id="cs-oy"><h4>Перетин з Oy</h4><p>Підстав x = 0: точка <b>(0; c)</b>.</p></section>
+  <section id="cs-algo"><h4>Алгоритм побудови</h4><ol><li>Напрям гілок (знак a).</li><li>Вершина (x₀; y₀).</li><li>Вісь симетрії x = x₀.</li><li>Нулі та точка (0; c).</li><li>Ще 2–4 точки поруч із вершиною — вони парні, симетричні відносно осі.</li><li>Плавна лінія через усі точки.</li></ol></section>
+  <section id="cs-props"><h4>Властивості (a &gt; 0)</h4><p>D(y) = (−∞; +∞); E(y) = [y₀; +∞)</p><p>спадає на (−∞; x₀], зростає на [x₀; +∞)</p><p>найменше значення y₀. Якщо a &lt; 0 — усе навпаки, y₀ найбільше.</p></section>
+  <section id="cs-cross"><h4>Перетин двох графіків</h4><p>Прирівняй праві частини, розв'яжи рівняння — отримаєш x. Потім знайди y з рівняння прямої.</p><p>Коренів немає → графіки не перетинаються.</p></section>
+  <section id="cs-input"><h4>Як вводити відповіді</h4><p>Дроби — через кому або крапку: 0,45 або 0.45. Мінус — звичайний дефіс: −3 → -3.</p><p>Після 3 невдалих спроб з'явиться кнопка «Показати розв'язання» (але бали за завдання не нараховуються).</p></section>
+</aside>
+</div>
+<button class="csbtn" id="csbtn">Шпаргалка</button>
+<footer><button class="hint" id="teach">Для вчителя: перевірити код звіту</button></footer>
+
+<div class="overlay" id="tdlg"><div class="dlg">
+  <h2 style="font-size:28px">Перевірка звіту</h2>
+  <p>Вставте код, який надіслав учень. Сторінка розшифрує його та перевірить, чи код не було змінено вручну.</p>
+  <textarea id="tcode" placeholder="KF-…"></textarea>
+  <div class="acts"><button id="tgo">Перевірити</button><button class="ghost" id="tclose">Закрити</button></div>
+  <div id="tout"></div>
+</div></div>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>{v=Math.round(v*100)/100;if(Object.is(v,-0))v=0;return String(v).replace('.',',').replace('-','−')};
+const num=s=>{s=String(s??'').trim().replace(/\s/g,'').replace(',','.').replace(/[−–—]/g,'-');if(!/^-?\d*\.?\d+$/.test(s))return NaN;return parseFloat(s)};
+const eq=(a,b)=>Math.abs(a-b)<1e-9;
+const TASKS=['t1','t2','t3','t4','t5','t6','t7'];
+const KEY='kvf9-lesson-v1';
+const fresh=()=>({name:'',cls:'',start:0,end:0,cur:0,max:0,tasks:Object.fromEntries(TASKS.map(t=>[t,{att:0,ok:false,sol:false}])),inp:{},test:{order:null,ans:{},done:false,score:0},refl:{rate:'',nw:'',hard:'',q:'',self:8}});
+let S=fresh();
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(fresh(),JSON.parse(raw))}catch(e){}
+if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
+window.claude?.hot?.snapshot?.(()=>({S}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+/* ---------- plotting ---------- */
+function plot(fig,o){fig._o=o;if(!fig._ro){fig._ro=new ResizeObserver(()=>draw(fig));fig._ro.observe(fig);const svg=fig.querySelector('svg');svg.addEventListener('click',e=>{const q=fig._o;if(!q||!q.click)return;const r=svg.getBoundingClientRect(),m=q._m;const x=q.xr[0]+(e.clientX-r.left-m)/(r.width-2*m)*(q.xr[1]-q.xr[0]);const y=q.yr[1]-(e.clientY-r.top-m)/(r.height-2*m)*(q.yr[1]-q.yr[0]);q.click(Math.round(x),Math.round(y))})}draw(fig)}
+function draw(fig){const o=fig._o,svg=fig.querySelector('svg');const W=fig.clientWidth,H=fig.clientHeight;if(!o||!W||!H)return;
+ const m=14;o._m=m;const [x0,x1]=o.xr,[y0,y1]=o.yr;const X=x=>m+(x-x0)/(x1-x0)*(W-2*m),Y=y=>H-m-(y-y0)/(y1-y0)*(H-2*m);
+ const pxu=(W-2*m)/(x1-x0),pyu=(H-2*m)/(y1-y0);const sx=pxu<26?2:1,sy=pyu<20?(pyu<8?5:2):1;let h='';
+ for(let x=Math.ceil(x0);x<=x1;x++)h+=`<line class="gl" x1="${X(x)}" x2="${X(x)}" y1="0" y2="${H}"/>`;
+ for(let y=Math.ceil(y0);y<=y1;y++)h+=`<line class="gl" y1="${Y(y)}" y2="${Y(y)}" x1="0" x2="${W}"/>`;
+ h+=`<line class="ax" x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/><line class="ax" y1="0" y2="${H}" x1="${X(0)}" x2="${X(0)}"/>`;
+ h+=`<path d="M${W-1} ${Y(0)} l-9 -5 v10z" fill="currentColor" style="color:var(--ink)"/><path d="M${X(0)} 1 l-5 9 h10z" fill="currentColor" style="color:var(--ink)"/>`;
+ h+=`<text x="${W-14}" y="${Y(0)-8}" text-anchor="end">x</text><text x="${X(0)+8}" y="14">y</text>`;
+ for(let x=Math.ceil(x0);x<x1;x++){if(x===0||x%sx)continue;h+=`<text x="${X(x)}" y="${Y(0)+16}" text-anchor="middle">${fmt(x)}</text>`}
+ for(let y=Math.ceil(y0);y<y1;y++){if(y===0||y%sy)continue;h+=`<text x="${X(0)-6}" y="${Y(y)+4}" text-anchor="end">${fmt(y)}</text>`}
+ const cid=fig.id+'c';h+=`<defs><clipPath id="${cid}"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#${cid})">`;
+ if(o.axis!=null)h+=`<line class="sym" x1="${X(o.axis)}" x2="${X(o.axis)}" y1="0" y2="${H}"/>`;
+ (o.fns||[]).forEach(fn=>{let d='',N=Math.max(80,Math.round(W/2));for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N;let y=fn.f(x);y=Math.max(y0-(y1-y0),Math.min(y1+(y1-y0),y));d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1)}h+=`<path class="${fn.c||'c1'}" d="${d}"/>`});
+ h+='</g>';
+ (o.pts||[]).forEach(p=>{h+=`<circle class="${p.c||'p1'}" cx="${X(p.x)}" cy="${Y(p.y)}" r="${p.r||6}"/>`;if(p.l){const right=X(p.x)<W-90;h+=`<text class="pl" x="${X(p.x)+(right?10:-10)}" y="${Y(p.y)-9}" text-anchor="${right?'start':'end'}">${esc(p.l)}</text>`}});
+ svg.innerHTML=h}
+const P=(x,y,c,l)=>({x,y,c,l:l===undefined?`(${fmt(x)}; ${fmt(y)})`:l});
+
+/* ---------- theory 1 self-check ---------- */
+$('q0').onclick=()=>{const ok=eq(num($('q0a').value),-2)&&eq(num($('q0b').value),1)&&eq(num($('q0c').value),4);const f=$('q0fb');f.className='fb '+(ok?'ok':'bad');f.textContent=ok?'Так! Члени можна записувати в будь-якому порядку: a = −2 (перед x²), b = 1 (перед x), c = 4.':'Ще раз: a — число перед x², b — перед x, c — вільний член. Не забудь про знак.'};
+
+/* ---------- theory 2 ---------- */
+function upA(){const a=+$('ra').value;$('oa').textContent=fmt(a);const fig=$('fa');
+ if(a===0){plot(fig,{xr:[-5,5],yr:[-8,8],fns:[{f:()=>0,c:'c2'}]});$('la').innerHTML='<b>a = 0</b> — це вже не квадратична функція: y = 0, графік — пряма (вісь Ox).';return}
+ plot(fig,{xr:[-5,5],yr:[-8,8],fns:[{f:x=>x*x,c:'c2'},{f:x=>a*x*x}],pts:[P(0,0,'p1','вершина (0; 0)'),P(1,a,'p1',`(1; ${fmt(a)})`)],axis:0});
+ $('la').innerHTML=`<div>Функція: <b class="m">y = ${fmt(a)}x²</b> (червона — для порівняння y = x²)</div><div>Гілки: <b>${a>0?'вгору':'вниз'}</b>, бо a ${a>0?'&gt;':'&lt;'} 0</div><div>Форма: <b>${Math.abs(a)>1?'вужча за y = x²':Math.abs(a)<1?'ширша за y = x²':'як y = x²'}</b></div><div>E(y) = <b>${a>0?'[0; +∞)':'(−∞; 0]'}</b>; ${a>0?'зростає на [0; +∞)':'спадає на [0; +∞)'}</div>`}
+$('ra').oninput=upA;
+
+/* ---------- theory 3 ---------- */
+function up3(){const a=+$('r3a').value,b=+$('r3b').value,c=+$('r3c').value;$('o3a').textContent=fmt(a);$('o3b').textContent=fmt(b);$('o3c').textContent=fmt(c);
+ if(a===0){plot($('fb3'),{xr:[-7,7],yr:[-10,10],fns:[{f:x=>b*x+c,c:'c2'}]});$('l3').innerHTML='<b>a = 0</b>: це лінійна функція, графік — пряма, а не парабола.';return}
+ const x0=-b/(2*a),y0=a*x0*x0+b*x0+c,D=b*b-4*a*c;const pts=[];let z='';
+ if(D>0){const r1=(-b-Math.sqrt(D))/(2*a),r2=(-b+Math.sqrt(D))/(2*a);pts.push(P(r1,0,'p2',''),P(r2,0,'p2',''));z=`два нулі: x = ${fmt(Math.min(r1,r2))} і x = ${fmt(Math.max(r1,r2))}`}else if(D===0){pts.push(P(x0,0,'p2',''));z=`один нуль: x = ${fmt(x0)}`}else z='нулів немає (D &lt; 0)';
+ pts.push(P(0,c,'p3',''),P(x0,y0,'p1',`(${fmt(x0)}; ${fmt(y0)})`));
+ plot($('fb3'),{xr:[-7,7],yr:[-10,10],fns:[{f:x=>a*x*x+b*x+c}],pts,axis:x0});
+ $('l3').innerHTML=`<div>Функція: <b class="m">y = ${fmt(a)}x² ${b<0?'−':'+'} ${fmt(Math.abs(b))}x ${c<0?'−':'+'} ${fmt(Math.abs(c))}</b></div><div>Гілки: <b>${a>0?'вгору':'вниз'}</b></div><div>x₀ = −(${fmt(b)}) / (2·${fmt(a)}) = <b>${fmt(x0)}</b></div><div>y₀ = <b>${fmt(y0)}</b> → вершина <b>(${fmt(x0)}; ${fmt(y0)})</b></div><div>D = ${fmt(D)}: ${z}</div><div>Перетин з Oy: <b>(0; ${fmt(c)})</b></div>`}
+['r3a','r3b','r3c'].forEach(id=>$(id).oninput=up3);
+
+/* ---------- theory 4 ---------- */
+let k4=0;const f4=x=>x*x-4*x-5;
+function up4(){const lis=[...$('steps4').children];lis.forEach((l,i)=>l.classList.toggle('on',i<k4));const pts=[];
+ if(k4>=2)pts.push(P(2,-9,'p1'));if(k4>=4)pts.push(P(-1,0,'p2'),P(5,0,'p2'));if(k4>=5)pts.push(P(0,-5,'p3'),P(4,-5,'p3'));
+ plot($('f4'),{xr:[-3,7],yr:[-10,8],fns:k4>=6?[{f:f4}]:[],pts,axis:k4>=3?2:null});
+ $('props4').hidden=k4<6;$('st4').disabled=k4>=6;$('st4').textContent=k4>=6?'Побудовано':'Наступний крок'}
+$('st4').onclick=()=>{k4=Math.min(6,k4+1);up4()};$('st4r').onclick=()=>{k4=0;up4()};
+
+/* ---------- task UIs ---------- */
+const T1=[['a','y = 3x² − 2x + 1',1],['b','y = 5x − 4',0],['c','y = 7 − x²',1],['d','y = 2/x² + 1',0],['e','y = x³ − x²',0],['f','y = 0,5x²',1],['g','y = (x + 2)²',1]];
+$('t1o').innerHTML=T1.map(([v,t])=>`<label class="opt"><input type="checkbox" name="t1" value="${v}"><span class="m">${t}</span></label>`).join('');
+const T2=[['y = 2x² − 3','up'],['y = −x² + 4x','down'],['y = 3x − 1','no'],['y = 0,1x² + x','up'],['y = −½x²','down'],['y = x³ + 2','no']];
+$('t2r').innerHTML=T2.map(([f],i)=>`<div class="row"><span class="fx m">${i+1}) ${f}</span><select id="t2_${i}"><option value="">— обери —</option><option value="up">парабола, гілки вгору</option><option value="down">парабола, гілки вниз</option><option value="no">не парабола</option></select></div>`).join('');
+const T4=[['y = −8',[[-2,-8],[2,-8]]],['y = 10',null],['y = 4x',[[0,0],[-2,-8]]]];
+$('t4r').innerHTML=T4.map(([f],i)=>`<div class="row"><span class="fx m">${i+1}) ${f}</span>(<input class="n" id="t4_${i}_x1" inputmode="decimal">;<input class="n" id="t4_${i}_y1" inputmode="decimal">) &nbsp;(<input class="n" id="t4_${i}_x2" inputmode="decimal">;<input class="n" id="t4_${i}_y2" inputmode="decimal">)<label class="opt" style="min-height:44px;padding:6px 10px"><input type="checkbox" id="t4_${i}_no"> не перетинаються</label></div>`).join('');
+
+let t7pts=[];
+function draw7(showCurve){const pts=t7pts.map(([x,y])=>P(x,y,'p1',''));plot($('f7t'),{xr:[-3,5],yr:[-3,9],pts,fns:showCurve?[{f:x=>x*x-2*x}]:[],axis:showCurve?1:null,click:S.tasks.t7.ok||S.tasks.t7.sol?null:(x,y)=>{const i=t7pts.findIndex(p=>p[0]===x&&p[1]===y);if(i>=0)t7pts.splice(i,1);else t7pts.push([x,y]);$('t7n').textContent='Точок: '+t7pts.length;draw7(false);store()}})}
+$('t7clr').onclick=()=>{if(S.tasks.t7.ok||S.tasks.t7.sol)return;t7pts=[];$('t7n').textContent='Точок: 0';draw7(false);store()};
+const draw3t=done=>plot($('f3t'),{xr:[-6,6],yr:[-1,6],fns:done?[{f:x=>0.2*x*x}]:[],pts:done?[0,1,2,3,4,5].flatMap(x=>x?[P(x,0.2*x*x,'p1',''),P(-x,0.2*x*x,'p1','')]:[P(0,0,'p1','')]):[]});
+const draw5t=done=>plot($('f5t'),{xr:[-1,9],yr:[-10,9],fns:done?[{f:x=>x*x-8*x+7}]:[],pts:done?[P(4,-9,'p1'),P(1,0,'p2',''),P(7,0,'p2',''),P(0,7,'p3')]:[],axis:done?4:null});
+
+/* ---------- checkers ---------- */
+const setEq=(a,b)=>a.length===b.length&&a.every(p=>b.some(q=>eq(p[0],q[0])&&eq(p[1],q[1])))&&b.every(p=>a.some(q=>eq(p[0],q[0])&&eq(p[1],q[1])));
+const CK={
+ t1(){const ch=[...document.querySelectorAll('input[name=t1]')];const wrong=ch.filter((c,i)=>c.checked!==!!T1[i][2]).length;if(!ch.some(c=>c.checked))return[false,'Познач хоча б один варіант.'];return wrong?[false,`Кількість помилок: ${wrong}. Шукай x у найвищому степені 2 і не забудь розкрити дужки.`]:[true,'Правильно! Зверни увагу: y = (x + 2)² теж квадратична, бо після розкриття дужок маємо x² + 4x + 4.']},
+ t2(){const v=T2.map((_,i)=>$('t2_'+i).value);if(v.some(x=>!x))return[false,'Обери відповідь для кожної функції.'];const w=v.filter((x,i)=>x!==T2[i][1]).length;return w?[false,`Неправильних відповідей: ${w}. Подивись на знак числа перед x².`]:[true,'Усе вірно! Знак коефіцієнта a визначає напрям гілок.']},
+ t3(){const exp=[0,0.2,0.8,1.8,3.2,5];const bad=exp.map((e,i)=>eq(num($('t3_'+i).value),e)?0:1).reduce((a,b)=>a+b,0)+(eq(num($('t3_a').value),0.45)?0:1)+(eq(num($('t3_b').value),1.25)?0:1);return bad?[false,`Помилок: ${bad}. Спочатку піднеси x до квадрата, потім помнож на 0,2. Наприклад, 0,2·3² = 0,2·9.`]:[true,'Чудово! Подивись на графік: парабола широка, бо a = 0,2 менше за 1.']},
+ t4(){let bad=0;T4.forEach(([,ans],i)=>{const no=$(`t4_${i}_no`).checked;const pts=[1,2].map(k=>[num($(`t4_${i}_x${k}`).value),num($(`t4_${i}_y${k}`).value)]).filter(p=>!isNaN(p[0])||!isNaN(p[1]));if(ans===null){if(!no)bad++}else if(no||!setEq(pts,ans))bad++});return bad?[false,`Неправильних пунктів: ${bad}. Прирівняй −2x² до правої частини прямої і розв'яжи рівняння.`]:[true,'Так! Коли рівняння не має коренів, графіки не перетинаються.']},
+ t5(){const m=[];if($('t5_d').value!=='up')m.push('напрям гілок');if(!eq(num($('t5_x').value),4)||!eq(num($('t5_y').value),-9))m.push('вершина');if(!eq(num($('t5_s').value),4))m.push('вісь симетрії');const r=[num($('t5_r1').value),num($('t5_r2').value)].sort((a,b)=>a-b);if(!eq(r[0],1)||!eq(r[1],7))m.push('нулі');if(!eq(num($('t5_c').value),7))m.push('перетин з Oy');return m.length?[false,'Перевір: '+m.join(', ')+'.']:[true,'Усе правильно! Подивись, як усі знайдені точки лягли на графік.']},
+ t6(){const m=[];const ra=[num($('t6_a1').value),num($('t6_a2').value)].sort((a,b)=>a-b),rb=[num($('t6_b1').value),num($('t6_b2').value)].sort((a,b)=>a-b);if(!eq(ra[0],2)||!eq(ra[1],5))m.push('нулі в 1)');if(!eq(num($('t6_ac').value),10))m.push('перетин з Oy в 1)');if(!eq(rb[0],-1)||!eq(rb[1],1.5))m.push('нулі в 2)');if(!eq(num($('t6_bc').value),-3))m.push('перетин з Oy в 2)');return m.length?[false,'Перевір: '+m.join(', ')+'.']:[true,'Правильно! Перетин з Oy — це завжди (0; c).']},
+ t7(){const f=x=>x*x-2*x;const off=t7pts.filter(([x,y])=>y!==f(x)).length;const m=[];if(t7pts.length<5)m.push(`постав щонайменше 5 точок (зараз ${t7pts.length})`);if(off)m.push(`точок не на параболі: ${off}`);if(!t7pts.some(([x,y])=>x===1&&y===-1))m.push('немає вершини');if($('t7_e').value!=='b')m.push('область значень');if($('t7_g').value!=='c')m.push('проміжок зростання');return m.length?[false,'Перевір: '+m.join('; ')+'.']:[true,'Блискуче! Графік побудовано правильно.']}
+};
+const AFTER={t3:()=>draw3t(true),t5:()=>draw5t(true),t7:()=>draw7(true)};
+
+/* ---------- input persistence ---------- */
+const inpSel='.task input, .task select';
+function store(){document.querySelectorAll(inpSel).forEach(el=>{if(!el.id&&el.name!=='t1')return;const k=el.id||('t1_'+el.value);S.inp[k]=el.type==='checkbox'?el.checked:el.value});S.inp.t7pts=t7pts;save()}
+function restore(){document.querySelectorAll(inpSel).forEach(el=>{const k=el.id||('t1_'+el.value);if(!(k in S.inp))return;if(el.type==='checkbox')el.checked=S.inp[k];else el.value=S.inp[k]});t7pts=S.inp.t7pts||[];$('t7n').textContent='Точок: '+t7pts.length}
+document.addEventListener('change',e=>{if(e.target.closest('.task'))store()});
+document.addEventListener('input',e=>{if(e.target.closest('.task'))store()});
+
+function taskUI(t){const st=S.tasks[t],done=st.ok||st.sol;const sec=document.querySelector(`[data-task=${t}]`);
+ sec.querySelectorAll('input,select').forEach(el=>el.disabled=done);sec.querySelector(`[data-check=${t}]`).disabled=done;
+ sec.querySelector(`[data-sol=${t}]`).hidden=!(st.att>=3&&!done);
+ $('sol_'+t).classList.toggle('on',done);
+ const s=$('st_'+t);s.className='state'+(st.ok?' ok':'');s.textContent=st.ok?`· виконано (спроб: ${st.att})`:st.sol?'· переглянуто розв\'язання':st.att?`· спроб: ${st.att}`:'';
+ if(done&&AFTER[t])AFTER[t]()}
+document.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>{const t=b.dataset.check,st=S.tasks[t];if(st.ok||st.sol)return;const [ok,msg]=CK[t]();st.att++;const f=$('fb_'+t);f.className='fb '+(ok?'ok':'bad');f.textContent=ok?msg:msg+(st.att>=3?' Можеш переглянути розв\'язання, але тоді бали за це завдання не нарахуються.':'');if(ok)st.ok=true;save();taskUI(t);nav()});
+document.querySelectorAll('[data-sol]').forEach(b=>b.onclick=()=>{const t=b.dataset.sol;S.tasks[t].sol=true;$('fb_'+t).className='fb';save();taskUI(t);nav()});
+const pts=t=>{const s=S.tasks[t];return s.ok?(s.att===1?2:1):0};
+
+/* ---------- cheat sheet ---------- */
+const cs=$('cs');
+document.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{const sec=$(b.dataset.cs);cs.classList.add('open');document.querySelectorAll('aside section').forEach(s=>s.classList.remove('hl'));sec.classList.add('hl');sec.scrollIntoView({block:'nearest',behavior:'smooth'});setTimeout(()=>sec.classList.remove('hl'),4000)});
+$('csbtn').onclick=()=>cs.classList.toggle('open');$('csclose').onclick=()=>cs.classList.remove('open');
+
+/* ---------- test ---------- */
+const TQ=[
+ ['Яка з функцій є квадратичною?',['y = 4 − 3x²','y = 4x − 3','y = 3/x² + 4','y = x³ − 4x']],
+ ['Куди напрямлені гілки параболи y = −3x² + x + 5?',['вниз','вгору','вправо','залежить від c']],
+ ['Абсциса вершини параболи y = 2x² − 8x + 1 дорівнює:',['2','−2','4','8']],
+ ['Координати вершини параболи y = x² + 6x + 5:',['(−3; −4)','(3; 32)','(−3; 5)','(6; 5)']],
+ ['Графік y = 4x² − 3x − 7 перетинає вісь Oy у точці:',['(0; −7)','(−7; 0)','(0; 4)','(0; −3)']],
+ ['Скільки нулів має функція y = x² + 2x + 5?',['жодного','один','два','безліч']],
+ ['Найменше значення функції y = x² − 4x + 3 дорівнює:',['−1','3','2','−4']],
+ ['Функція y = −x² + 4x зростає на проміжку:',['(−∞; 2]','[2; +∞)','(−∞; 4]','[0; 4]']]];
+if(!S.test.order)S.test.order=TQ.map(q=>q[1].map((_,i)=>i).sort(()=>Math.random()-.5));
+function renderTest(){const T=S.test;$('testq').innerHTML=TQ.map(([q,o],i)=>{const a=T.ans[i];const mark=T.done?(a===0?'<span class="pill ok">правильно</span>':`<span class="pill bad">правильна відповідь: ${esc(o[0])}</span>`):'';return `<div class="box"><p><b>${i+1}. ${esc(q)}</b> ${mark}</p><div class="opts">${T.order[i].map(j=>`<label class="opt"><input type="radio" name="tq${i}" value="${j}" ${a===j?'checked':''} ${T.done?'disabled':''}><span class="m">${esc(o[j])}</span></label>`).join('')}</div></div>`}).join('');
+ $('testgo').hidden=T.done;if(T.done){const f=$('testfb');f.className='fb '+(T.score>=6?'ok':'bad');f.textContent=`Результат: ${T.score} з 8. ${T.score>=7?'Відмінно!':T.score>=5?'Добре, але переглянь помилки.':'Варто ще раз переглянути теорію та шпаргалку.'}`}}
+$('testq').addEventListener('change',e=>{const m=e.target.name?.match(/^tq(\d)$/);if(m&&!S.test.done){S.test.ans[m[1]]=+e.target.value;save()}});
+$('testgo').onclick=()=>{const n=Object.keys(S.test.ans).length;if(n<TQ.length){const f=$('testfb');f.className='fb bad';f.textContent=`Дай відповідь на всі питання (зараз ${n} з ${TQ.length}).`;return}
+ $('testfb').className='fb';$('testgo').disabled=true;$('testgo').textContent='Справді завершити?';setTimeout(()=>{$('testgo').disabled=false},600);
+ $('testgo').onclick=()=>{S.test.done=true;S.test.score=TQ.filter((_,i)=>S.test.ans[i]===0).length;save();renderTest();nav()}};
+
+/* ---------- reflection ---------- */
+function reflLoad(){const r=S.refl;document.querySelectorAll('input[name=rate]').forEach(x=>x.checked=x.value===r.rate);$('r_new').value=r.nw;$('r_hard').value=r.hard;$('r_q').value=r.q;$('r_self').value=r.self;$('r_selfo').textContent=r.self}
+function reflSave(){const r=S.refl;r.rate=document.querySelector('input[name=rate]:checked')?.value||'';r.nw=$('r_new').value;r.hard=$('r_hard').value;r.q=$('r_q').value;r.self=+$('r_self').value;$('r_selfo').textContent=r.self;save();nav()}
+['r_new','r_hard','r_q','r_self'].forEach(id=>$(id).addEventListener('input',reflSave));$('rate').addEventListener('change',reflSave);
+const reflOk=()=>S.refl.rate&&S.refl.nw.trim().length>=5&&S.refl.hard.trim().length>=3;
+const RATE={4:'Усе зрозуміло, можу пояснити іншим',3:'Зрозумів(-ла), потрібно потренуватися',2:'Розібрався(-лась) частково',1:'Потрібна допомога вчителя'};
+
+/* ---------- report code ---------- */
+const SALT='kv9-parabola-2026';
+const fnv=s=>{let h=0x811c9dc5;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0}return h.toString(16).padStart(8,'0')};
+const b64e=s=>btoa(unescape(encodeURIComponent(s))),b64d=s=>decodeURIComponent(escape(atob(s)));
+function payload(){return {n:S.name,c:S.cls,s:S.start,e:S.end,t:TASKS.map(t=>[S.tasks[t].att,S.tasks[t].ok?1:0,S.tasks[t].sol?1:0]),q:S.test.score,r:+S.refl.rate,g:S.refl.self,w:S.refl.nw,h:S.refl.hard,u:S.refl.q}}
+function makeCode(){const j=JSON.stringify(payload());return 'KF-'+fnv(SALT+j)+'.'+b64e(j)}
+function readCode(code){const m=code.trim().replace(/\s/g,'').match(/^KF-([0-9a-f]{8})\.(.+)$/);if(!m)return null;let j;try{j=b64d(m[2])}catch(e){return null}let d;try{d=JSON.parse(j)}catch(e){return null}return {d,valid:fnv(SALT+j)===m[1]}}
+const dt=ms=>ms?new Date(ms).toLocaleString('uk-UA',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+const dur=(a,b)=>{const m=Math.round((b-a)/60000);return m<60?m+' хв':Math.floor(m/60)+' год '+m%60+' хв'};
+function reportHTML(d,forTeacher){const tp=d.t.reduce((s,[a,o])=>s+(o?(a===1?2:1):0),0);const tl=d.t.map(([a,o,so],i)=>`<li>Завдання ${i+1}: ${o?`<span class="pill ok">виконано, спроб ${a}</span>`:so?'<span class="pill mid">переглянуто розв\'язання</span>':'<span class="pill bad">не виконано</span>'}</li>`).join('');
+ return `<div class="report"><dl><dt>Учень</dt><dd>${esc(d.n)}</dd><dt>Клас</dt><dd>${esc(d.c)}</dd><dt>Початок</dt><dd>${dt(d.s)}</dd><dt>Завершення</dt><dd>${dt(d.e)}</dd><dt>Тривалість</dt><dd>${dur(d.s,d.e)}</dd><dt>Завдання</dt><dd>${tp} з 14 балів</dd><dt>Міні-тест</dt><dd>${d.q} з 8</dd><dt>Самооцінка</dt><dd>${esc(d.g)} з 12 · ${esc(RATE[d.r]||'—')}</dd></dl>
+ <ul style="margin:6px 0 10px;padding-left:1.2em">${tl}</ul>
+ <p><b>Що нового:</b> ${esc(d.w)}</p><p><b>Що складно:</b> ${esc(d.h)}</p>${d.u?`<p><b>Питання вчителеві:</b> ${esc(d.u)}</p>`:''}</div>`}
+function reportText(d,code){const tp=d.t.reduce((s,[a,o])=>s+(o?(a===1?2:1):0),0);return `ЗВІТ · Квадратична функція (9 клас)\nУчень: ${d.n}, клас ${d.c}\nЧас: ${dt(d.s)} — ${dt(d.e)} (${dur(d.s,d.e)})\nЗавдання: ${tp}/14 балів (${d.t.map(([a,o,s],i)=>`№${i+1} ${o?'✓'+a:s?'розв.':'—'}`).join(', ')})\nТест: ${d.q}/8\nСамооцінка: ${d.g}/12 · ${RATE[d.r]||''}\nЩо нового: ${d.w}\nЩо складно: ${d.h}\n${d.u?'Питання: '+d.u+'\n':''}Код перевірки: ${code}`}
+function renderReport(){const miss=[];TASKS.forEach((t,i)=>{if(!(S.tasks[t].ok||S.tasks[t].sol))miss.push([`Завдання ${i+1}`,5+i])});if(!S.test.done)miss.push(['Міні-тест',12]);if(!reflOk())miss.push(['Рефлексія',13]);
+ if(miss.length){$('repbody').innerHTML=`<p>Щоб отримати звіт, заверши:</p><div class="acts">${miss.map(([t,i])=>`<button class="ghost" data-go="${i}">${t}</button>`).join('')}</div>`;$('repbody').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));return}
+ if(!S.end){S.end=Date.now();save()}const code=makeCode(),d=payload();
+ $('repbody').innerHTML=`<div class="two"><div>${reportHTML(d)}</div><div><p class="big">${d.q}/8</p><p>тест · <b>${d.t.reduce((s,[a,o])=>s+(o?(a===1?2:1):0),0)}/14</b> балів за завдання</p>
+ <div class="box"><b>Як здати роботу:</b><ol style="margin:6px 0 0;padding-left:1.2em"><li>Натисни «Скопіювати звіт».</li><li>Встав його в повідомлення вчителеві (Classroom, Viber, Telegram або пошта) і надішли.</li><li>Або зроби скріншот цієї сторінки разом із кодом.</li></ol></div>
+ <p style="margin-bottom:4px"><b>Код перевірки</b> (вчитель перевірить, що звіт справжній):</p><div class="code" id="rcode">${esc(code)}</div>
+ <div class="acts"><button id="cpy">Скопіювати звіт</button><button class="ghost" id="cpc">Лише код</button></div><div class="fb" id="cpfb"></div>
+ <textarea id="rtxt" readonly style="margin-top:10px;font-size:14px" hidden>${esc(reportText(d,code))}</textarea></div></div>`;
+ const cp=async(txt)=>{const f=$('cpfb');try{await navigator.clipboard.writeText(txt);f.className='fb ok';f.textContent='Скопійовано! Тепер встав і надішли вчителеві.'}catch(e){const ta=$('rtxt');ta.hidden=false;ta.value=txt;ta.focus();ta.select();f.className='fb bad';f.textContent='Не вдалося скопіювати автоматично. Текст виділено нижче — натисни Ctrl+C (або «Копіювати» на телефоні).'}};
+ $('cpy').onclick=()=>cp(reportText(d,code));$('cpc').onclick=()=>cp(code)}
+
+/* ---------- teacher dialog ---------- */
+$('teach').onclick=()=>$('tdlg').classList.add('on');$('tclose').onclick=()=>$('tdlg').classList.remove('on');
+$('tgo').onclick=()=>{const raw=$('tcode').value;const mm=raw.match(/KF-[0-9a-f]{8}\.[A-Za-z0-9+/=\s]+/);const r=mm?readCode(mm[0]):null;const o=$('tout');
+ if(!r){o.innerHTML='<div class="fb bad">Код не розпізнано. Скопіюйте його повністю, починаючи з KF-.</div>';return}
+ o.innerHTML=(r.valid?'<div class="fb ok">Код справжній: дані не змінювали.</div>':'<div class="fb bad">Увага: код змінено вручну, даним довіряти не можна.</div>')+reportHTML(r.d,true)};
+
+/* ---------- navigation ---------- */
+const slides=[...document.querySelectorAll('.slide')];const N=slides.length;
+$('prog').innerHTML=slides.map((s,i)=>`<button title="${esc(s.dataset.t)}" aria-label="${esc(s.dataset.t)}" data-i="${i}"></button>`).join('');
+$('prog').onclick=e=>{const i=e.target.dataset?.i;if(i!==undefined&&+i<=S.max)go(+i)};
+function gate(i){const s=slides[i];if(i===0){if(!S.name.trim()||!S.cls.trim())return'Введи прізвище, ім\'я та клас';return''}const t=s.dataset.task;if(t&&!(S.tasks[t].ok||S.tasks[t].sol))return'Розв\'яжи завдання, щоб іти далі';if(i===12&&!S.test.done)return'Заверши тест';if(i===13&&!reflOk())return'Обери варіант і заповни перші два поля';return''}
+function nav(){const g=gate(S.cur);$('next').disabled=!!g||S.cur===N-1;$('next').hidden=S.cur===N-1;$('prev').disabled=S.cur===0;$('lock').textContent=g;
+ [...$('prog').children].forEach((b,i)=>{const t=slides[i].dataset.task;b.className=(i===S.cur?'cur':(t&&(S.tasks[t].ok||S.tasks[t].sol))||(i===12&&S.test.done)?'d':i<=S.max?'v':'');b.disabled=i>S.max});
+ $('who').textContent=S.name?`${S.name}, ${S.cls}`:'Самостійна робота з теми'}
+function go(i){i=Math.max(0,Math.min(N-1,i));S.cur=i;S.max=Math.max(S.max,i);slides.forEach((s,k)=>s.classList.toggle('on',k===i));save();nav();
+ if(i===2)upA();if(i===3)up3();if(i===4)up4();if(i===7)draw3t(S.tasks.t3.ok||S.tasks.t3.sol);if(i===9)draw5t(S.tasks.t5.ok||S.tasks.t5.sol);if(i===11)draw7(S.tasks.t7.ok||S.tasks.t7.sol);if(i===12)renderTest();if(i===13)reflLoad();if(i===14)renderReport();
+ document.querySelector('main').scrollIntoView({block:'start'});window.scrollTo({top:0})}
+$('next').onclick=()=>{if(S.cur===0&&!S.start){S.start=Date.now()}if(!gate(S.cur))go(S.cur+1)};$('prev').onclick=()=>go(S.cur-1);
+document.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))return;if(e.key==='ArrowRight'&&!$('next').disabled)$('next').click();if(e.key==='ArrowLeft'&&S.cur>0)go(S.cur-1)});
+$('sname').value=S.name;$('sclass').value=S.cls;
+const nameIn=()=>{if(S.end)return;S.name=$('sname').value;S.cls=$('sclass').value;save();nav()};$('sname').oninput=nameIn;$('sclass').oninput=nameIn;
+if(S.start){$('resume').hidden=false}
+$('restart').onclick=()=>{if($('restart').dataset.c){S=fresh();try{localStorage.removeItem(KEY)}catch(e){}location.reload()}else{$('restart').dataset.c=1;$('restart').textContent='Точно стерти все? Натисни ще раз'}};
+restore();TASKS.forEach(taskUI);
+go(S.cur||0);
+}
+</script>
+</body>
+</html>
