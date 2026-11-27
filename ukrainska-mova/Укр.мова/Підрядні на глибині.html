@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Підрядні на глибині</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: спокійний, дружній тренер для 9 класу, без поспіху
+   IDEA: занурення — кожна відповідь опускає тебе глибше, як у фрідайвінгу
+   PICTURE: глибиномір збоку + вода, що темнішає з прогресом
+   COLOUR and TYPE: піна, бірюза, глибокий синій, кораловий акцент; Comfortaa + Manrope
+   LAYOUT: одна спокійна колонка-картка, глибиномір ліворуч (на телефоні — смуга вгорі) */
+:root{color-scheme:light dark;
+--bg:light-dark(#EAF6F5,#0E2430);--ink:light-dark(#22323A,#E6F2F1);--mute:light-dark(#5B6F77,#9FB8BC);
+--card:light-dark(#FFFFFF,#14313F);--line:light-dark(#CFE6E3,#24485A);--sea:#7FC4C4;--deep:#2F5D7C;
+--coral:#F0A58E;--ok:light-dark(#2E8C7A,#7FD6C3);--bad:light-dark(#C0563D,#F3A48F);--soft:light-dark(#F4FAF9,#183A4A)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+#water{position:fixed;inset:0;background:linear-gradient(180deg,#5FB3B3,#1F4560);opacity:var(--d,0);transition:opacity 1.2s ease;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;display:grid;grid-template-columns:96px minmax(0,1fr);gap:24px;max-width:980px;margin:0 auto;padding:clamp(20px,4vw,48px) max(4vw,16px) 64px}
+h1,h2{font-family:Comfortaa,Manrope,sans-serif;line-height:1.1;text-wrap:balance;margin:0 0 12px}
+h1{font-size:clamp(30px,5vw,46px)}h2{font-size:clamp(22px,3.2vw,30px)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:clamp(20px,3.5vw,36px);box-shadow:0 18px 40px -24px rgba(20,60,80,.45)}
+.gauge{position:sticky;top:24px;height:min(78vh,620px);display:grid;grid-template-rows:auto 1fr auto;justify-items:center;gap:8px;font-size:13px;color:var(--mute)}
+.tube{position:relative;width:14px;border-radius:10px;background:linear-gradient(#BFE6E2,#2F5D7C);height:100%}
+.diver{position:absolute;left:50%;top:var(--p,0%);transform:translate(-50%,-50%);width:44px;height:44px;transition:top 1s ease}
+.tick{position:absolute;left:22px;font-size:13px;white-space:nowrap;transform:translateY(-50%);color:var(--mute)}
+.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:15px;color:var(--mute)}
+.chip{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--ink);font-weight:600;white-space:nowrap}
+.stage{font-family:Comfortaa,sans-serif;font-weight:700;color:var(--deep)}
+:root[data-theme=dark] .stage{color:#BFE6E2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .stage{color:#BFE6E2}}
+.sent{font-size:clamp(20px,2.6vw,25px);line-height:1.45;margin:10px 0 18px;font-weight:600}
+mark{background:var(--coral);color:#2B2B2B;border-radius:6px;padding:0 5px}
+.ask{color:var(--mute);margin:0 0 14px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+button,input,textarea{font:inherit;color:inherit}
+.opt{min-height:56px;text-align:left;padding:12px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--soft);cursor:pointer;display:flex;gap:10px;align-items:center;transition:border-color .2s,background .2s}
+.opt b{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);font-size:14px}
+.opt:hover:not(:disabled){border-color:var(--sea)}
+.opt:disabled{cursor:default}
+.opt.no{border-color:var(--bad);opacity:.6;text-decoration:line-through}
+.opt.yes{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--card))}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+.fb{margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--soft);border-left:4px solid var(--sea);display:none}
+.fb.show{display:block}.fb.ok{border-color:var(--ok)}.fb.bad{border-color:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;align-items:center}
+.btn{min-height:48px;padding:10px 22px;border-radius:999px;border:0;background:var(--deep);color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input[type=text],textarea{width:100%;font-size:16px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft)}
+textarea{min-height:90px;resize:vertical}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0;padding:0;list-style:none}
+.steps li{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:15px}
+.steps strong{display:block;font-family:Comfortaa,sans-serif;color:var(--ink)}
+.small{font-size:14px;color:var(--mute)}
+.check{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--mute);margin-top:6px}
+.bar{height:10px;border-radius:9px;background:var(--line);overflow:hidden;margin:4px 0 12px}.bar i{display:block;height:100%;background:var(--sea)}
+.res td,.res th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{font-weight:700}
+pre{white-space:pre-wrap;background:var(--soft);border-radius:14px;padding:14px;font:15px/1.5 Manrope,sans-serif;border:1px dashed var(--line)}
+.ov{position:fixed;inset:0;background:rgba(10,30,40,.55);display:none;z-index:5;padding:max(3vw,12px);overflow:auto}
+.ov.show{display:block}.ov .card{max-width:860px;margin:0 auto}
+.ak{position:fixed;right:14px;bottom:12px;width:34px;opacity:.13;z-index:2;pointer-events:none}
+.big{font-family:Comfortaa,sans-serif;font-size:clamp(40px,8vw,64px);font-weight:700;color:var(--deep);line-height:1}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .big{color:#BFE6E2}}
+:root[data-theme=dark] .big{color:#BFE6E2}
+@media(max-width:600px){.wrap{grid-template-columns:minmax(0,1fr)}.gauge{position:static;height:auto;grid-template-rows:none;grid-auto-flow:column;align-items:center}
+.tube{width:100%;height:12px;min-width:200px}.diver{top:50%;left:var(--p,0%)}.tick{display:none}.opts{grid-template-columns:minmax(0,1fr)}
+table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;font-weight:700}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="water"></div>
+<div class="wrap">
+  <aside class="gauge" aria-label="Глибиномір">
+    <span>0 м</span>
+    <div class="tube">
+      <span class="tick" style="top:25%">Етап 1</span><span class="tick" style="top:50%">Етап 2</span><span class="tick" style="top:75%">Етап 3</span>
+      <svg class="diver" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="#F0A58E" stroke="#fff" stroke-width="3"/><path d="M12 24c4-6 14-8 20-2-3 0-5 1-6 3-4-1-9 0-14-1z" fill="#fff"/><circle cx="28" cy="13" r="2.2" fill="#fff" opacity=".8"/><circle cx="32" cy="8" r="1.4" fill="#fff" opacity=".7"/></svg>
+    </div>
+    <span>45 м</span>
+  </aside>
+  <main id="app"></main>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovt">
+  <div class="card">
+    <h2 id="ovt">Опорна картка: 7 видів підрядних</h2>
+    <p><strong>Алгоритм:</strong> 1) знайди головну частину; 2) постав питання <em>від головної до підрядної</em>; 3) перевір слово-маяк і сполучник. <strong>Не вір сполучнику — вір питанню!</strong></p>
+    <table class="stack">
+      <thead><tr><th>Вид</th><th>Питання</th><th>Чим приєднується</th><th>Підказка</th></tr></thead>
+      <tbody>
+        <tr><td>Означальна</td><td>який? чий?</td><td>який, чий, що, де, куди, звідки, коли</td><td>пояснює іменник</td></tr>
+        <tr><td>З'ясувальна</td><td>питання відмінків: що? чого? про що?</td><td>що, щоб, як, де, коли, чому, звідки</td><td>пояснює слово на кшталт «знаю, сказав, запитав, відомо»</td></tr>
+        <tr><td>Місця</td><td>де? куди? звідки?</td><td>де, куди, звідки</td><td>у головній часто «там, туди, звідти»</td></tr>
+        <tr><td>Часу</td><td>коли? відколи? доки?</td><td>коли, як, поки, доки, відколи, щойно, як тільки, після того як</td><td>пояснює всю головну частину</td></tr>
+        <tr><td>Способу дії</td><td>як? яким способом?</td><td>як, щоб</td><td>маяк «так» у головній</td></tr>
+        <tr><td>Ступеня</td><td>наскільки? якою мірою?</td><td>що, що аж, що… то</td><td>маяки «так, такий, стільки, настільки»</td></tr>
+        <tr><td>Порівняльна</td><td>як хто? як що? подібно до чого?</td><td>як, мов, мовби, ніби, наче, неначе, немов, начебто</td><td>дві різні картинки, одна схожа на іншу</td></tr>
+      </tbody>
+    </table>
+    <div class="row"><button class="btn" id="ovclose">Повернутися до завдання</button></div>
+  </div>
+</div>
+
+<svg class="ak" viewBox="0 0 200 200" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><circle cx="100" cy="100" r="88" stroke-width="4"/><path d="M48 140 L78 60 L108 140"/><path d="M60 110 L96 110"/><path d="M122 60 L122 140"/><path d="M152 60 L122 102 L154 140"/></g></svg>
+
+<script>
+{
+const T={
+ oz:{n:'означальна',q:'який? яка? чий?'},
+ zj:{n:"з'ясувальна",q:'що? чого? про що? (питання відмінків)'},
+ mis:{n:'місця',q:'де? куди? звідки?'},
+ chas:{n:'часу',q:'коли? відколи? доки?'},
+ spos:{n:'способу дії',q:'як? яким способом?'},
+ step:{n:'ступеня',q:'наскільки? якою мірою?'},
+ por:{n:'порівняльна',q:'як хто? як що? подібно до чого?'}
+};
+const CONF={oz:['zj','mis','chas'],zj:['oz','spos','chas'],mis:['oz','zj','chas'],chas:['oz','zj','mis'],spos:['step','por','zj'],step:['spos','por','oz'],por:['spos','step','chas']};
+const B=[
+ ['oz',"Я пам'ятаю літо, коли ми вперше побачили море.",'коли'],
+ ['oz',"Біля школи росте дуб, який посадив мій дідусь."],
+ ['oz',"Ми зайшли в село, де народилася моя бабуся.",'де'],
+ ['oz',"Це книжка, що змінила моє ставлення до читання.",'що'],
+ ['oz',"Нарешті настав день, якого ми чекали цілий рік."],
+ ['oz',"Друг, чия порада мені допомогла, живе поруч."],
+ ['oz',"Ми піднялися на пагорб, звідки видно все місто."],
+ ['oz',"У кімнаті, де ми робили уроки, завжди пахло яблуками."],
+ ['zj',"Учитель пояснив, що кома ставиться на межі частин.",'що'],
+ ['zj',"Я не знаю, де зараз мій брат.",'де'],
+ ['zj',"Мама запитала, коли я повернуся додому.",'коли'],
+ ['zj',"Ми довго думали, як розв'язати цю задачу.",'як'],
+ ['zj',"Усі хотіли, щоб свято вдалося.",'щоб'],
+ ['zj',"Наталка розповіла, чому запізнилася."],
+ ['zj',"Я вірю, що все буде добре."],
+ ['zj',"Нікому не відомо, звідки прилетіли ці птахи."],
+ ['mis',"Де шумить ліс, там легко дихається."],
+ ['mis',"Ми пішли туди, куди вела стежка."],
+ ['mis',"Там, де колись була пустка, тепер росте сад.",'де'],
+ ['mis',"Залишайся там, де тобі спокійно."],
+ ['mis',"Вітер дув звідти, де темніли хмари."],
+ ['mis',"Куди не глянь, усюди квіти."],
+ ['chas',"Коли зійшло сонце, ми вирушили в дорогу.",'коли'],
+ ['chas',"Як тільки задзвенів дзвоник, клас затих.",'як'],
+ ['chas',"Поки закипав чайник, я накрила на стіл."],
+ ['chas',"Ми чекали на зупинці, доки не вщух дощ."],
+ ['chas',"Відколи ми переїхали, я щодня бачу море."],
+ ['chas',"Щойно стемніло, у вікнах засвітилося світло."],
+ ['chas',"Після того як закінчилися уроки, ми пішли в парк."],
+ ['spos',"Роби так, як радить тренер.",'як'],
+ ['spos',"Говори так, щоб тебе всі почули.",'щоб'],
+ ['spos',"Учні виконали вправу так, як було показано у зразку."],
+ ['spos',"Пиши так, щоб кожну літеру можна було легко прочитати."],
+ ['spos',"Дихай так, щоб видих був довший за вдих."],
+ ['spos',"Ми поставили намет так, як учив інструктор."],
+ ['step',"Вода була така холодна, що зводило пальці.",'що'],
+ ['step',"Ми так утомилися, що відразу заснули."],
+ ['step',"Що вище ми піднімалися, то холоднішим ставав вітер."],
+ ['step',"Він говорив настільки тихо, що ніхто не почув."],
+ ['step',"Снігу насипало стільки, що не можна було відчинити двері."],
+ ['step',"Музика була така гучна, що аж дзеленчали шибки."],
+ ['step',"Що більше читаєш, то багатшою стає мова."],
+ ['por',"Вітер завивав, як вовк у полі.",'як'],
+ ['por',"Хмари пливли, ніби білі кораблі."],
+ ['por',"Сніг падав, мов хтось сипав борошно з неба."],
+ ['por',"Як мати дбає про дитину, так учитель опікується учнями."],
+ ['por',"Дівчина засміялася, наче задзвенів дзвіночок."],
+ ['por',"Річка блищала на сонці, немов дзеркало."],
+ ['por',"Він мовчав, начебто нічого не сталося."]
+].map(([t,s,w],i)=>({t,s,w,i}));
+
+const STAGES=[
+ {n:'Етап 1 · Яке питання?',ask:'На яке питання відповідає підрядна частина? (питання ставимо від головної)',mode:'q'},
+ {n:'Етап 2 · Який вид?',ask:'Визнач вид підрядної частини.',mode:'t'},
+ {n:'Етап 3 · Двійники',ask:'Виділене слово однакове, а ролі різні. Який це вид підрядної?',mode:'t'}
+];
+const HINT=['Подумай ще: від якого слова в головній частині ти ставиш питання — від іменника, від дієслова чи від усієї частини? Чи є слово-маяк (так, такий, там)?',
+ 'Перевір себе за алгоритмом: знайди головну → постав питання до підрядної → подивись на слово-маяк. Можна відкрити опорну картку.',
+ 'Не вір сполучнику — вір питанню! Те саме слово може приєднувати різні підрядні.'];
+const MAX=24;
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S=null;
+
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+function build(){
+  const groups=shuf(['як','коли','де','що','щоб']);let twins=[];
+  for(const g of groups){const it=shuf(B.filter(b=>b.w===g));if(twins.length+it.length<=6)twins=twins.concat(it)}
+  if(twins.length<6){const rest=shuf(B.filter(b=>b.w&&!twins.includes(b)));twins=twins.concat(rest.slice(0,6-twins.length))}
+  const left=shuf(B.filter(b=>!twins.includes(b)));
+  const s2=[];for(const k of Object.keys(T)){const f=left.find(b=>b.t===k&&!s2.includes(b));if(f)s2.push(f)}
+  for(const b of left){if(s2.length>=12)break;if(!s2.includes(b))s2.push(b)}
+  const s1=left.filter(b=>!s2.includes(b)).slice(0,6);
+  return [s1,shuf(s2),twins].map((arr,si)=>arr.map(b=>({b,si,opts:options(b.t),tries:0,pts:0,done:false})));
+}
+function options(t){const c=shuf(CONF[t]).slice(0,2);const others=shuf(Object.keys(T).filter(k=>k!==t&&!c.includes(k)));return shuf([t,...c,others[0]])}
+
+function setDepth(){
+  const total=S.items.flat().length;const done=S.items.flat().filter(x=>x.done).length;
+  const p=S.view==='end'||S.view==='own'?1:done/total;
+  document.documentElement.style.setProperty('--d',(p*0.55).toFixed(2));
+  document.documentElement.style.setProperty('--p',(p*100).toFixed(1)+'%');
+}
+function score(){return S.items.flat().reduce((a,x)=>a+x.pts,0)}
+
+function start(){
+  app.innerHTML=`<div class="card">
+  <h1>Підрядні на глибині</h1>
+  <p>Тренажер-домашнє завдання. Ти розрізнятимеш <strong>сім видів підрядних частин</strong>: означальні, з'ясувальні, місця, часу, способу дії, ступеня й порівняльні. У кожного свій випадковий набір речень — списати не вийде, а от навчитися вийде.</p>
+  <ul class="steps">
+   <li><strong>Етап 1</strong>Яке питання? — 6 речень</li>
+   <li><strong>Етап 2</strong>Який вид? — 12 речень</li>
+   <li><strong>Етап 3</strong>Двійники: одне слово — різні ролі — 6 речень</li>
+   <li><strong>Етап 4</strong>Твої власні речення (перевірить учитель)</li>
+  </ul>
+  <p class="small">Правильно з першої спроби — 1 бал, з другої — 0,5. Після помилки буде підказка, а не відповідь. Поспішати не треба: дихай спокійно, як фрідайвер.</p>
+  <form id="f">
+   <label for="nm">Прізвище та ім'я</label><input type="text" id="nm" autocomplete="name" required>
+   <label for="cl">Клас</label><input type="text" id="cl" value="9-" required>
+   <div class="row"><button class="btn" type="submit">Пірнаємо</button><button class="btn ghost" type="button" data-card>Опорна картка</button></div>
+  </form></div>`;
+  const prev=store('pg-name');if(prev)$('#nm').value=prev;
+  $('#f').addEventListener('submit',e=>{e.preventDefault();const nm=$('#nm').value.trim(),cl=$('#cl').value.trim();if(nm.length<3)return $('#nm').focus();
+    store('pg-name',nm);const att=(+store('pg-att')||0)+1;store('pg-att',att);
+    S={nm,cl,att,items:build(),st:0,ix:0,view:'q',t0:Date.now()};show()});
+}
+
+function mark(b){if(S.st!==2||!b.w)return esc(b.s);
+  const re=new RegExp('(^|[^А-Яа-яЄєІіЇїҐґ\'’])('+b.w+')(?![А-Яа-яЄєІіЇїҐґ])','i');
+  return esc(b.s).replace(re,(m,a,w)=>a+'<mark>'+w+'</mark>')}
+
+function show(){
+  S.view='q';setDepth();
+  const st=STAGES[S.st],list=S.items[S.st],it=list[S.ix];
+  app.innerHTML=`<div class="card">
+   <div class="top"><span class="stage">${st.n}</span><span class="chip">Речення ${S.ix+1} з ${list.length}</span><span class="chip">Рахунок: ${fmt(score())} / ${MAX}</span></div>
+   <div class="bar"><i style="width:${(S.ix/list.length*100).toFixed(0)}%"></i></div>
+   <p class="ask">${st.ask}</p>
+   <p class="sent">${mark(it.b)}</p>
+   <div class="opts">${it.opts.map((k,i)=>`<button class="opt" data-k="${k}"><b>${'АБВГ'[i]}</b><span>${st.mode==='q'?T[k].q:T[k].n}</span></button>`).join('')}</div>
+   <div class="fb" id="fb" aria-live="polite"></div>
+   <div class="row"><button class="btn" id="next" disabled>Далі</button><button class="btn ghost" data-card>Опорна картка</button></div></div>`;
+  app.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>answer(b)));
+  $('#next').addEventListener('click',next);
+}
+function fmt(n){return String(n).replace('.',',')}
+
+function answer(btn){
+  const it=S.items[S.st][S.ix];if(it.done)return;
+  const k=btn.dataset.k,fb=$('#fb');it.tries++;
+  if(k===it.b.t){
+    it.pts=it.tries===1?1:0.5;it.done=true;btn.classList.add('yes');
+    fb.className='fb show ok';fb.innerHTML=`<strong>${it.tries===1?'Точно! +1':'Так, тепер правильно. +0,5'}</strong> Підрядна ${T[it.b.t].n}: відповідає на питання <em>${T[it.b.t].q}</em>`;
+    finishItem();
+  }else{
+    btn.classList.add('no');btn.disabled=true;
+    if(it.tries<2){fb.className='fb show bad';fb.innerHTML='<strong>Ще одна спроба.</strong> '+HINT[S.st]}
+    else{it.done=true;it.miss=true;
+      fb.className='fb show bad';fb.innerHTML=`<strong>Цього разу 0 балів — і це нормально.</strong> Тут підрядна <em>${T[it.b.t].n}</em>: питання <em>${T[it.b.t].q}</em>. Запам'ятай це речення — схоже може трапитися далі.`;
+      finishItem()}
+  }
+}
+function finishItem(){app.querySelectorAll('.opt').forEach(b=>b.disabled=true);$('#next').disabled=false;$('#next').focus();
+  app.querySelector('.chip:nth-of-type(2)')||0;setDepth();
+  const c=app.querySelectorAll('.chip')[1];if(c)c.textContent=`Рахунок: ${fmt(score())} / ${MAX}`}
+
+function next(){
+  const list=S.items[S.st];
+  if(S.ix<list.length-1){S.ix++;return show()}
+  if(S.st<2){pause();return}
+  own();
+}
+function pause(){
+  const got=S.items[S.st].reduce((a,x)=>a+x.pts,0),max=S.items[S.st].length;
+  S.view='pause';
+  app.innerHTML=`<div class="card"><p class="stage">${STAGES[S.st].n} — пройдено</p>
+   <p class="big">${fmt(got)} / ${max}</p>
+   <h2>Пауза на поверхні</h2>
+   <p>Встань, підніми руки на вдиху (рахуй до 4) і повільно опусти на видиху (до 6). Тричі. Спокійно, без затримки дихання.</p>
+   <div class="row"><button class="btn" id="go">Далі: ${STAGES[S.st+1].n}</button></div></div>`;
+  $('#go').addEventListener('click',()=>{S.st++;S.ix=0;show()});$('#go').focus();
+}
+
+function weak(){
+  const lost={};S.items.flat().forEach(x=>{lost[x.b.t]=(lost[x.b.t]||0)+(1-x.pts)});
+  const ks=Object.keys(T).sort((a,b)=>(lost[b]||0)-(lost[a]||0)||Math.random()-.5);
+  return {lost,two:(lost[ks[0]]>0?ks.slice(0,2):shuf(Object.keys(T)).slice(0,2))};
+}
+function own(){
+  S.view='own';setDepth();const w=weak();S.two=w.two;S.lost=w.lost;
+  app.innerHTML=`<div class="card"><p class="stage">Етап 4 · Твої речення</p>
+   <h2>Склади два власні речення</h2>
+   <p>Тренажер вибрав для тебе види, які варто закріпити. Пиши про своє: настрій, захоплення, як ти заспокоюєшся. Учитель перевірить ці речення окремо.</p>
+   ${w.two.map((k,i)=>`<label for="o${i}">${i+1}. СПР з підрядною <em>${T[k].n}</em> (питання: ${T[k].q})</label><textarea id="o${i}"></textarea>`).join('')}
+   <div class="check"><span>☐ є головна і підрядна</span><span>☐ питання від головної до підрядної</span><span>☐ відповідний сполучник</span><span>☐ кома на межі частин</span></div>
+   <p class="small" id="warn"></p>
+   <div class="row"><button class="btn" id="fin">Виринаю — мій результат</button><button class="btn ghost" data-card>Опорна картка</button></div></div>`;
+  $('#fin').addEventListener('click',()=>{const a=[$('#o0').value.trim(),$('#o1').value.trim()];
+    if(a.some(x=>x.length<15||!x.includes(','))){$('#warn').textContent='Напиши обидва речення повністю — у складнопідрядному реченні має бути кома між частинами.';return}
+    S.own=a;end()});
+}
+function code(str){let h=5381;for(const ch of str)h=((h*33)^ch.codePointAt(0))>>>0;return h.toString(36).toUpperCase().padStart(7,'0').slice(-7)}
+
+function end(){
+  S.view='end';setDepth();
+  const sc=score(),by=S.items.map(l=>l.reduce((a,x)=>a+x.pts,0));
+  const lvl=sc>=21?['На глибині','Ти впевнено розрізняєш види — можеш пояснити іншому.']:sc>=14?['Половина шляху','Основне вже є. Переглянь опорну картку й пройди тренажер ще раз — набір буде новий.']:['Біля поверхні','Нічого страшного: перечитай опорну картку й спробуй ще раз. Напиши вчителеві, що саме незрозуміло.'];
+  const rep=Object.keys(T).filter(k=>(S.lost[k]||0)>=1).map(k=>T[k].n);
+  const d=new Date(),ds=d.toLocaleDateString('uk-UA')+' '+d.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'});
+  const cd=code([S.nm,S.cl,sc,S.t0,S.own.join('|')].join('#'));
+  const txt=`Тренажер «Підрядні на глибині»
+${S.nm}, ${S.cl} · ${ds} · спроба ${S.att}
+Рахунок: ${fmt(sc)} / ${MAX} (етап 1: ${fmt(by[0])}/6, етап 2: ${fmt(by[1])}/12, етап 3: ${fmt(by[2])}/6)
+Повторити: ${rep.length?rep.join(', '):'—'}
+Мої речення:
+1) [${T[S.two[0]].n}] ${S.own[0]}
+2) [${T[S.two[1]].n}] ${S.own[1]}
+Код: ${cd}`;
+  app.innerHTML=`<div class="card"><p class="stage">Ти виринув(-ла)!</p>
+   <p class="big">${fmt(sc)} / ${MAX}</p><h2>${lvl[0]}</h2><p>${lvl[1]}</p>
+   <table class="res"><tbody>
+    <tr><th>Етап 1 · питання</th><td>${fmt(by[0])} / 6</td></tr>
+    <tr><th>Етап 2 · вид</th><td>${fmt(by[1])} / 12</td></tr>
+    <tr><th>Етап 3 · двійники</th><td>${fmt(by[2])} / 6</td></tr>
+    <tr><th>Варто повторити</th><td>${rep.length?esc(rep.join(', ')):'усе вийшло рівно'}</td></tr>
+   </tbody></table>
+   <h2 style="margin-top:22px">Звіт для вчителя</h2>
+   <p class="small">Скопіюй і встав у приватний коментар до завдання в Google Класі (або зроби скриншот цього екрана).</p>
+   <pre id="rep">${esc(txt)}</pre>
+   <div class="row"><button class="btn" id="cp">Скопіювати звіт</button><button class="btn ghost" id="again">Пройти ще раз (новий набір)</button><span class="small" id="cpm" aria-live="polite"></span></div></div>`;
+  $('#cp').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(txt);$('#cpm').textContent='Скопійовано!'}catch(e){const r=document.createRange();r.selectNodeContents($('#rep'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#cpm').textContent='Текст виділено — натисни Ctrl+C (або «Копіювати»).'}});
+  $('#again').addEventListener('click',()=>{document.documentElement.style.setProperty('--d',0);start();setTimeout(()=>{document.documentElement.style.setProperty('--p','0%')},0)});
+}
+
+document.addEventListener('click',e=>{if(e.target.closest('[data-card]')){$('#ov').classList.add('show');$('#ovclose').focus()}});
+$('#ovclose').addEventListener('click',()=>$('#ov').classList.remove('show'));
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')$('#ov').classList.remove('show')});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')return $('#ov').classList.remove('show');
+  if(!S||S.view!=='q'||$('#ov').classList.contains('show'))return;
+  const i='1234'.indexOf(e.key);if(i>=0){const b=app.querySelectorAll('.opt')[i];if(b&&!b.disabled)b.click()}
+});
+start();
+}
+</script>
+</body>
+</html>
