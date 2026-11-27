@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Власні назви: урок</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: дружній учительський голос, спокійно і ясно, для учнів 6 класу
+   IDEA: шкільний зошит у лінійку з червоним полем і перевіркою «червоною ручкою»
+   PICTURE: сторінка зошита з датою і «Класна робота», написаними від руки
+   COLOUR and TYPE: глибокий чорнильний синій, білий папір, червоне поле; Nunito + рукописний Caveat
+   LAYOUT: синя смуга-заголовок, крокова навігація, один крок уроку на екрані */
+:root{color-scheme:light dark;
+--bg:light-dark(#f3f5fb,#0d1224);--paper:light-dark(#fffefa,#161d33);--ink:light-dark(#16223f,#e7ebf7);
+--blue:light-dark(#1d3f9e,#9db7ff);--band:light-dark(#17307a,#101a42);--red:light-dark(#cf2339,#ff7083);
+--line:light-dark(#dbe4f4,#232d4d);--muted:light-dark(#56627f,#a5afca);--ok:light-dark(#17703f,#6fdc9f);
+--okbg:light-dark(#e5f4ea,#11301f);--bad:light-dark(#b3192c,#ff8a98);--badbg:light-dark(#fde9eb,#3a1621);
+--chip:light-dark(#eef2fc,#1f2847);--yellow:#ffd23f}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{line-height:1.1;text-wrap:balance;margin:0 0 .5em}
+h2{font-size:clamp(26px,4vw,36px);font-weight:800;color:var(--blue)}
+h3{font-size:20px;font-weight:800}
+p{margin:0 0 .8em;max-width:68ch}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.hand{font-family:Caveat,cursive}
+header{background:var(--band);color:#fff;padding:clamp(24px,4vw,48px) max(5vw,16px) 0}
+.hwrap{max-width:1180px;margin:auto;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:end}
+header .kicker{font-weight:700;color:#c9d6ff;margin-bottom:10px}
+header h1{font-size:clamp(32px,5vw,50px);font-weight:800;line-height:1.05}
+header p{color:#dbe3ff}
+.meter{display:flex;gap:18px;flex-wrap:wrap;padding:6px 0 28px;font-weight:700}
+.meter b{font-size:28px;color:var(--yellow)}
+.bar{height:10px;background:#ffffff26;border-radius:6px;overflow:hidden;width:min(320px,100%);margin-top:8px}
+.bar i{display:block;height:100%;background:var(--yellow);width:0;transition:width .4s}
+.note{position:relative;background:#fffefa;color:#1d3f9e;border-radius:6px 6px 0 0;padding:26px 24px 30px 64px;transform:rotate(-1.5deg);transform-origin:bottom;box-shadow:0 -10px 30px #0004;
+background-image:linear-gradient(#cfdcf3 1px,transparent 1px);background-size:100% 38px;background-position:0 20px;min-height:230px}
+.note::before{content:"";position:absolute;left:46px;top:0;bottom:0;width:2px;background:#e0485b}
+.note div{font-family:Caveat,cursive;font-size:clamp(26px,3.2vw,34px);line-height:38px;font-weight:700}
+.note .c{text-align:center}
+.note small{display:block;font:600 13px Nunito,sans-serif;color:#7d89a8;margin-top:6px}
+nav{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 2px 10px #0001}
+.steps{display:flex;gap:8px;overflow-x:auto;padding:10px max(5vw,16px);max-width:1240px;margin:auto;scrollbar-width:thin}
+.steps button{flex:none;border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:8px 14px;min-height:40px;font-size:15px;font-weight:700;color:var(--muted)}
+.steps button[aria-current=true]{background:var(--blue);color:var(--paper);border-color:var(--blue)}
+.steps button.fin{color:var(--ok);border-color:var(--ok)}
+.steps button.fin[aria-current=true]{color:var(--paper);background:var(--ok)}
+main{max-width:1000px;margin:24px auto 60px;padding:0 max(3vw,12px)}
+.sheet{position:relative;background:var(--paper);border-radius:14px;padding:clamp(22px,4vw,44px) clamp(18px,4vw,44px) clamp(22px,4vw,44px) clamp(34px,6vw,72px);
+box-shadow:0 1px 0 var(--line),0 18px 40px #0b17401a}
+.sheet::before{content:"";position:absolute;left:clamp(18px,3.4vw,40px);top:0;bottom:0;width:2px;background:var(--red);opacity:.55}
+.step[hidden]{display:none}
+.tag{display:inline-block;background:var(--red);color:#fff;font-weight:800;font-size:14px;padding:3px 10px;border-radius:6px;margin-bottom:10px}
+.pts{color:var(--muted);font-weight:700;font-size:15px}
+.box{border-radius:12px;padding:16px 18px;margin:16px 0;background:var(--chip)}
+.box.warn{background:light-dark(#fff6d6,#2e2710);border-left:5px solid var(--yellow)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px;margin:16px 0}
+.card{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--paper)}
+.card h3{color:var(--blue)}
+.ex{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ex span{background:var(--chip);border-radius:8px;padding:4px 10px;font-weight:700}
+.cap{color:var(--red);font-weight:800}
+table{border-collapse:collapse;width:100%;margin:12px 0}
+td,th{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+th{font-size:15px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 14px;border-radius:10px;border:1px solid var(--line);margin:8px 0;background:var(--paper)}
+.row .ph{flex:1 1 220px;font-size:19px}
+.row.ok{background:var(--okbg);border-color:var(--ok)}
+.row.bad{background:var(--badbg);border-color:var(--bad)}
+.fix{flex-basis:100%;color:var(--bad);font-weight:700;font-size:15px}
+.ok .fix{color:var(--ok)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.opt{border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 14px;min-height:44px;font-weight:700}
+.opt[aria-pressed=true]{border-color:var(--blue);background:var(--blue);color:var(--paper)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok)!important;background:var(--okbg)!important;color:var(--ok)!important}
+.opt.wrong{border-color:var(--bad)!important;background:var(--badbg)!important;color:var(--bad)!important}
+select,input[type=text],textarea{border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;min-height:44px;font-size:16px;width:100%}
+select{max-width:520px}
+textarea{min-height:90px;resize:vertical}
+.text{font-size:20px;line-height:2.3}
+.gap{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:38px;border:2px dashed var(--blue);border-radius:8px;background:var(--chip);font:800 20px Nunito,sans-serif;color:var(--blue);vertical-align:baseline;padding:0 4px;margin:0 1px}
+.gap.ok{border-style:solid;border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+.gap.bad{border-style:solid;border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+.nw{white-space:nowrap}
+.under{text-decoration:underline 3px var(--red);text-underline-offset:5px}
+.wd{border:2px solid var(--line);background:var(--paper);border-radius:8px;padding:6px 10px;min-height:44px;font:700 19px Nunito,sans-serif;margin:3px}
+.wd.up{border-color:var(--blue);color:var(--blue)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:20px}
+.btn{border:0;border-radius:12px;padding:12px 22px;min-height:48px;font-weight:800;background:var(--blue);color:var(--paper)}
+.btn.red{background:var(--red);color:#fff}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.res{font-weight:800;margin:14px 0 0}
+.res.good{color:var(--ok)}.res.mid{color:var(--blue)}
+.msg{font-weight:700;color:var(--bad);min-height:1.5em;margin:8px 0 0}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
+.fact{border-left:5px solid var(--blue);padding:10px 16px;background:var(--chip);border-radius:0 12px 12px 0}
+.poem{font-family:Caveat,cursive;font-size:28px;line-height:1.3;color:var(--blue);margin:10px 0 18px}
+.lvl{display:grid;gap:8px}
+.cert img{width:100%;border-radius:10px;border:1px solid var(--line);display:block;margin:16px 0}
+ol.how li{margin-bottom:8px}
+label.f{display:block;font-weight:700;margin:12px 0 6px}
+.grid2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
+.flash{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.97)}60%{transform:scale(1.02)}100%{transform:none}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}.bar i{transition:none}}
+@media(max-width:720px){.hwrap{grid-template-columns:minmax(0,1fr)}.note{min-height:0;padding-left:56px}.note::before{left:40px}.grid2{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){body{font-size:16px}.text{font-size:18px}table{font-size:14px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="hwrap">
+  <div>
+   <div class="kicker">Українська мова · 6 клас · самостійна робота</div>
+   <h1>Загальні та власні назви. Велика буква у власних назвах</h1>
+   <p>Ти дізнаєшся, чим слова, що називають багато однорідних предметів, відрізняються від назв одного конкретного предмета, і навчишся правильно писати велику букву.</p>
+   <div class="meter"><div>Бали<br><b id="pts">0</b> <span id="ptsMax"></span></div><div>Виконано кроків<br><b id="stp">0</b><div class="bar"><i id="barI"></i></div></div></div>
+  </div>
+  <div class="note" aria-label="Запис у зошиті">
+   <div class="c" id="dateWords">Двадцять сьоме листопада</div>
+   <div class="c">Класна робота</div>
+   <div>Велика буква у власних назвах</div>
+   <small>Запиши це в зошит</small>
+  </div>
+ </div>
+</header>
+<nav><div class="steps" id="steps"></div></nav>
+<main><div class="sheet">
+
+<section class="step" data-t="Початок">
+ <h2>Привіт! Готуйся до уроку</h2>
+ <p>Ти працюватимеш самостійно. Урок складається з кроків: спочатку читаєш правило, потім виконуєш вправу і натискаєш «Перевірити». Перевірити кожну вправу можна <b>лише один раз</b>, тож не поспішай. Після перевірки ти побачиш правильні відповіді: уважно розглянь свої помилки.</p>
+ <div class="box"><b>Що тобі знадобиться:</b> зошит і ручка. Запиши в зошит число, «Класна робота» і тему, як на сторінці зошита вгорі.</div>
+ <div class="grid2">
+  <div><label class="f" for="nm">Твоє прізвище та ім’я</label><input type="text" id="nm" data-bind="name" autocomplete="name" placeholder="Наприклад: Коваленко Марія"></div>
+  <div><label class="f" for="cl">Клас</label><input type="text" id="cl" data-bind="cls" placeholder="6-А"></div>
+ </div>
+ <p class="pts" style="margin-top:14px">Наприкінці ти отримаєш сертифікат із результатом, який можна зберегти й прикріпити в Google Класі.</p>
+</section>
+
+<section class="step" data-t="Загальні і власні" hidden>
+ <h2>Загальні та власні назви</h2>
+ <div class="two">
+  <div class="card"><h3>Загальні назви</h3><p>Називають <b>будь-який</b> предмет із групи однорідних. Пишемо з малої букви.</p><div class="ex"><span>місто</span><span>річка</span><span>кішка</span><span>книжка</span><span>море</span></div></div>
+  <div class="card"><h3>Власні назви</h3><p>Називають <b>один конкретний</b> предмет, щоб вирізнити його з-поміж інших. Пишемо з великої букви.</p><div class="ex"><span>Херсон</span><span>Рось</span><span>Мурка</span><span>«Кобзар»</span><span>Чорне море</span></div></div>
+ </div>
+ <p>Власними назвами бувають імена, по батькові та прізвища людей, клички тварин, назви міст, сіл, вулиць, річок, гір, країн, планет і сузір’їв, свят, установ, книжок тощо.</p>
+ <h3>Порівняй</h3>
+ <table><thead><tr><th>Загальна назва</th><th>Власна назва</th></tr></thead><tbody>
+  <tr><td>місто</td><td>Біла Церква, Вінниця</td></tr>
+  <tr><td>річка</td><td>Дніпро, Південний Буг</td></tr>
+  <tr><td>собака</td><td>Рекс, Бровко</td></tr>
+  <tr><td>планета</td><td>Земля, Марс</td></tr>
+ </tbody></table>
+ <div class="box warn"><b>Зверни увагу!</b> Слова <i>місто, вулиця, море, річка, сузір’я, церква</i> та подібні — це загальні назви. Навіть поруч із власною назвою їх пишемо з малої букви: <i>місто Херсон, Чорне море, Володимирський собор</i>.</div>
+</section>
+
+<section class="step" data-t="Вправа 248" hidden>
+ <span class="tag">Вправа 248</span> <span class="pts">6 балів · 1 бал за кожну правильну відповідь</span>
+ <h2>Чому співзвучні слова написано по-різному?</h2>
+ <p>Визнач, чим є виділене слово: <b>загальною</b> чи <b>власною</b> назвою.</p>
+ <div id="t248"></div>
+ <div class="actions"><button class="btn" data-check="t248">Перевірити</button></div>
+ <p class="msg" id="msg-t248"></p><p class="res" id="res-t248"></p>
+ <div id="exp-t248" hidden class="box">Великий Віз, Земля, Сніжинка — назви <b>одного</b> конкретного сузір’я, планети, кішки, тому це власні назви. А великий віз, рідна земля, холодна сніжинка — звичайні предмети, яких багато, тому це загальні назви.</div>
+</section>
+
+<section class="step" data-t="Правила" hidden>
+ <h2>Запам’ятай! Велика буква у власних назвах</h2>
+ <div class="box"><b>Орфограма «Велика буква у власних назвах».</b> Власні назви пишемо з великої букви: <i>Херсон, Рось, Буковина, Великдень, Чорне море, Володимирський собор</i>.</div>
+ <div class="two">
+  <div class="card"><h3>Лише перше слово з великої</h3><p>Якщо власна назва складається з кількох слів, з великої букви зазвичай пишемо перше слово (і власні назви всередині):</p><div class="ex"><span><span class="cap">Д</span>ень учителя</span><span><span class="cap">М</span>узей історичних коштовностей</span><span><span class="cap">Н</span>аціональна опера <span class="cap">У</span>країни</span><span><span class="cap">Д</span>руга світова війна</span></div></div>
+  <div class="card"><h3>Усі слова з великої</h3><p>Але є назви, у яких з великої букви пишемо <b>всі слова</b>. Їх перелічено нижче.</p></div>
+ </div>
+ <h3>З великої букви пишемо всі слова в назвах:</h3>
+ <div class="two">
+  <div class="card"><h3>Держав</h3><div class="ex"><span>Арабська Республіка Єгипет</span><span>Республіка Польща</span><span>Республіка Боснія і Герцеговина</span></div></div>
+  <div class="card"><h3>Міст, сіл, вулиць, провулків, проспектів, бульварів</h3><div class="ex"><span>місто Біла Церква</span><span>вулиця Верхній Вал</span><span>село Великий Кучурів</span></div></div>
+  <div class="card"><h3>Географічних і астрономічних об’єктів</h3><div class="ex"><span>галактика Чумацький Шлях</span><span>острів Нова Гвінея</span><span>річка Південний Буг</span></div></div>
+  <div class="card"><h3>Найвищих державних установ України і міжнародних організацій</h3><div class="ex"><span>Верховна Рада України</span><span>Організація Об’єднаних Націй</span><span>Європейський Союз</span></div></div>
+  <div class="card"><h3>Дійових осіб у казках, байках, мультфільмах</h3><div class="ex"><span>Лисичка-Сестричка</span><span>Губка Боб</span><span>Снігова Королева</span></div></div>
+ </div>
+ <h3>З великої букви також пишемо</h3>
+ <table class="stack"><thead><tr><th>Правило</th><th>Приклади</th></tr></thead><tbody>
+  <tr><td>Слова, пов’язані з релігією</td><td>Бог, Божа Матір, Святий Дух, Аллах, Будда, Біблія, Коран. <b>Але:</b> бог Перун (назва язичницького бога)</td></tr>
+  <tr><td>Назви державних символів</td><td>Державний Герб України, Державний Прапор України, Державний Гімн України</td></tr>
+  <tr><td>Назви найвищих державних посад</td><td>Президент України, Голова Верховної Ради України</td></tr>
+  <tr><td>Назви свят</td><td>Перше слово і власні назви: День захисників і захисниць України, День учителя. Окремо запам’ятай: День Незалежності України, День Соборності України</td></tr>
+ </tbody></table>
+</section>
+
+<section class="step" data-t="Редагувальник" hidden>
+ <span class="tag">Вправа «Редагувальник»</span> <span class="pts">5 балів</span>
+ <h2>До якої групи належать ці назви?</h2>
+ <p>У кожній з цих назв з великої букви написано всі слова. Обери для кожного рядка правило, яке це пояснює.</p>
+ <div id="red"></div>
+ <div class="actions"><button class="btn" data-check="red">Перевірити</button></div>
+ <p class="msg" id="msg-red"></p><p class="res" id="res-red"></p>
+</section>
+
+<section class="step" data-t="Вправа 247" hidden>
+ <span class="tag">Вправа 247</span> <span class="pts">6 балів + 1 бал</span>
+ <h2>Мальовниче Поділля</h2>
+ <p>Прочитай текст. Натискай на квадратики, щоб обрати <b>велику</b> чи <b>малу</b> букву (кожне натискання змінює букву). Подумай, де власна назва, а де загальна.</p>
+ <div class="box text" id="pod"></div>
+ <p class="pts">За матеріалами інтернету. Бали: 6 × частка правильних букв, округлено.</p>
+ <h3 style="margin-top:22px">Чому підкреслене слово <span class="under">річкою</span> — загальна назва, а не власна?</h3>
+ <div id="why"></div>
+ <div class="actions"><button class="btn" data-check="pod">Перевірити</button></div>
+ <p class="msg" id="msg-pod"></p><p class="res" id="res-pod"></p>
+ <div id="exp-pod" hidden class="box"><b>Власні назви з тексту:</b> Південний Буг, Дністер, Поділля, Вінниччина, Хмельниччина, Тернопільщина, Західне Поділля, Східне Поділля, Опілля, Побережжя. Тема тексту — розташування й частини Поділля. Випиши ці власні назви в зошит.</div>
+</section>
+
+<section class="step" data-t="Вправа 246" hidden>
+ <span class="tag">Вправа 246</span> <span class="pts">10 балів · 1 бал за кожне сполучення</span>
+ <h2>Де потрібна велика буква?</h2>
+ <p>Усі слова тут написано з малої букви. Натисни на слово, яке треба писати з великої, і воно зміниться. Натисни ще раз, щоб повернути малу.</p>
+ <div id="t246"></div>
+ <div class="actions"><button class="btn" data-check="t246">Перевірити</button></div>
+ <p class="msg" id="msg-t246"></p><p class="res" id="res-t246"></p>
+ <label class="f" for="sent">З одним сполученням (на вибір) склади і запиши речення. Його побачить учитель у твоєму результаті.</label>
+ <textarea id="sent" data-bind="sentence" placeholder="Наприклад: Улітку ми плавали на човні по річці Сіверський Донець."></textarea>
+</section>
+
+<section class="step" data-t="Загадка" hidden>
+ <span class="tag">Загадка</span> <span class="pts">1 бал</span>
+ <h2>Про яке слово йдеться?</h2>
+ <div class="poem">Ой, цікаве слово! — каже Ніна.<br>В словнику, як хочеш, перевір:<br>напиши з великої — країна,<br>а з малої — головний убір.</div>
+ <div class="grid2"><input type="text" id="riddle" placeholder="Впиши слово" autocomplete="off"></div>
+ <div class="actions"><button class="btn" data-check="riddle">Перевірити</button></div>
+ <p class="msg" id="msg-riddle"></p><p class="res" id="res-riddle"></p>
+ <div id="exp-riddle" hidden class="fact"><b>Панама</b> — країна, а <b>панама</b> — літній капелюх. Республіка Панама розташована на стику Північної і Південної Америки. Її столиця теж називається Панама. Країна відома штучним Панамським каналом — найкоротшим шляхом між Тихим і Атлантичним океанами. Через нього проходить близько 6 % світової торгівлі.</div>
+</section>
+
+<section class="step" data-t="Тест" hidden>
+ <span class="tag">Вправа 253 і тест</span> <span class="pts">7 балів · 1 бал за кожну правильну відповідь</span>
+ <h2>Виконай тестові завдання</h2>
+ <div id="test"></div>
+ <div class="actions"><button class="btn" data-check="test">Перевірити</button></div>
+ <p class="msg" id="msg-test"></p><p class="res" id="res-test"></p>
+</section>
+
+<section class="step cert" data-t="Сертифікат" hidden>
+ <h2>Підсумок і сертифікат</h2>
+ <table><thead><tr><th>Завдання</th><th style="text-align:right">Бали</th></tr></thead><tbody id="sum"></tbody></table>
+ <div id="todo"></div>
+ <h3 style="margin-top:22px">Рефлексія: оціни свою роботу на уроці</h3>
+ <div class="lvl" id="refl"></div>
+ <label class="f" for="nt">Що було найцікавішим або найскладнішим? (необов’язково)</label>
+ <textarea id="nt" data-bind="note"></textarea>
+ <div class="grid2"><div><label class="f" for="nm2">Прізвище та ім’я</label><input type="text" id="nm2" data-bind="name"></div><div><label class="f" for="cl2">Клас</label><input type="text" id="cl2" data-bind="cls"></div></div>
+ <div class="box"><b>Домашнє завдання:</b> вивчити правила §30 та конспект; виконати вправу 292.</div>
+ <div class="actions"><button class="btn red" id="mk">Отримати сертифікат</button></div>
+ <p class="msg" id="msg-cert"></p>
+ <div id="certOut" hidden>
+  <img id="certImg" alt="Сертифікат про проходження уроку">
+  <canvas id="cv" hidden></canvas>
+  <div class="actions">
+   <button class="btn" id="saveBtn" hidden>Зберегти сертифікат (PNG)</button>
+   <button class="btn ghost" id="copyImg">Копіювати зображення</button>
+   <button class="btn ghost" id="copyTxt">Копіювати результат текстом</button>
+  </div>
+  <p class="msg" id="msg-copy" style="color:var(--ok)"></p>
+  <div class="box"><h3>Як здати роботу в Google Класі</h3><ol class="how">
+   <li>Натисни «Зберегти сертифікат». Якщо кнопки немає, натисни на зображення правою кнопкою миші (на телефоні — утримуй палець) і обери «Зберегти зображення».</li>
+   <li>Відкрий завдання в Google Класі і натисни <b>«Додати або створити» → «Файл»</b>. Обери збережений сертифікат.</li>
+   <li>Натисни «Копіювати результат текстом» і встав текст у поле <b>«Особистий коментар»</b> — так учитель побачить і твоє речення.</li>
+   <li>Натисни <b>«Здати»</b>.</li>
+  </ol><p class="pts">Скопійоване зображення можна також вставити (Ctrl+V) у документ Google, який ти створиш у завданні.</p></div>
+  <textarea id="txtOut" readonly hidden></textarea>
+ </div>
+ <div class="actions" style="margin-top:30px"><button class="btn ghost" id="reset">Почати урок заново</button></div>
+</section>
+
+<div class="pager"><button class="btn ghost" id="prev">Назад</button><button class="btn" id="next">Далі</button></div>
+</div></main>
+
+<script>
+{
+const K="urok-vlasni-nazvy-v1";
+const $=s=>document.querySelector(s);
+let S={name:"",cls:"",step:0,ans:{},done:{},refl:"",note:"",sentence:"",certAt:""};
+try{const v=JSON.parse(localStorage.getItem(K)||"null");if(v)S=Object.assign(S,v)}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const MAX={t248:6,red:5,pod:6,why:1,t246:10,riddle:1,test:7};
+const NAMES={t248:"Вправа 248",red:"Редагувальник",pod:"Вправа 247 (велика буква)",why:"Вправа 247 (питання)",t246:"Вправа 246",riddle:"Загадка",test:"Тест (вправа 253)"};
+const STEP_OF={t248:2,red:4,pod:5,why:5,t246:6,riddle:7,test:8};
+const TOTAL=Object.values(MAX).reduce((a,b)=>a+b,0);
+
+/* дата словами */
+const ORD=["перше","друге","третє","четверте","п’яте","шосте","сьоме","восьме","дев’яте","десяте","одинадцяте","дванадцяте","тринадцяте","чотирнадцяте","п’ятнадцяте","шістнадцяте","сімнадцяте","вісімнадцяте","дев’ятнадцяте","двадцяте"];
+const MON=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+const now=new Date(),d=now.getDate();
+let dw=d<=20?ORD[d-1]:d<30?"двадцять "+ORD[d-21]:d===30?"тридцяте":"тридцять перше";
+$("#dateWords").textContent=dw[0].toUpperCase()+dw.slice(1)+" "+MON[now.getMonth()];
+
+/* дані вправ */
+const I248=[["Скрипить <b>великий віз</b>","z"],["сузір’я <b>Великий Віз</b>","v"],["планета <b>Земля</b>","v"],["рідна <b>земля</b>","z"],["кішка <b>Сніжинка</b>","v"],["холодна <b>сніжинка</b>","z"]];
+const CATS=["назва держави","назва міста, села, вулиці","географічна чи астрономічна назва","назва найвищої державної установи чи міжнародної організації","дійова особа казки, байки, мультфільму"];
+const IRED=[["Лисичка-Сестричка, Губка Боб",4],["острів Нова Гвінея, галактика Чумацький Шлях",2],["Республіка Польща",0],["Верховна Рада України, Європейський Союз",3],["місто Біла Церква, вулиця Верхній Вал",1]];
+const POD="Між [р]ічкою [П]івденний [Б]уг і лівими [п]ритоками [Д]ністра розкинулося [м]альовниче [П]оділля. Поділля охоплює переважно території сучасних [В]інниччини, [Х]мельниччини й [Т]ернопільщини, а також невеликі частини інших [р]егіонів. Виділяють чотири частини цього [к]раю: [З]ахідне [П]оділля, [С]хідне [П]оділля, [О]пілля і [П]обережжя.";
+const PODA=[...POD.matchAll(/\[(.)\]/g)].map(m=>m[1]);
+const QWHY=[{q:"Обери правильне пояснення.",o:["Воно стоїть на початку речення","Воно називає будь-яку річку, а не одну конкретну","Воно є іменником жіночого роду","Після нього йде власна назва, тому його пишуть з великої"],a:1,e:"«Річка» — загальна назва для всіх річок. Власна назва тут — Південний Буг."}];
+const I246=[["місто Кривий Ріг","Назва міста: усі слова з великої; «місто» — загальна назва."],["Азовське море","Географічна назва; «море» — загальна назва."],["острів Хортиця","Назва острова; «острів» — загальна назва."],["вулиця Січових Стрільців","Назва вулиці: усі слова з великої."],["сузір’я Велика Ведмедиця","Астрономічна назва: усі слова з великої."],["річка Сіверський Донець","Назва річки: усі слова з великої."],["Китайська Народна Республіка","Назва держави: усі слова з великої."],["День захисників і захисниць України","Назва свята: перше слово і власна назва «України»."],["Червона Шапочка","Дійова особа казки: усі слова з великої."],["Музей води","Назва установи: з великої лише перше слово."]];
+const QT=[
+ {q:"1. З великої букви треба писати ВСІ слова в рядку",o:["(к)иївська (р)усь, (м)айдан (с)вободи","(г)алицько-(в)олинська (д)ержава","(о)стромирове (є)вангеліє","(о)строзька (а)кадемія"],a:2,e:"Остромирове Євангеліє — обидва слова з великої. Правильно: Київська Русь, майдан Свободи; Галицько-Волинська держава; Острозька академія."},
+ {q:"2. Орфографічну помилку допущено в реченні",o:["Найменший з океанів — Північний Льодовитий океан.","У водах Тихого океану є острів Нова Гвінея.","Надвечір під’їхали до села Зелена діброва.","Дізналися багато цікавого про сузір’я Скорпіона."],a:2,e:"Назва села — усі слова з великої: Зелена Діброва."},
+ {q:"3. Правильно написано",o:["Бог Перун","бог Перун","Бог перун","бог перун"],a:1,e:"Перун — власна назва, а «бог» тут — загальна назва язичницького божества."},
+ {q:"4. Правильно написано назву державного символу",o:["державний прапор України","Державний прапор україни","Державний Прапор України","державний Прапор України"],a:2,e:"У назвах державних символів усі слова пишемо з великої."},
+ {q:"5. У якому рядку правильно написано назву моря?",o:["Чорне Море","Чорне море","чорне море","чорне Море"],a:1,e:"«Море» — загальна назва, пишемо з малої: Чорне море."},
+ {q:"6. Загальну назву подано в рядку",o:["Херсон","Буковина","собор","Рось"],a:2,e:"Собор — назва будь-якої великої церкви, тому це загальна назва."},
+ {q:"7. Правильно написано назву державної посади",o:["президент України","Президент України","Президент україни","президент україни"],a:1,e:"Назви найвищих державних посад пишемо з великої букви: Президент України."}];
+const REFL=["Я все зрозумів(-ла) і можу пояснити іншим","Я зрозумів(-ла), але ще маю запитання","Мені потрібна допомога вчителя"];
+
+/* навігація */
+const steps=[...document.querySelectorAll(".step")];
+const stepDone=i=>{const ts=Object.keys(STEP_OF).filter(t=>STEP_OF[t]===i);if(ts.length)return ts.every(t=>S.done[t]);if(i===9)return !!S.certAt;return i<S.max};
+function nav(){
+ $("#steps").innerHTML=steps.map((s,i)=>`<button data-go="${i}" aria-current="${i===S.step}" class="${stepDone(i)?"fin":""}">${i+1}. ${s.dataset.t}</button>`).join("");
+ const cur=$("#steps").children[S.step];if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});
+}
+function show(i){
+ S.step=Math.max(0,Math.min(steps.length-1,i));S.max=Math.max(S.max||0,S.step);
+ steps.forEach((s,k)=>s.hidden=k!==S.step);
+ $("#prev").disabled=S.step===0;$("#next").hidden=S.step===steps.length-1;
+ if(S.step===9)renderSum();
+ nav();meter();save();window.scrollTo({top:document.querySelector("nav").offsetTop,behavior:"smooth"});
+}
+function score(){return Object.keys(MAX).reduce((a,t)=>a+(S.done[t]?S.done[t].s:0),0)}
+function meter(){
+ $("#pts").textContent=score();$("#ptsMax").textContent="з "+TOTAL;
+ const n=steps.filter((s,i)=>stepDone(i)).length;$("#stp").textContent=n+" з "+steps.length;$("#barI").style.width=(100*n/steps.length)+"%";
+}
+
+/* рендер вправ */
+const A=t=>S.ans[t]||(S.ans[t]=t==="t246"?I246.map(p=>p[0].split(" ").map(()=>false)):{});
+function r248(){const a=A("t248"),d=S.done.t248;
+ $("#t248").innerHTML=I248.map(([h,c],i)=>`<div class="row ${d?(a[i]===c?"ok":"bad"):""}"><span class="ph">${h}</span><span class="seg">${["z","v"].map(v=>`<button class="opt" data-t="t248" data-i="${i}" data-v="${v}" aria-pressed="${a[i]===v}" ${d?"disabled":""}>${v==="z"?"загальна":"власна"}</button>`).join("")}</span>${d&&a[i]!==c?`<span class="fix">Правильно: ${c==="z"?"загальна":"власна"} назва</span>`:""}</div>`).join("");
+ $("#exp-t248").hidden=!d}
+function rRed(){const a=A("red"),d=S.done.red;
+ $("#red").innerHTML=IRED.map(([t,c],i)=>`<div class="row ${d?(+a[i]===c?"ok":"bad"):""}"><span class="ph"><b>${t}</b></span><select data-t="red" data-i="${i}" ${d?"disabled":""} aria-label="Правило для: ${t}"><option value="">— обери правило —</option>${CATS.map((k,j)=>`<option value="${j}" ${a[i]!==undefined&&+a[i]===j&&a[i]!==""?"selected":""}>${k}</option>`).join("")}</select>${d&&+a[i]!==c?`<span class="fix">Правильно: ${CATS[c]}</span>`:""}</div>`).join("")}
+function rPod(){const a=A("pod"),d=S.done.pod;let g=0;
+ $("#pod").innerHTML=POD.replace(/\[(.)\]([^\s.,:;]*)/g,(m,ch,rest)=>{const i=g++,v=a[i];const shown=v==="U"?ch.toUpperCase():v==="L"?ch.toLowerCase():"?";const cls=d?(shown===ch?"ok":"bad"):"";const w=i===0?`<span class="under">${rest}</span>`:rest;
+  return `<span class="nw"><button class="gap ${cls}" data-t="pod" data-i="${i}" ${d?"disabled":""} aria-label="Буква ${ch.toLowerCase()}…${rest}" title="${d&&shown!==ch?"Правильно: "+ch:""}">${d&&shown!==ch?ch:shown}</button>${w}</span>`});
+ $("#exp-pod").hidden=!d;mcq("why",QWHY)}
+function r246(){const a=A("t246"),d=S.done.t246;
+ $("#t246").innerHTML=I246.map(([p,why],i)=>{const ws=p.split(" ");const ok=ws.every((w,k)=>a[i][k]===(w[0]!==w[0].toLowerCase()));
+  return `<div class="row ${d?(ok?"ok":"bad"):""}"><span class="ph">${ws.map((w,k)=>{const l=w.toLowerCase();const up=a[i][k];return `<button class="wd ${up?"up":""}" data-t="t246" data-i="${i}" data-k="${k}" ${d?"disabled":""}>${up?l[0].toUpperCase()+l.slice(1):l}</button>`}).join(" ")}</span>${d?`<span class="fix">${ok?"":"Правильно: <b>"+p+"</b>. "}${why}</span>`:""}</div>`}).join("")}
+function mcq(t,Q){const a=A(t),d=S.done[t],el=$("#"+t);
+ el.innerHTML=Q.map((q,i)=>`<div class="row ${d?(a[i]===q.a?"ok":"bad"):""}" style="display:block"><p><b>${q.q}</b></p><div class="seg">${q.o.map((o,j)=>`<button class="opt ${d&&j===q.a?"right":""} ${d&&a[i]===j&&j!==q.a?"wrong":""}" data-t="${t}" data-i="${i}" data-v="${j}" aria-pressed="${a[i]===j}" ${d?"disabled":""}>${"АБВГ"[j]}) ${o}</button>`).join("")}</div>${d?`<span class="fix" style="display:block;margin-top:8px">${q.e}</span>`:""}</div>`).join("")}
+function rRiddle(){const d=S.done.riddle,i=$("#riddle");i.value=S.ans.riddle||"";i.disabled=!!d;$("#exp-riddle").hidden=!d}
+function renderAll(){r248();rRed();rPod();r246();rRiddle();mcq("test",QT);
+ ["t248","red","pod","t246","riddle","test"].forEach(t=>{showRes(t)});renderRefl()}
+function showRes(t){const el=$("#res-"+t);if(!el)return;const ts=t==="pod"?["pod","why"]:[t];
+ if(!ts.every(x=>S.done[x])){el.textContent="";return}
+ const s=ts.reduce((a,x)=>a+S.done[x].s,0),m=ts.reduce((a,x)=>a+MAX[x],0);
+ el.textContent=`Твій результат: ${s} з ${m}. `+(s===m?"Чудово, без жодної помилки!":s>=m*.6?"Добре! Розглянь виправлені помилки.":"Перечитай правило і подивись правильні відповіді.");
+ el.className="res "+(s>=m*.6?"good":"mid");
+ const b=document.querySelector(`[data-check="${t}"]`);if(b){b.disabled=true;b.textContent="Перевірено"}}
+
+/* перевірка */
+function check(t){const msg=$("#msg-"+t);msg.textContent="";const a=A(t);let s;
+ if(t==="t248"){if(I248.some((x,i)=>!a[i]))return msg.textContent="Дай відповідь на всі пункти.";s=I248.filter((x,i)=>a[i]===x[1]).length}
+ if(t==="red"){if(IRED.some((x,i)=>a[i]===undefined||a[i]===""))return msg.textContent="Обери правило для кожного рядка.";s=IRED.filter((x,i)=>+a[i]===x[1]).length}
+ if(t==="pod"){const w=A("why");if(PODA.some((x,i)=>!a[i]))return msg.textContent="Заповни всі квадратики в тексті.";if(w[0]===undefined)return msg.textContent="Дай відповідь на питання під текстом.";
+  const c=PODA.filter((ch,i)=>(a[i]==="U"?ch.toUpperCase():ch.toLowerCase())===ch).length;s=Math.round(6*c/PODA.length);S.done.why={s:w[0]===QWHY[0].a?1:0}}
+ if(t==="t246"){s=I246.filter(([p],i)=>p.split(" ").every((w,k)=>a[i][k]===(w[0]!==w[0].toLowerCase()))).length}
+ if(t==="riddle"){const v=$("#riddle").value.trim();if(!v)return msg.textContent="Впиши слово.";S.ans.riddle=v;s=/^панам[аи]?$/i.test(v.replace(/[«»"'.!]/g,""))?1:0}
+ if(t==="test"){if(QT.some((x,i)=>a[i]===undefined))return msg.textContent="Дай відповідь на всі питання.";s=QT.filter((x,i)=>a[i]===x.a).length}
+ S.done[t]={s};save();renderAll();meter();nav();
+ const r=$("#res-"+t);r.classList.add("flash");}
+
+/* події */
+document.addEventListener("click",e=>{
+ const g=e.target.closest("[data-go]");if(g)return show(+g.dataset.go);
+ const c=e.target.closest("[data-check]");if(c&&!c.disabled)return check(c.dataset.check);
+ const b=e.target.closest("button[data-t]");if(!b||b.disabled)return;
+ const t=b.dataset.t,i=+b.dataset.i,a=A(t);
+ if(t==="t248"){a[i]=b.dataset.v;r248()}
+ else if(t==="pod"){a[i]=a[i]==="U"?"L":"U";rPod()}
+ else if(t==="t246"){const k=+b.dataset.k;a[i][k]=!a[i][k];r246()}
+ else if(t==="why"||t==="test"){a[i]=+b.dataset.v;mcq(t,t==="why"?QWHY:QT)}
+ else if(t==="refl"){S.refl=REFL[i];renderRefl()}
+ save();
+});
+document.addEventListener("change",e=>{const s=e.target.closest("select[data-t]");if(s){A(s.dataset.t)[+s.dataset.i]=s.value;save()}});
+document.querySelectorAll("[data-bind]").forEach(el=>{el.value=S[el.dataset.bind]||"";
+ el.addEventListener("input",()=>{S[el.dataset.bind]=el.value;document.querySelectorAll(`[data-bind="${el.dataset.bind}"]`).forEach(o=>{if(o!==el)o.value=el.value});save()})});
+$("#riddle").addEventListener("keydown",e=>{if(e.key==="Enter")check("riddle")});
+$("#prev").onclick=()=>show(S.step-1);$("#next").onclick=()=>show(S.step+1);
+document.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;if(e.key==="ArrowRight")show(S.step+1);if(e.key==="ArrowLeft")show(S.step-1)});
+
+/* підсумок */
+function renderRefl(){$("#refl").innerHTML=REFL.map((r,i)=>`<button class="opt" style="text-align:left" data-t="refl" data-i="${i}" aria-pressed="${S.refl===r}">${r}</button>`).join("")}
+function level(p){return p>=90?"високий":p>=70?"достатній":p>=40?"середній":"початковий"}
+function renderSum(){
+ $("#sum").innerHTML=Object.keys(MAX).map(t=>`<tr><td>${NAMES[t]}</td><td style="text-align:right;white-space:nowrap">${S.done[t]?S.done[t].s:"—"} з ${MAX[t]}</td></tr>`).join("")+`<tr><td><b>Разом</b></td><td style="text-align:right"><b>${score()} з ${TOTAL}</b></td></tr>`;
+ const miss=[...new Set(Object.keys(MAX).filter(t=>!S.done[t]).map(t=>STEP_OF[t]))];
+ $("#todo").innerHTML=miss.length?`<div class="box warn"><b>Ще не перевірено:</b> ${miss.map(i=>`<button class="opt" data-go="${i}">${steps[i].dataset.t}</button>`).join(" ")}</div>`:"";
+ if(S.certAt)makeCert(false)}
+
+/* сертифікат */
+let dl=null,certBlob=null;
+(async()=>{try{if(window.claude&&window.claude.use){dl=await window.claude.use("downloads")}}catch(e){}$("#saveBtn").hidden=!dl})();
+function fit(c,txt,font,size,max){let s=size;do{c.font=font.replace("{s}",s);s-=2}while(c.measureText(txt).width>max&&s>20);}
+function motif(c,x,y,s){[[0,-2,1],[-1,-1,0],[1,-1,0],[-2,0,1],[0,0,0],[2,0,1],[-1,1,0],[1,1,0],[0,2,1]].forEach(([dx,dy,k])=>{c.fillStyle=k?"#cf2339":"#1b1b1b";c.fillRect(x+dx*s-s/2,y+dy*s-s/2,s,s)})}
+async function makeCert(fresh){
+ const msg=$("#msg-cert");msg.textContent="";
+ if(fresh){
+  if(Object.keys(MAX).some(t=>!S.done[t])){msg.textContent="Спочатку виконай і перевір усі вправи (список вище).";return}
+  if(!S.refl){msg.textContent="Обери, як ти оцінюєш свою роботу (рефлексія).";return}
+  if(!S.name.trim()){msg.textContent="Впиши своє прізвище та ім’я.";$("#nm2").focus();return}
+  if(!S.certAt)S.certAt=new Date().toISOString();save();nav();meter()}
+ try{await document.fonts.load("700 76px Caveat");await document.fonts.load("800 40px Nunito")}catch(e){}
+ const cv=$("#cv"),W=1600,H=1131;cv.width=W;cv.height=H;const c=cv.getContext("2d");
+ const sc=score(),pct=Math.round(100*sc/TOTAL),dt=new Date(S.certAt);
+ c.fillStyle="#fffdf7";c.fillRect(0,0,W,H);
+ c.strokeStyle="#17307a";c.lineWidth=12;c.strokeRect(36,36,W-72,H-72);c.lineWidth=2;c.strokeRect(60,60,W-120,H-120);
+ for(let x=110;x<=W-110;x+=46){motif(c,x,100,6);motif(c,x,H-100,6)}
+ c.textAlign="center";c.fillStyle="#17307a";c.font="800 92px Nunito, sans-serif";c.fillText("СЕРТИФІКАТ",W/2,238);
+ c.fillStyle="#56627f";c.font="600 30px Nunito, sans-serif";c.fillText("засвідчує, що",W/2,298);
+ c.fillStyle="#1d3f9e";fit(c,S.name.trim(),"700 {s}px Caveat, cursive",84,1200);c.fillText(S.name.trim(),W/2,392);
+ c.strokeStyle="#cf2339";c.lineWidth=2;c.beginPath();c.moveTo(380,414);c.lineTo(W-380,414);c.stroke();
+ c.fillStyle="#16223f";c.font="600 30px Nunito, sans-serif";
+ if(S.cls.trim())c.fillText("учень (учениця) "+S.cls.trim()+" класу",W/2,462);
+ c.fillText("успішно опрацював(-ла) інтерактивний урок української мови",W/2,520);
+ c.font="800 42px Nunito, sans-serif";c.fillStyle="#17307a";c.fillText("«Загальні та власні назви.",W/2,590);c.fillText("Велика буква у власних назвах»",W/2,642);
+ c.fillStyle="#cf2339";c.font="800 72px Nunito, sans-serif";c.fillText(sc+" з "+TOTAL+" балів",W/2,758);
+ c.fillStyle="#16223f";c.font="700 32px Nunito, sans-serif";c.fillText(pct+"% · "+level(pct)+" рівень",W/2,812);
+ c.fillStyle="#56627f";c.font="600 26px Nunito, sans-serif";fit(c,"Самооцінка: "+S.refl,"600 {s}px Nunito, sans-serif",26,1300);c.fillText("Самооцінка: "+S.refl,W/2,868);
+ c.font="600 26px Nunito, sans-serif";c.textAlign="left";c.fillStyle="#16223f";
+ c.fillText("Дата: "+dt.toLocaleDateString("uk-UA")+", "+dt.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"}),130,H-160);
+ c.textAlign="right";c.fillText("Українська мова · 6 клас",W-130,H-160);
+ $("#certImg").src=cv.toDataURL("image/png");$("#certOut").hidden=false;
+ certBlob=await new Promise(r=>cv.toBlob(r,"image/png"));
+ $("#txtOut").value=`Урок: Загальні та власні назви. Велика буква у власних назвах
+Учень (учениця): ${S.name.trim()}${S.cls.trim()?", "+S.cls.trim()+" клас":""}
+Результат: ${sc} з ${TOTAL} балів (${pct}%, ${level(pct)} рівень)
+${Object.keys(MAX).map(t=>"  "+NAMES[t]+": "+S.done[t].s+" з "+MAX[t]).join("\n")}
+Самооцінка: ${S.refl}${S.note.trim()?"\nНайцікавіше / найскладніше: "+S.note.trim():""}${S.sentence.trim()?"\nМоє речення (вправа 246): "+S.sentence.trim():""}
+Дата: ${dt.toLocaleString("uk-UA")}`;
+ if(fresh)$("#certImg").scrollIntoView({behavior:"smooth",block:"center"})}
+$("#mk").onclick=()=>makeCert(true);
+const fname=()=>"Сертифікат_"+(S.name.trim().replace(/[^\p{L}\p{N}]+/gu,"_")||"учень")+".png";
+$("#saveBtn").onclick=async()=>{const m=$("#msg-copy");if(!dl||!certBlob)return;
+ try{await dl.save({filename:fname(),data:certBlob});m.textContent="Сертифікат збережено. Тепер прикріпи його в Google Класі."}
+ catch(e){m.textContent=e&&e.code==="declined"?"Збереження скасовано.":"Не вдалося зберегти. Натисни на зображення правою кнопкою і обери «Зберегти зображення»."}};
+$("#copyImg").onclick=async()=>{const m=$("#msg-copy");
+ try{await navigator.clipboard.write([new ClipboardItem({"image/png":certBlob||new Promise(r=>$("#cv").toBlob(r,"image/png"))})]);m.textContent="Зображення скопійовано. Встав його (Ctrl+V) у документ Google або в повідомлення."}
+ catch(e){m.textContent="Браузер не дозволив скопіювати зображення. Натисни на сертифікат правою кнопкою і обери «Копіювати зображення» або збережи його."}};
+$("#copyTxt").onclick=async()=>{const m=$("#msg-copy"),ta=$("#txtOut");
+ try{await navigator.clipboard.writeText(ta.value);m.textContent="Текст результату скопійовано. Встав його в «Особистий коментар» у Google Класі."}
+ catch(e){ta.hidden=false;ta.style.minHeight="200px";ta.focus();ta.select();m.textContent="Виділи текст нижче і скопіюй його (Ctrl+C)."}};
+let arm=false;$("#reset").onclick=()=>{const b=$("#reset");if(!arm){arm=true;b.textContent="Натисни ще раз, щоб стерти всі відповіді";b.classList.add("red");setTimeout(()=>{arm=false;b.textContent="Почати урок заново";b.classList.remove("red")},4000);return}
+ S={name:S.name,cls:S.cls,step:0,ans:{},done:{},refl:"",note:"",sentence:"",certAt:""};save();
+ document.querySelectorAll("[data-bind]").forEach(el=>el.value=S[el.dataset.bind]||"");
+ document.querySelectorAll("[data-check]").forEach(b=>{b.disabled=false;b.textContent="Перевірити"});$("#certOut").hidden=true;arm=false;b.textContent="Почати урок заново";b.classList.remove("red");renderAll();show(0)};
+
+renderAll();show(S.step||0);
+}
+</script>
+</body>
+</html>
