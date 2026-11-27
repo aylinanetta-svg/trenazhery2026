@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Урок 17. Запити до ШІ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: жвавий шкільний урок-тренажер, ясний і серйозний водночас
+   IDEA: лабораторний журнал дослідника ШІ — кожен слайд як дослід
+   PICTURE: живі симулятори (чат, голосовий помічник, конвеєр ШІ) у центрі слайда
+   COLOUR and TYPE: білий, чорнило #10131a, кармін #c1121f, прусська синь #0b4f8a; Literata + Golos Text
+   LAYOUT: горизонтальна колода слайдів, шапка з балами, кнопки й стрілки для навігації */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0f1217);--ink:light-dark(#10131a,#e8ebf1);--mut:light-dark(#5a6170,#9aa3b2);
+--line:light-dark(#dfe3ea,#2a303b);--soft:light-dark(#f3f6fa,#171b23);--card:light-dark(#ffffff,#141820);
+--red:light-dark(#c1121f,#ff5a63);--blue:light-dark(#0b4f8a,#6cb6ff);--blueSoft:light-dark(#e6f0f9,#132538);
+--redSoft:light-dark(#fbe9ea,#3a1518);--ok:light-dark(#11703c,#4fd18b);--okSoft:light-dark(#e5f4ec,#12301f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Golos Text",system-ui,sans-serif;overflow:hidden}
+h1,h2,h3{font-family:Literata,Georgia,serif;font-weight:600;line-height:1.08;text-wrap:balance;margin:0 0 .4em}
+h1{font-size:clamp(32px,5vw,54px)}h2{font-size:clamp(26px,3.4vw,42px)}h3{font-size:21px}
+p{margin:.3em 0 .8em;max-width:70ch}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;min-height:44px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);transition:.15s}
+button:hover{border-color:var(--blue)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+button.red{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+input,textarea,select{font-size:16px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);width:100%}
+textarea{min-height:84px;resize:vertical}
+.top{height:60px;display:flex;align-items:center;gap:14px;padding:0 max(2vw,12px);background:var(--ink);color:var(--bg)}
+.top b{font-family:Literata,serif;font-size:18px;white-space:nowrap}
+.top .t{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:.75;font-size:14px}
+.badge{background:var(--red);color:#fff;border-radius:999px;padding:5px 14px;font-weight:600;font-size:15px;white-space:nowrap}
+.top button{min-height:38px;padding:4px 12px;background:transparent;color:var(--bg);border-color:rgba(127,127,127,.5);font-size:14px}
+.bar{height:4px;background:var(--line)}.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .3s}
+.deck{height:calc(100% - 64px - 64px);display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;overflow-y:auto;padding:clamp(18px,3vw,44px) max(4vw,16px) 40px}
+.in{max-width:1180px;margin:0 auto}
+.nav{height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 max(2vw,12px);border-top:1px solid var(--line)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.dots button{width:14px;height:14px;min-height:0;padding:0;border-radius:50%;background:var(--line);border:0}
+.dots button.on{background:var(--red)}.dots button.dn{background:var(--blue)}
+.kick{color:var(--red);font-weight:600;font-size:15px;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:18px}
+.soft{background:var(--soft);border-radius:14px;padding:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chip{border-radius:999px;padding:8px 14px;min-height:40px;font-size:15px}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.good{background:var(--okSoft)!important;border-color:var(--ok)!important}
+.bad{background:var(--redSoft)!important;border-color:var(--red)!important}
+.fb{margin-top:10px;font-weight:500;min-height:1.5em}
+.fb.ok{color:var(--ok)}.fb.no{color:var(--red)}
+.small{font-size:14px;color:var(--mut)}
+.pts{display:inline-block;font-size:13px;font-weight:600;color:var(--blue);background:var(--blueSoft);border-radius:999px;padding:2px 10px;margin-left:6px;vertical-align:middle;font-family:"Golos Text",sans-serif}
+/* title */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:32px;align-items:center;min-height:70vh}
+.orb{position:relative;aspect-ratio:1;max-width:440px;width:100%;margin:auto}
+.orb svg{width:100%;height:100%}
+/* chat */
+.chat{background:var(--soft);border-radius:16px;padding:16px;min-height:300px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:92%;padding:12px 16px;border-radius:16px;white-space:pre-line}
+.msg.u{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg.a{align-self:flex-start;background:var(--card);border:1.5px solid var(--line);border-bottom-left-radius:4px}
+.meter{display:flex;gap:4px;margin:8px 0}.meter i{flex:1;height:10px;border-radius:5px;background:var(--line)}
+.meter i.f{background:var(--ok)}
+.prompt{font-family:Literata,serif;font-size:18px;background:var(--card);border:1.5px dashed var(--blue);border-radius:12px;padding:14px;min-height:70px}
+.prompt span{background:var(--blueSoft);border-radius:4px;padding:0 3px}
+/* voice */
+.phone{background:var(--ink);color:var(--bg);border-radius:28px;padding:22px;min-height:360px;display:flex;flex-direction:column;gap:12px}
+.wave{display:flex;gap:4px;align-items:center;height:60px;justify-content:center}
+.wave i{width:6px;border-radius:3px;background:var(--red);height:8px;transition:height .12s}
+.heard{font-family:Literata,serif;font-size:19px;min-height:2.6em}
+.heard s{color:#ff7a82;text-decoration:none;border-bottom:2px wavy #ff7a82}
+.reply{background:rgba(127,127,127,.18);border-radius:14px;padding:12px;min-height:3em}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}
+.opt.on{border-color:var(--blue);background:var(--blueSoft)}
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;position:relative;margin:14px 0}
+.stg{border:2px solid var(--line);border-radius:14px;padding:14px 10px;text-align:center;background:var(--card);cursor:pointer;position:relative;min-height:120px;transition:.25s}
+.stg .n{font-family:Literata,serif;font-size:30px;color:var(--blue);line-height:1}
+.stg.act{border-color:var(--blue);box-shadow:0 0 0 4px var(--blueSoft);transform:translateY(-4px)}
+.stg.warn{border-color:var(--red)}
+.stg .flag{position:absolute;top:-10px;right:-6px;background:var(--red);color:#fff;font-size:12px;border-radius:999px;padding:2px 8px;display:none}
+.stg.warn .flag{display:block}
+.slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.slot{border:2px dashed var(--line);border-radius:12px;min-height:56px;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px;font-weight:500}
+.slot.f{border-style:solid;border-color:var(--blue);background:var(--blueSoft)}
+table{border-collapse:collapse;width:100%}
+td,th{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+th{font-family:Literata,serif;font-weight:600}
+.sortc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card)}
+.sortc .row button{min-height:38px;padding:4px 12px;font-size:14px}
+.sortc .row button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.timer{font-family:Literata,serif;font-size:44px;font-variant-numeric:tabular-nums;line-height:1}
+.flow svg{width:100%;height:auto;display:block}
+.eye{position:relative;height:min(52vh,420px);background:var(--soft);border-radius:18px;overflow:hidden}
+.eye i{position:absolute;width:34px;height:34px;border-radius:50%;background:var(--red);box-shadow:0 0 0 8px var(--redSoft);left:50%;top:50%;transform:translate(-50%,-50%)}
+.flip{cursor:pointer;min-height:130px;display:flex;flex-direction:column;justify-content:center}
+.flip .b{display:none}.flip.op .b{display:block}.flip.op .f{display:none}
+.q{margin-bottom:18px}
+.cert-wrap canvas{width:100%;height:auto;border-radius:10px;border:1.5px solid var(--line);display:block}
+.chk li{margin:4px 0}
+@media(max-width:820px){.grid2,.hero,.grid3{grid-template-columns:minmax(0,1fr)}.pipe,.slots{grid-template-columns:minmax(0,1fr)}.top .t,.top b,#fs,.dots{display:none}.top{justify-content:center}.nav button{white-space:nowrap}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{body{overflow:visible}.top,.nav,.bar,.deck>.slide:not(#s-cert){display:none!important}.deck{display:block;height:auto}#s-cert .noprint{display:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <b>Інформатика · 9 клас</b>
+  <span class="t">Урок 17. Пошукові запити до розмовних агентів і голосових помічників</span>
+  <span class="badge" id="badge">0 / 100 балів</span>
+  <button id="fs" type="button">На весь екран</button>
+</div>
+<div class="bar"><i id="prog"></i></div>
+
+<main class="deck" id="deck">
+
+<!-- 0 TITLE -->
+<section class="slide"><div class="in hero">
+  <div>
+    <div class="kick">Урок 17 · Інформатика</div>
+    <h1>Як питати ШІ, щоб отримати саме те, що потрібно</h1>
+    <p>Пошукові запити до чат-ботів і голосових помічників: формулюємо, уточнюємо, перевіряємо.</p>
+    <div class="card" style="max-width:520px">
+      <label for="nm"><b>Прізвище та ім’я</b></label>
+      <input id="nm" autocomplete="off" placeholder="Наприклад: Коваленко Марія">
+      <div style="height:10px"></div>
+      <label for="cl"><b>Клас</b></label>
+      <input id="cl" autocomplete="off" placeholder="9-А">
+      <p class="small" style="margin-top:10px">Ім’я потрапить у сертифікат наприкінці уроку. Його треба буде прикріпити в Google Classroom.</p>
+      <button class="pri" type="button" data-go="1">Почати урок →</button>
+    </div>
+  </div>
+  <div class="orb" aria-hidden="true">
+    <svg viewBox="0 0 400 400">
+      <defs><radialGradient id="g1" cx="40%" cy="35%"><stop offset="0" stop-color="#6cb6ff"/><stop offset="1" stop-color="#0b4f8a"/></radialGradient></defs>
+      <circle cx="200" cy="200" r="150" fill="url(#g1)"/>
+      <ellipse cx="200" cy="372" rx="120" ry="14" fill="#10131a" opacity=".12"/>
+      <g fill="none" stroke="#fff" stroke-width="3" opacity=".9">
+        <rect x="110" y="140" width="180" height="70" rx="20"/>
+        <path d="M150 210 l-14 28 l40-28"/>
+      </g>
+      <text x="200" y="185" text-anchor="middle" font-family="Literata,serif" font-size="30" fill="#fff">Привіт, ШІ!</text>
+      <g fill="#c1121f"><rect x="150" y="262" width="12" height="40" rx="6"><animate attributeName="height" values="40;14;40" dur="1.1s" repeatCount="indefinite"/></rect>
+      <rect x="172" y="250" width="12" height="64" rx="6"><animate attributeName="height" values="64;24;64" dur=".9s" repeatCount="indefinite"/></rect>
+      <rect x="194" y="244" width="12" height="76" rx="6"><animate attributeName="height" values="76;30;76" dur="1.3s" repeatCount="indefinite"/></rect>
+      <rect x="216" y="252" width="12" height="60" rx="6"><animate attributeName="height" values="60;20;60" dur="1s" repeatCount="indefinite"/></rect>
+      <rect x="238" y="264" width="12" height="36" rx="6"><animate attributeName="height" values="36;12;36" dur="1.2s" repeatCount="indefinite"/></rect></g>
+      <circle cx="315" cy="95" r="26" fill="#fff" stroke="#c1121f" stroke-width="4"/><text x="315" y="105" text-anchor="middle" font-family="Literata,serif" font-size="30" fill="#c1121f">?</text>
+    </svg>
+  </div>
+</div></section>
+
+<!-- 1 GOALS -->
+<section class="slide"><div class="in">
+  <div class="kick">Мета уроку</div>
+  <h2>Сьогодні навчимося</h2>
+  <div class="grid3" style="margin-bottom:24px">
+    <div class="card"><h3>Формулювати</h3><p>складати запити до чат-ботів і голосових помічників так, щоб відповідь була точною.</p></div>
+    <div class="card"><h3>Уточнювати</h3><p>додавати роль, аудиторію, формат і обмеження, коли перша відповідь не влаштовує.</p></div>
+    <div class="card"><h3>Перевіряти</h3><p>оцінювати, наскільки відповідь ШІ достовірна, і знаходити, де могла з’явитися упередженість.</p></div>
+  </div>
+  <h3>Маршрут уроку і бали</h3>
+  <div class="soft"><ol id="route" class="chk" style="margin:0;padding-left:22px"></ol>
+  <p class="small" style="margin:8px 0 0">Разом 100 балів → оцінка за 12-бальною шкалою. Наприкінці — сертифікат для Google Classroom.</p></div>
+</div></section>
+
+<!-- 2 THINK -->
+<section class="slide"><div class="in grid2" style="align-items:center">
+  <div>
+    <div class="kick">Розминка · Поміркуй</div>
+    <h2>Питання-рулетка</h2>
+    <p>Натисни кнопку — випаде питання для обговорення. Відповідаємо усно, на кожне до хвилини.</p>
+    <div class="row"><button class="pri" type="button" id="spin">Крутити рулетку</button><button type="button" id="tStart1">Таймер 1:00</button><span class="timer" id="t1">1:00</span></div>
+    <p class="small" style="margin-top:14px">Залишилось питань: <b id="left">9</b></p>
+  </div>
+  <div class="card" style="min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center">
+    <h2 id="qOut" style="margin:0;font-size:clamp(24px,2.8vw,34px)">Готові? Крутимо!</h2>
+  </div>
+</div></section>
+
+<!-- 3 PIPELINE DEMO -->
+<section class="slide"><div class="in">
+  <div class="kick">Демонстрація · Як «думає» ШІ-помічник</div>
+  <h2>П’ять кроків від запиту до відповіді</h2>
+  <p>Запусти конвеєр і подивись, що відбувається на кожному етапі. Потім увімкни <b>упереджені дані</b> — і побачиш, де саме відповідь може «зіпсуватися».</p>
+  <div class="row" style="margin-bottom:6px">
+    <select id="pq" style="max-width:520px">
+      <option value="0">Хто зазвичай стає програмістом?</option>
+      <option value="1">Які професії підходять для дівчат?</option>
+      <option value="2">Що таке фейк?</option>
+    </select>
+    <label class="row" style="gap:8px;cursor:pointer"><input type="checkbox" id="bias" style="width:22px;height:22px"> Упереджені навчальні дані</label>
+    <button class="pri" type="button" id="run">Запустити ▶</button>
+  </div>
+  <div class="pipe" id="pipe"></div>
+  <div class="grid2">
+    <div class="soft"><h3 id="stTitle">Натисни «Запустити»</h3><p id="stText" style="margin:0">Або клацни будь-який етап, щоб прочитати про нього.</p></div>
+    <div class="chat" style="min-height:160px"><div class="small">Відповідь ШІ:</div><div class="msg a" id="pOut">…</div><div id="pDet" class="fb no"></div></div>
+  </div>
+</div></section>
+
+<!-- 4 ORDER EXERCISE -->
+<section class="slide"><div class="in">
+  <div class="kick">Вправа 1 <span class="pts">10 балів</span></div>
+  <h2>Збери алгоритм і знайди ризики</h2>
+  <p><b>Крок А.</b> Натискай етапи у правильному порядку — вони стануть у клітинки 1–5.</p>
+  <div class="row" id="ordPool" style="margin-bottom:10px"></div>
+  <div class="slots" id="ordSlots"></div>
+  <div class="row" style="margin-top:8px"><button type="button" id="ordReset">Скинути порядок</button></div>
+  <p style="margin-top:18px"><b>Крок Б.</b> На якому етапі найімовірніше виникає кожна проблема?</p>
+  <div id="risks"></div>
+  <button class="pri" type="button" id="ordCheck">Перевірити</button>
+  <div class="fb" id="ordFb"></div>
+</div></section>
+
+<!-- 5 PROMPT CONSTRUCTOR -->
+<section class="slide"><div class="in">
+  <div class="kick">Симулятор 1 · Чат-бот <span class="pts">10 балів</span></div>
+  <h2>Конструктор запиту</h2>
+  <div class="grid2">
+    <div>
+      <p>Базове завдання: <b>«Поясни, що таке фейк»</b>. Додавай деталі й надсилай — дивись, як змінюється відповідь.</p>
+      <div class="row" id="parts"></div>
+      <div class="small" style="margin-top:12px">Твій запит:</div>
+      <div class="prompt" id="promptView"></div>
+      <div class="small" style="margin-top:8px">Якість запиту</div>
+      <div class="meter" id="meter"></div>
+      <div class="row"><button class="pri" type="button" id="send">Надіслати</button><button type="button" id="regen">Згенерувати ще раз</button><button type="button" id="clr">Очистити чат</button></div>
+      <p class="small" style="margin-top:10px">Бали: 2 за кожну деталь у найкращому надісланому запиті. Спробуй «Згенерувати ще раз» — помітиш, що ШІ щоразу відповідає трохи інакше.</p>
+    </div>
+    <div class="chat" id="chat"><div class="small">Чат з ботом</div></div>
+  </div>
+</div></section>
+
+<!-- 6 VOICE -->
+<section class="slide"><div class="in">
+  <div class="kick">Симулятор 2 · Голосовий помічник <span class="pts">10 балів</span></div>
+  <h2>Скажи так, щоб тебе зрозуміли</h2>
+  <div class="grid2">
+    <div>
+      <div class="row" id="missions" style="margin-bottom:10px"></div>
+      <h3 id="mTitle"></h3>
+      <div id="mOpts"></div>
+      <div class="soft" style="margin-top:10px">
+        <label for="noise"><b>Шум навколо:</b> <span id="noiseL">тиша</span></label>
+        <input type="range" id="noise" min="0" max="2" step="1" value="0" style="padding:0;border:0">
+      </div>
+      <div class="row" style="margin-top:10px"><button class="red" type="button" id="say">Сказати</button></div>
+      <div class="fb" id="vFb"></div>
+    </div>
+    <div class="phone">
+      <div class="small" style="color:inherit;opacity:.7">Голосовий помічник</div>
+      <div class="wave" id="wave"></div>
+      <div class="small" style="color:inherit;opacity:.7">Помічник почув:</div>
+      <div class="heard" id="heard">…</div>
+      <div class="reply" id="vReply">Обери фразу й натисни «Сказати».</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 7 TASK 18 -->
+<section class="slide"><div class="in">
+  <div class="kick">Завдання 18 · Підручник, с. 73 <span class="pts">12 балів</span></div>
+  <h2>Стань ШІ: побудуй власну мінімодель</h2>
+  <div class="grid2">
+    <div>
+      <p><b>1. Питання, на яке відповідатимеш</b></p>
+      <div class="row" id="t18q"></div>
+      <p style="margin-top:14px"><b>2. Які джерела перевіряєш?</b></p>
+      <div class="row" id="t18s"></div>
+      <p style="margin-top:14px"><b>3. Що включаєш у відповідь?</b></p>
+      <div class="row" id="t18i"></div>
+      <p style="margin-top:14px"><b>4. Як перевіряєш достовірність?</b></p>
+      <div class="row" id="t18v"></div>
+      <div class="row" style="margin-top:14px"><button class="pri" type="button" id="t18go">Оцінити модель</button></div>
+      <div class="fb" id="t18fb"></div>
+    </div>
+    <div class="card flow"><div class="small">Твоя модель (будується автоматично; можна перемалювати в графічному редакторі)</div><div id="flow"></div></div>
+  </div>
+</div></section>
+
+<!-- 8 TASK 19 -->
+<section class="slide"><div class="in">
+  <div class="kick">Завдання 19 · Інструкційна картка <span class="pts">14 балів</span></div>
+  <h2>Людина чи ШІ? Порівняй свою модель із моделлю ШІ</h2>
+  <p>Для кожного твердження обери, кому воно більше підходить. Після перевірки відкриється таблиця-підказка.</p>
+  <div class="grid2">
+    <div id="sortL"></div><div id="sortR"></div>
+  </div>
+  <button class="pri" type="button" id="t19go">Перевірити</button>
+  <div class="fb" id="t19fb"></div>
+  <div id="t19tbl" style="display:none;margin-top:14px"></div>
+  <div class="soft" style="margin-top:14px"><label for="t19w"><b>Що має сильніші сторони — людина чи ШІ? Чому?</b></label><textarea id="t19w" placeholder="Моя думка…"></textarea></div>
+</div></section>
+
+<!-- 9 TASK 20 -->
+<section class="slide"><div class="in">
+  <div class="kick">Завдання 20 · Робота в команді · с. 74 <span class="pts">8 балів</span></div>
+  <h2>Представте свою модель команді</h2>
+  <div class="grid2">
+    <div>
+      <p>Поясніть: чому побудували модель саме так, які висновки зробили про роботу ШІ. Потім позначте, з якими висновками погоджуєтесь.</p>
+      <div id="concl"></div>
+    </div>
+    <div>
+      <div class="card" style="text-align:center">
+        <div class="small">Час на виступ команди</div>
+        <div class="timer" id="t2" style="margin:8px 0">2:00</div>
+        <div class="row" style="justify-content:center"><button class="pri" type="button" id="t2s">Старт</button><button type="button" id="t2r">Скинути</button></div>
+      </div>
+      <div class="soft" style="margin-top:14px"><label for="own"><b>Висновок, який ми додаємо від себе</b></label><textarea id="own" placeholder="Ми вважаємо, що…"></textarea></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 10 DEEPFAKE -->
+<section class="slide"><div class="in">
+  <div class="kick">Робота в парі · Дипфейки <span class="pts">10 балів</span></div>
+  <h2>Детектор дипфейків</h2>
+  <div class="grid2">
+    <div>
+      <p>Позначте ті ознаки, які справді можуть видавати підроблене відео чи голос. Решту залиште.</p>
+      <div class="row" id="df"></div>
+      <div class="row" style="margin-top:12px"><button class="pri" type="button" id="dfgo">Перевірити</button></div>
+      <div class="fb" id="dffb"></div>
+    </div>
+    <div class="soft">
+      <h3>Обговоріть у парі</h3>
+      <ol style="padding-left:20px;margin:0 0 12px">
+        <li>Які підказки видають, що відео чи голос несправжні?</li>
+        <li>Чим дипфейки небезпечні для політики, медіа і звичайних людей?</li>
+        <li>Що краще: повністю заборонити дипфейки чи навчитися їх розпізнавати?</li>
+      </ol>
+      <div class="row"><span class="timer" id="t3">3:00</span><button type="button" id="t3s">Старт</button><button type="button" id="t3r">Скинути</button></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 11 EYES -->
+<section class="slide"><div class="in">
+  <div class="kick">Перерва</div>
+  <h2>Гімнастика для очей</h2>
+  <p>Голова нерухома — стеж за червоною точкою лише очима. 40 секунд.</p>
+  <div class="eye" id="eye"><i id="dot"></i></div>
+  <div class="row" style="margin-top:12px"><button class="pri" type="button" id="eyeGo">Почати</button><span class="timer" id="eyeT" style="font-size:32px">0:40</span><span id="eyeHint" class="small"></span></div>
+</div></section>
+
+<!-- 12 TRAINER -->
+<section class="slide"><div class="in">
+  <div class="kick">Закріплення · Тренажер <span class="pts">12 балів</span></div>
+  <h2>Покращ запит</h2>
+  <p>Обери найкращий варіант переписаного запиту. Відповідь зараховується з першої спроби.</p>
+  <div id="trn"></div>
+</div></section>
+
+<!-- 13 TEST -->
+<section class="slide"><div class="in">
+  <div class="kick">Підсумковий тест <span class="pts">10 балів</span></div>
+  <h2>Перевір себе</h2>
+  <div id="test"></div>
+</div></section>
+
+<!-- 14 CONCLUSIONS -->
+<section class="slide"><div class="in">
+  <div class="kick">Обговоріть і зробіть висновки</div>
+  <h2>Що ми з’ясували</h2>
+  <p>Спершу сформулюйте висновок самі, а потім відкрийте картку.</p>
+  <div class="grid3" id="flips"></div>
+</div></section>
+
+<!-- 15 REFLECTION -->
+<section class="slide"><div class="in">
+  <div class="kick">Рефлексія · «Плюс — мінус — цікаво» <span class="pts">4 бали</span></div>
+  <h2>Як минув урок?</h2>
+  <div class="grid3">
+    <div class="card"><h3 style="color:var(--ok)">Плюс</h3><p class="small">Що сподобалось, було корисним.</p><textarea id="r1"></textarea></div>
+    <div class="card"><h3 style="color:var(--red)">Мінус</h3><p class="small">Що було складним чи незрозумілим.</p><textarea id="r2"></textarea></div>
+    <div class="card"><h3 style="color:var(--blue)">Цікаво</h3><p class="small">Що нового дізнались, про що хочете знати більше.</p><textarea id="r3"></textarea></div>
+  </div>
+</div></section>
+
+<!-- 16 CERT -->
+<section class="slide" id="s-cert"><div class="in">
+  <div class="kick noprint">Фініш</div>
+  <h2 class="noprint">Твій сертифікат</h2>
+  <div class="grid2">
+    <div class="cert-wrap"><canvas id="cv" width="1600" height="1130"></canvas></div>
+    <div class="noprint">
+      <div class="card">
+        <h3>Чекліст завдань</h3>
+        <ul id="chk" class="chk" style="padding-left:20px;margin:0 0 10px"></ul>
+        <div class="row"><b style="font-size:20px" id="cTot"></b></div>
+      </div>
+      <div class="soft" style="margin-top:14px">
+        <h3>Як здати роботу в Google Classroom</h3>
+        <ol style="padding-left:20px;margin:0 0 10px">
+          <li>Перевір, що ім’я та клас указано правильно.</li>
+          <li>Натисни «Завантажити сертифікат (PNG)».</li>
+          <li>У Classroom відкрий завдання → «Додати або створити» → «Файл» → обери сертифікат → «Здати».</li>
+        </ol>
+        <div class="row">
+          <button class="pri" type="button" id="dl">Завантажити сертифікат (PNG)</button>
+          <button type="button" id="pr">Друк / PDF</button>
+          <button type="button" id="cp">Копіювати звіт</button>
+        </div>
+        <p class="small" id="dlHint" style="margin-top:10px">Якщо кнопка завантаження не спрацювала у вашому браузері — зробіть знімок екрана сертифіката (Windows: Win+Shift+S, Chromebook: Ctrl+Shift+«Показати вікна») і прикріпіть його.</p>
+      </div>
+      <div class="row" style="margin-top:12px"><button type="button" id="restart">Почати урок заново (новий учень)</button></div>
+    </div>
+  </div>
+</div></section>
+
+</main>
+
+<div class="nav">
+  <button type="button" id="prev">← Назад</button>
+  <div class="dots" id="dots"></div>
+  <button class="pri" type="button" id="next">Далі →</button>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- STATE ---------- */
+const TASKS=[
+ {k:'ord',t:'Вправа 1: алгоритм ШІ і ризики',m:10},
+ {k:'pr',t:'Симулятор «Конструктор запиту»',m:10},
+ {k:'vo',t:'Симулятор «Голосовий помічник»',m:10},
+ {k:'t18',t:'Завдання 18: власна мінімодель',m:12},
+ {k:'t19',t:'Завдання 19: людина чи ШІ',m:14},
+ {k:'t20',t:'Завдання 20: робота в команді',m:8},
+ {k:'df',t:'Робота в парі: детектор дипфейків',m:10},
+ {k:'trn',t:'Тренажер «Покращ запит»',m:12},
+ {k:'test',t:'Підсумковий тест',m:10},
+ {k:'ref',t:'Рефлексія',m:4}];
+let S={name:'',cls:'',sc:{},dn:{}};
+const KEY='urok17-ai-prompts';
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.sc)S=s}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const total=()=>TASKS.reduce((a,t)=>a+Math.min(t.m,S.sc[t.k]||0),0);
+const grade=p=>Math.max(1,Math.min(12,Math.round(p/100*12)));
+const level=g=>g>=10?'високий':g>=7?'достатній':g>=4?'середній':'початковий';
+function setScore(k,v,done=true){S.sc[k]=Math.max(0,Math.round(v));if(done)S.dn[k]=true;save();refresh()}
+function refresh(){const p=total();$('#badge').textContent=p+' / 100 балів · оцінка '+grade(p);
+ $('#route').innerHTML=TASKS.map(t=>`<li>${esc(t.t)} — <b>${t.m}</b> ${S.dn[t.k]?'<span style="color:var(--ok)">✓ '+(S.sc[t.k]||0)+'</span>':''}</li>`).join('');
+ drawCert()}
+
+$('#nm').value=S.name;$('#cl').value=S.cls;
+$('#nm').addEventListener('input',e=>{S.name=e.target.value;save();drawCert()});
+$('#cl').addEventListener('input',e=>{S.cls=e.target.value;save();drawCert()});
+
+/* ---------- DECK NAV ---------- */
+const deck=$('#deck'),slides=[...document.querySelectorAll('.slide')];let cur=0;
+$('#dots').innerHTML=slides.map((_,i)=>`<button type="button" aria-label="Слайд ${i+1}" data-i="${i}"></button>`).join('');
+const dots=[...document.querySelectorAll('#dots button')];
+function go(i){i=Math.max(0,Math.min(slides.length-1,i));slides[i].scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});setCur(i)}
+function setCur(i){cur=i;dots.forEach((d,j)=>{d.className=j===i?'on':j<i?'dn':''});$('#prog').style.width=(i/(slides.length-1)*100)+'%';$('#prev').disabled=i===0;$('#next').disabled=i===slides.length-1;if(i===slides.length-1)drawCert()}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.6)setCur(slides.indexOf(e.target))}),{root:deck,threshold:[.6]});
+slides.forEach(s=>io.observe(s));
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+dots.forEach(d=>d.onclick=()=>go(+d.dataset.i));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));
+document.addEventListener('keydown',e=>{const tg=e.target.tagName;if(/INPUT|TEXTAREA|SELECT/.test(tg))return;
+ if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(cur+1)}if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(cur-1)}});
+window.addEventListener('resize',()=>slides[cur].scrollIntoView({inline:'start',block:'nearest'}));
+$('#fs').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+setCur(0);
+
+/* ---------- TIMER helper ---------- */
+function mkTimer(out,sec,startBtn,resetBtn,onEnd){let left=sec,id=null;const fmt=()=>{out.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');out.style.color=left<=10&&left>0?'var(--red)':''};
+ const stop=()=>{clearInterval(id);id=null;if(startBtn)startBtn.textContent='Старт'};
+ const start=()=>{if(id){stop();return}if(left<=0)left=sec;if(startBtn)startBtn.textContent='Пауза';id=setInterval(()=>{left--;fmt();if(left<=0){stop();out.textContent='Час!';if(onEnd)onEnd()}},1000)};
+ const reset=()=>{stop();left=sec;fmt()};fmt();if(startBtn)startBtn.onclick=start;if(resetBtn)resetBtn.onclick=reset;return{start,reset,stop}}
+
+/* ---------- 2 ROULETTE ---------- */
+const QS=['Що таке пошуковий запит своїми словами?','Якими пошуковими системами чи чат-ботами ви користуєтесь найчастіше?','Від чого залежить точність результатів пошуку?','Чим пошук за ключовими словами відрізняється від запитання повним реченням?','Чому на те саме питання ШІ може дати різні відповіді?','Чи можна отримати якісну відповідь, написавши лише одне слово?','Як зміниться відповідь чат-бота, якщо вказати, для кого вона?','Що робити, якщо голосовий помічник неправильно почув команду?','Навіщо уточнювати запит, якщо перша відповідь не підійшла?'];
+let qLeft=shuffle(QS);const t1=mkTimer($('#t1'),60,null,null);
+$('#tStart1').onclick=()=>{t1.reset();t1.start()};
+$('#spin').onclick=()=>{if(!qLeft.length)qLeft=shuffle(QS);let n=0;const fin=qLeft.pop();$('#left').textContent=qLeft.length;
+ const id=setInterval(()=>{$('#qOut').textContent=QS[Math.floor(Math.random()*QS.length)];if(++n>12){clearInterval(id);$('#qOut').textContent=fin}},70)};
+
+/* ---------- 3 PIPELINE ---------- */
+const ST=[
+ {n:'Запит',d:'Користувач формулює питання. Уже тут формулювання може підштовхувати до стереотипу: слова «зазвичай», «підходять для» наперед задають рамку.'},
+ {n:'Аналіз',d:'ШІ розбиває текст на частини, шукає ключові слова й знайомі шаблони, намагається зрозуміти намір. Якщо запит розмитий — розуміння теж буде розмитим.'},
+ {n:'Вибір джерел',d:'Модель спирається на те, чого навчилася, а пошукові помічники — ще й на знайдені сайти. Якщо дані однобокі або сайт рекламний — це перейде у відповідь.'},
+ {n:'Формування',d:'ШІ підбирає найімовірніші слова одне за одним і пропускає текст через фільтри безпеки. Він не «знає» правду — він прогнозує текст, тому може вигадати факт.'},
+ {n:'Виведення',d:'Користувач бачить гладкий, упевнений текст. Звучить переконливо навіть тоді, коли містить помилку. Тут вмикається людина: перевіряє й уточнює.'}];
+const PQ=[
+ {ok:'Програмістами стають люди будь-якої статі та походження. Важливі інтерес до логіки, навчання і практика. В Україні в ІТ працюють і чоловіки, і жінки, і їхня кількість зростає.',
+  bad:'Зазвичай програмістами стають чоловіки, бо вони краще розуміються на техніці.',warn:[0,2,3],why:'Упередженість: питання зі словом «зазвичай» + однобокі дані → відповідь повторює стереотип.'},
+ {ok:'Професію обирають за інтересами та здібностями, а не за статтю. Дівчата успішно працюють інженерками, програмістками, лікарками, пілотками — як і в будь-якій іншій сфері.',
+  bad:'Дівчатам більше підходять спокійні професії: вихователька, секретарка, перукарка.',warn:[0,2,3],why:'Упередженість: формулювання вже містить стереотип, а дані його підсилили.'},
+ {ok:'Фейк — неправдива або навмисно перекручена інформація, яку подають як правдиву. Перевірити можна на офіційних сайтах і фактчекінгових ресурсах.',
+  bad:'Фейк — це новина, яка вам не подобається. Детальніше на сайті «Новини-Топ-Клік».',warn:[2,3],why:'Ненадійне джерело на етапі вибору джерел → неточна відповідь із рекламою.'}];
+$('#pipe').innerHTML=ST.map((s,i)=>`<div class="stg" data-i="${i}" tabindex="0" role="button"><span class="flag">ризик</span><div class="n">${i+1}</div><b>${s.n}</b></div>`).join('');
+const stg=[...document.querySelectorAll('.stg')];
+const showSt=i=>{stg.forEach((e,j)=>e.classList.toggle('act',j===i));$('#stTitle').textContent=(i+1)+'. '+ST[i].n;$('#stText').textContent=ST[i].d};
+stg.forEach(e=>{e.onclick=()=>showSt(+e.dataset.i);e.onkeydown=k=>{if(k.key==='Enter')showSt(+e.dataset.i)}});
+let running=false;
+$('#run').onclick=()=>{if(running)return;running=true;const q=PQ[+$('#pq').value],b=$('#bias').checked;stg.forEach(e=>e.classList.remove('warn'));$('#pOut').textContent='…';$('#pDet').textContent='';
+ let i=0;const step=()=>{showSt(i);if(b&&q.warn.includes(i))stg[i].classList.add('warn');i++;if(i<5)setTimeout(step,1100);else setTimeout(()=>{$('#pOut').textContent=b?q.bad:q.ok;$('#pDet').textContent=b?'Детектор: '+q.why:'';running=false},700)};step()};
+
+/* ---------- 4 ORDER + RISKS ---------- */
+const NAMES=ST.map(s=>s.n);let ord=[],ordLocked=false;
+const RISK=[{t:'Слово «зазвичай» у питанні підштовхує до стереотипу',a:0},{t:'Помічник неправильно зрозумів, що саме ви шукаєте',a:1},{t:'У відповідь потрапив рекламний або ненадійний сайт',a:2},{t:'ШІ «вигадав» факт, якого не існує (галюцинація)',a:3},{t:'Помилкова відповідь звучить дуже впевнено, і її не перевірили',a:4}];
+function drawOrd(){$('#ordPool').innerHTML=shuffleOnce.map(n=>`<button type="button" class="chip" data-n="${esc(n)}" ${ord.includes(n)||ordLocked?'disabled':''}>${esc(n)}</button>`).join('');
+ $('#ordSlots').innerHTML=[0,1,2,3,4].map(i=>`<div class="slot ${ord[i]?'f':''}" id="sl${i}">${ord[i]?(i+1)+'. '+esc(ord[i]):i+1}</div>`).join('');
+ document.querySelectorAll('#ordPool button').forEach(b=>b.onclick=()=>{ord.push(b.dataset.n);drawOrd()})}
+const shuffleOnce=shuffle(NAMES);drawOrd();
+$('#ordReset').onclick=()=>{if(ordLocked)return;ord=[];drawOrd()};
+$('#risks').innerHTML=RISK.map((r,i)=>`<div class="sortc"><span>${esc(r.t)}</span><select id="rk${i}" style="width:auto"><option value="">— етап —</option>${NAMES.map((n,j)=>`<option value="${j}">${j+1}. ${n}</option>`).join('')}</select></div>`).join('');
+$('#ordCheck').onclick=()=>{if(ordLocked)return;if(ord.length<5){$('#ordFb').className='fb no';$('#ordFb').textContent='Спершу розстав усі 5 етапів.';return}
+ let p=0;ord.forEach((n,i)=>{const ok=n===NAMES[i];if(ok)p++;$('#sl'+i).classList.add(ok?'good':'bad')});
+ RISK.forEach((r,i)=>{const s=$('#rk'+i),ok=+s.value===r.a&&s.value!=='';if(ok)p++;s.classList.add(ok?'good':'bad');s.disabled=true});
+ ordLocked=true;drawOrd();ord.forEach((n,i)=>$('#sl'+i).classList.add(n===NAMES[i]?'good':'bad'));
+ $('#ordFb').className='fb '+(p>=7?'ok':'no');$('#ordFb').textContent=`Результат: ${p} з 10. Правильний порядок: ${NAMES.join(' → ')}.`;setScore('ord',p)};
+
+/* ---------- 5 PROMPT CONSTRUCTOR ---------- */
+const PARTS=[{k:'role',l:'Роль',t:'Ти — учитель інформатики.'},{k:'aud',l:'Для кого',t:'Поясни для учня 9 класу'},{k:'fmt',l:'Формат',t:'у 3 пунктах з прикладом'},{k:'len',l:'Обсяг',t:'не більше 80 слів'},{k:'src',l:'Джерела',t:'і підкажи, де перевірити інформацію'}];
+const on={};let best=0,regenN=0,lastSent=null;
+$('#parts').innerHTML=PARTS.map(p=>`<button type="button" class="chip" data-k="${p.k}">+ ${p.l}</button>`).join('');
+document.querySelectorAll('#parts button').forEach(b=>b.onclick=()=>{on[b.dataset.k]=!on[b.dataset.k];b.classList.toggle('on',on[b.dataset.k]);drawPrompt()});
+$('#meter').innerHTML='<i></i>'.repeat(5);
+function promptText(){const a=[];if(on.role)a.push('<span>'+PARTS[0].t+'</span>');
+ let core='Поясни, що таке фейк';if(on.aud)core='<span>'+PARTS[1].t+'</span>, що таке фейк';a.push(core+(on.fmt?', <span>'+PARTS[2].t+'</span>':'')+(on.len?', <span>'+PARTS[3].t+'</span>':'')+(on.src?' <span>'+PARTS[4].t+'</span>':'')+'.');return a.join(' ')}
+function cnt(){return PARTS.filter(p=>on[p.k]).length}
+function drawPrompt(){$('#promptView').innerHTML=promptText();const c=cnt();document.querySelectorAll('#meter i').forEach((e,i)=>e.classList.toggle('f',i<c))}
+drawPrompt();
+function answer(st,v){const lines=[];
+ if(st.role)lines.push(v%2?'Як учитель, поясню коротко й по суті.':'Розберімося разом, як на уроці.');
+ const def=v%2?'Фейк — це неправдива або перекручена інформація, яку видають за правду.':'Фейком називають навмисно спотворену чи вигадану новину, подану як достовірну.';
+ const ex=st.aud?(v%2?'Приклад: у чаті класу ширять «скриншот» нібито від директора про скасування уроків, якого він не писав.':'Приклад: фото «снігу в липні», яке насправді зроблене кілька років тому в іншій країні.'):'Приклад: неправдиві новини в інтернеті.';
+ if(st.fmt){lines.push('1) '+def);lines.push('2) Мета — налякати, розсердити або змусити поширити.');lines.push('3) '+ex)}
+ else{lines.push(def+' '+(st.aud?ex:'Фейки бувають різні.'))}
+ if(!st.len&&!st.fmt)lines.push('Взагалі тема фейків дуже широка: їх створюють з різних причин, у різних медіа, у різні часи, і про це можна говорити дуже довго, згадуючи історію, пропаганду, соцмережі та багато чого іншого…');
+ else if(!st.len)lines.push('Тема велика, тож це лише короткий огляд — питай, якщо цікаво більше.');
+ if(st.src)lines.push('Перевіряй: офіційні сайти, енциклопедії, фактчекінгові ресурси (StopFake, VoxCheck).');
+ if(cnt2(st)===0)return 'Фейк — це щось несправжнє. Буває різне.';return lines.join('\n')}
+const cnt2=st=>Object.values(st).filter(Boolean).length;
+function typeMsg(text){const m=document.createElement('div');m.className='msg a';$('#chat').appendChild(m);let i=0;const id=setInterval(()=>{i+=3;m.textContent=text.slice(0,i);$('#chat').scrollTop=1e6;if(i>=text.length)clearInterval(id)},18)}
+$('#send').onclick=()=>{const st={...on};lastSent=st;regenN=0;const u=document.createElement('div');u.className='msg u';u.textContent=$('#promptView').textContent;$('#chat').appendChild(u);
+ const c=cnt();setTimeout(()=>typeMsg(answer(st,0)),300);if(c>best){best=c;setScore('pr',c*2)}else if(!S.dn.pr)setScore('pr',c*2)};
+$('#regen').onclick=()=>{if(!lastSent){typeMsg('Спершу надішли запит.');return}regenN++;typeMsg('(інша генерація) '+answer(lastSent,regenN))};
+$('#clr').onclick=()=>{$('#chat').innerHTML='<div class="small">Чат з ботом</div>'};
+
+/* ---------- 6 VOICE ---------- */
+const MIS=[
+ {t:'Місія 1: постав таймер на 15 хвилин, щоб зробити перерву',p:3,o:[
+  {s:'Еее… постав там щось на п’ятнадцять, ну, щоб не забути',ok:0,r:'Що саме поставити: будильник, таймер чи нагадування? І на п’ятнадцять чого?',n1:'Еее… <s>постав там</s> щось на <s>п’ятдесят</s>, ну…',why:'Фраза розмита: помічник не зрозумів, яку дію виконати.'},
+  {s:'Постав таймер на 15 хвилин',ok:1,r:'Таймер на 15 хвилин запущено.',n2:'Постав таймер на <s>50</s> хвилин',r2:'Таймер на 50 хвилин запущено.',why:'Коротко й конкретно: дія + число + одиниця.'},
+  {s:'Таймер',ok:0,r:'На скільки поставити таймер?',why:'Неповна команда: бракує часу.'}]},
+ {t:'Місія 2: дізнайся, яка погода буде завтра у Львові',p:3,o:[
+  {s:'Яка погода?',ok:0,r:'Зараз у вашому місті +3°, хмарно.',why:'Не вказано ні місто, ні день — помічник відповів про «тут і зараз».'},
+  {s:'Яка погода завтра у Львові?',ok:1,r:'Завтра у Львові від 0° до +4°, мокрий сніг.',n2:'Яка погода завтра у <s>Лієві</s>?',r2:'Не знайшла місто «Лієві». Уточніть, будь ласка.',why:'Є все потрібне: що, коли, де.'},
+  {s:'Скажи погоду там, куди я поїду',ok:0,r:'Я не знаю, куди ви плануєте поїхати. Назвіть місто.',why:'Помічник не читає думки: потрібна конкретна назва.'}]},
+ {t:'Місія 3: нагадування зробити домашнє з інформатики сьогодні о 18:00',p:4,o:[
+  {s:'Нагадай про домашку',ok:0,r:'Коли нагадати?',why:'Бракує часу.'},
+  {s:'Нагадай о шостій',ok:0,r:'Нагадування на 06:00 ранку створено. Про що нагадати?',why:'«О шостій» — неоднозначно (ранок чи вечір), і не сказано, про що.'},
+  {s:'Нагадай сьогодні о 18:00 зробити домашнє з інформатики',ok:1,r:'Готово: сьогодні о 18:00 — «зробити домашнє з інформатики».',n2:'Нагадай сьогодні о <s>8:00</s> зробити домашнє з інформатики',r2:'Не можу: 8:00 сьогодні вже минула. Можливо, ви мали на увазі 18:00?',why:'Дата, час у 24-годинному форматі й чітка суть.'}]}];
+let mi=0,sel=-1;const vDone={};
+$('#wave').innerHTML='<i></i>'.repeat(22);const bars=[...document.querySelectorAll('#wave i')];
+const NL=['тиша','гамір у класі','галаслива перерва'];
+$('#noise').oninput=e=>$('#noiseL').textContent=NL[e.target.value];
+function drawMis(){$('#missions').innerHTML=MIS.map((m,i)=>`<button type="button" class="chip ${i===mi?'on':''}" data-i="${i}">${vDone[i]?'✓ ':''}Місія ${i+1}</button>`).join('');
+ document.querySelectorAll('#missions button').forEach(b=>b.onclick=()=>{mi=+b.dataset.i;sel=-1;drawMis()});
+ $('#mTitle').textContent=MIS[mi].t;$('#mOpts').innerHTML=MIS[mi].o.map((o,i)=>`<button type="button" class="opt ${i===sel?'on':''}" data-i="${i}">«${esc(o.s)}»</button>`).join('');
+ document.querySelectorAll('#mOpts .opt').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;drawMis()})}
+drawMis();
+$('#say').onclick=()=>{if(sel<0){$('#vFb').className='fb no';$('#vFb').textContent='Обери фразу.';return}
+ const o=MIS[mi].o[sel],nz=+$('#noise').value;let n=0;$('#heard').textContent='слухаю…';$('#vReply').textContent='';
+ const id=setInterval(()=>{bars.forEach(b=>b.style.height=(8+Math.random()*(nz?52:40))+'px');if(++n>14){clearInterval(id);bars.forEach(b=>b.style.height='8px');result()}},90);
+ function result(){let heard=esc(o.s),rep=o.r,success=o.ok===1;
+  if(nz===2&&o.n2){heard=o.n2;rep=o.r2;success=false}
+  else if(nz>=1&&o.n1){heard=o.n1}
+  $('#heard').innerHTML=heard;$('#vReply').textContent=rep;
+  const fb=$('#vFb');
+  if(success){fb.className='fb ok';fb.textContent='Успіх! '+o.why;if(!vDone[mi]){vDone[mi]=1;setScore('vo',MIS.reduce((a,m,i)=>a+(vDone[i]?m.p:0),0))}drawMis()}
+  else if(o.ok===1){fb.className='fb no';fb.textContent='Фраза правильна, але через шум помічник почув інше. Зменш шум (відійди в тихіше місце) і перевір, що він підтвердив саме твою команду.'}
+  else{fb.className='fb no';fb.textContent='Не те. '+o.why+' Спробуй іншу фразу.'}}};
+
+/* ---------- 7 TASK 18 ---------- */
+const T18={q:['Що таке фейк?','Чому небо блакитне?','Скільки в Україні областей?'],
+ s:[{t:'Офіційні сайти державних установ',g:1},{t:'Енциклопедії',g:1},{t:'Фактчекінгові ресурси',g:1},{t:'Підручник',g:1},{t:'Анонімний телеграм-канал',g:0},{t:'Коментарі під відео',g:0},{t:'Сайт із купою реклами',g:0},{t:'Перший результат пошуку, не читаючи',g:0}],
+ i:[{t:'Чітке визначення',g:1},{t:'Приклад',g:1},{t:'Посилання на джерело',g:1},{t:'Власна думка без доказів',g:0},{t:'Реклама сервісу',g:0}],
+ v:[{t:'Порівнюю 2–3 джерела',g:1},{t:'Перевіряю дату публікації',g:1},{t:'Перевіряю автора',g:1},{t:'Вірю, якщо багато лайків',g:0}]};
+const s18={q:-1,s:new Set(),i:new Set(),v:new Set()};
+function draw18(){$('#t18q').innerHTML=T18.q.map((t,i)=>`<button type="button" class="chip ${s18.q===i?'on':''}" data-g="q" data-i="${i}">${t}</button>`).join('');
+ ['s','i','v'].forEach(g=>$('#t18'+g).innerHTML=T18[g].map((o,i)=>`<button type="button" class="chip ${s18[g].has(i)?'on':''}" data-g="${g}" data-i="${i}">${o.t}</button>`).join(''));
+ document.querySelectorAll('#t18q button,#t18s button,#t18i button,#t18v button').forEach(b=>b.onclick=()=>{const g=b.dataset.g,i=+b.dataset.i;if(g==='q')s18.q=i;else s18[g].has(i)?s18[g].delete(i):s18[g].add(i);draw18()});
+ drawFlow()}
+function drawFlow(){const box=(y,h,title,items,col)=>{const lines=items.length?items:['—'];return `<rect x="20" y="${y}" width="420" height="${h}" rx="14" fill="none" stroke="${col}" stroke-width="2.5"/><text x="36" y="${y+28}" font-family="Literata,serif" font-size="19" font-weight="600" fill="currentColor">${title}</text>`+lines.map((l,i)=>`<text x="36" y="${y+54+i*22}" font-size="15" fill="currentColor">• ${esc(l)}</text>`).join('')};
+ const sec=[['Питання',s18.q<0?[]:[T18.q[s18.q]]],['Джерела',[...s18.s].map(i=>T18.s[i].t)],['Що включаю',[...s18.i].map(i=>T18.i[i].t)],['Перевірка',[...s18.v].map(i=>T18.v[i].t)],['Відповідь',['Готова, перевірена відповідь']]];
+ let y=10,out='';sec.forEach((s,k)=>{const h=44+Math.max(1,s[1].length)*22;out+=box(y,h,(k+1)+'. '+s[0],s[1],k===4?'var(--red)':'var(--blue)');y+=h;if(k<4){out+=`<path d="M230 ${y+2} v18 m-7 -8 l7 8 l7 -8" stroke="currentColor" stroke-width="2" fill="none"/>`;y+=26}});
+ $('#flow').innerHTML=`<svg viewBox="0 0 460 ${y+10}" style="color:var(--ink)">${out}</svg>`}
+draw18();
+$('#t18go').onclick=()=>{const fb=$('#t18fb');if(s18.q<0||!s18.s.size||!s18.v.size){fb.className='fb no';fb.textContent='Заповни всі чотири блоки моделі.';return}
+ const sum=g=>[...s18[g]].reduce((a,i)=>a+(T18[g][i].g?1:-1),0);
+ let p=2+Math.max(0,Math.min(4,sum('s')))+Math.max(0,Math.min(3,sum('i')))+Math.max(0,Math.min(3,[...s18.v].reduce((a,i)=>a+(T18.v[i].g?1:-2),0)));
+ const badS=[...s18.s].filter(i=>!T18.s[i].g).map(i=>T18.s[i].t),badI=[...s18.i].filter(i=>!T18.i[i].g).map(i=>T18.i[i].t),badV=[...s18.v].filter(i=>!T18.v[i].g).map(i=>T18.v[i].t);
+ const bad=[...badS,...badI,...badV];fb.className='fb '+(p>=10?'ok':'no');
+ fb.textContent=`Модель оцінено: ${p} з 12.`+(bad.length?' Ризиковані елементи: '+bad.join('; ')+'. Можна виправити й оцінити ще раз.':' Чудова, надійна модель!');setScore('t18',p)};
+
+/* ---------- 8 TASK 19 ---------- */
+const CR=[['Розуміння запиту','Враховує контекст, інтонацію, приховані наміри','Аналізує ключові слова, шаблони й тон'],
+ ['Вибір джерел','Обирає відомі джерела, яким довіряє','Збирає дані з дуже широкого кола, іноді й комерційних'],
+ ['Критичне мислення','Сумнівається, порівнює, перепитує','Може «повірити» поверховому чи невідомому джерелу'],
+ ['Формулювання','Добирає зрозумілі слова й приклади, перевіряє логіку','Генерує текст за статистикою мови'],
+ ['Перевірка достовірності','Може перевірити в іншому джерелі','Не завжди перевіряє, може «галюцинувати»'],
+ ['Емоції','Зважає на почуття, ситуацію, етику','Нейтральний, не завжди вловлює емоційний контекст'],
+ ['Швидкість','Працює повільніше, особливо зі складним','Відповідає майже миттєво']];
+const cards19=shuffle(CR.flatMap((c,i)=>[{t:c[1],a:'h'},{t:c[2],a:'a'}]));const ans19={};let lock19=false;
+function draw19(){const h=cards19.map((c,i)=>`<div class="sortc" id="c19${i}"><span>${esc(c.t)}</span><div class="row"><button type="button" data-i="${i}" data-v="h" class="${ans19[i]==='h'?'on':''}" ${lock19?'disabled':''}>Людина</button><button type="button" data-i="${i}" data-v="a" class="${ans19[i]==='a'?'on':''}" ${lock19?'disabled':''}>ШІ</button></div></div>`);
+ $('#sortL').innerHTML=h.slice(0,7).join('');$('#sortR').innerHTML=h.slice(7).join('');
+ document.querySelectorAll('#sortL button,#sortR button').forEach(b=>b.onclick=()=>{ans19[b.dataset.i]=b.dataset.v;draw19()});
+ if(lock19)cards19.forEach((c,i)=>$('#c19'+i).classList.add(ans19[i]===c.a?'good':'bad'))}
+draw19();
+$('#t19go').onclick=()=>{if(lock19)return;if(Object.keys(ans19).length<14){$('#t19fb').className='fb no';$('#t19fb').textContent='Розподіли всі 14 тверджень.';return}
+ lock19=true;const p=cards19.filter((c,i)=>ans19[i]===c.a).length;draw19();$('#t19fb').className='fb '+(p>=11?'ok':'no');$('#t19fb').textContent=`Правильно: ${p} з 14.`;
+ $('#t19tbl').style.display='block';$('#t19tbl').innerHTML='<table class="stack"><thead><tr><th>Критерій</th><th>Людина</th><th>ШІ (чат-боти)</th></tr></thead><tbody>'+CR.map(c=>`<tr><td><b>${c[0]}</b></td><td>${c[1]}</td><td>${c[2]}</td></tr>`).join('')+'</tbody></table>';setScore('t19',p)};
+
+/* ---------- 9 TASK 20 ---------- */
+const CON=['ШІ працює швидко, але не завжди глибоко аналізує ситуацію.','ШІ не розуміє зміст, а підбирає найімовірніші слова — тому може вигадувати або помилятися.','ШІ не завжди перевіряє джерела й іноді обирає просто популярні.','ШІ корисний, якщо правильно ставити запитання і самостійно перевіряти відповідь.','Найкращий результат — людина + ШІ разом: ШІ дає швидку інформацію, людина вирішує, що з нею робити.'];
+const a20={};
+function draw20(){$('#concl').innerHTML=CON.map((c,i)=>`<div class="sortc"><span>${i+1}. ${c}</span><div class="row"><button type="button" data-i="${i}" data-v="y" class="${a20[i]==='y'?'on':''}">Так</button><button type="button" data-i="${i}" data-v="n" class="${a20[i]==='n'?'on':''}">Ні</button></div></div>`).join('');
+ document.querySelectorAll('#concl button').forEach(b=>b.onclick=()=>{a20[b.dataset.i]=b.dataset.v;draw20();sc20()})}
+function sc20(){const p=Object.keys(a20).length+($('#own').value.trim().length>=20?3:0);setScore('t20',p,p>0)}
+draw20();$('#own').addEventListener('input',sc20);
+mkTimer($('#t2'),120,$('#t2s'),$('#t2r'));
+
+/* ---------- 10 DEEPFAKE ---------- */
+const DF=[{t:'Людина на відео майже не кліпає',g:1},{t:'Губи не збігаються зі звуком',g:1},{t:'Розмиті або «пливучі» краї обличчя',g:1},{t:'Дивні тіні й освітлення на обличчі',g:1},{t:'Металевий голос, неприродні паузи',g:1},{t:'Сенсація + заклик терміново поширити',g:1},{t:'Немає першоджерела, лише репости',g:1},{t:'Відео у високій якості',g:0},{t:'Багато лайків і переглядів',g:0},{t:'Опубліковано пізно ввечері',g:0}];
+const dfOrder=shuffle(DF.map((_,i)=>i)),dfSel=new Set();let dfLock=false;
+function drawDf(){$('#df').innerHTML=dfOrder.map(i=>`<button type="button" class="chip ${dfSel.has(i)?'on':''} ${dfLock?(DF[i].g===(dfSel.has(i)?1:0)?'good':'bad'):''}" data-i="${i}" ${dfLock?'disabled':''}>${DF[i].t}</button>`).join('');
+ document.querySelectorAll('#df button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;dfSel.has(i)?dfSel.delete(i):dfSel.add(i);drawDf()})}
+drawDf();
+$('#dfgo').onclick=()=>{if(dfLock)return;dfLock=true;const p=DF.filter((d,i)=>d.g===(dfSel.has(i)?1:0)).length;drawDf();
+ $('#dffb').className='fb '+(p>=8?'ok':'no');$('#dffb').textContent=`Правильно класифіковано: ${p} з 10. Якість відео, лайки та час публікації самі по собі нічого не доводять.`;setScore('df',p)};
+mkTimer($('#t3'),180,$('#t3s'),$('#t3r'));
+
+/* ---------- 11 EYES ---------- */
+let eyeRun=false;
+$('#eyeGo').onclick=()=>{if(eyeRun)return;eyeRun=true;const box=$('#eye'),dot=$('#dot');let t0=performance.now();const D=40000;
+ const hints=[[0,'Вліво — вправо'],[10000,'Вгору — вниз'],[20000,'По колу'],[30000,'Вісімка']];
+ const f=now=>{const t=now-t0,W=box.clientWidth/2-30,H=box.clientHeight/2-30,a=t/700;let x=0,y=0;
+  if(t<10000)x=Math.sin(a)*W;else if(t<20000)y=Math.sin(a)*H;else if(t<30000){x=Math.cos(a)*W*.8;y=Math.sin(a)*H*.8}else{x=Math.sin(a)*W*.85;y=Math.sin(2*a)*H*.6}
+  dot.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
+  const left=Math.max(0,Math.ceil((D-t)/1000));$('#eyeT').textContent='0:'+String(left).padStart(2,'0');$('#eyeHint').textContent=hints.filter(h=>t>=h[0]).pop()[1];
+  if(t<D)requestAnimationFrame(f);else{eyeRun=false;dot.style.transform='translate(-50%,-50%)';$('#eyeHint').textContent='Заплющ очі на 5 секунд і відкрий. Молодець!'}};requestAnimationFrame(f)};
+
+/* ---------- 12 TRAINER ---------- */
+const TR=[
+ {q:'«реферат»',o:['Напиши реферат','Склади план реферату про історію інтернету для 9 класу: 5 пунктів, до кожного 1 речення','Реферат про інтернет швидко'],a:1},
+ {q:'«погода»',o:['Яка погода в Києві в суботу вдень?','Погода погода погода','Скажи погоду, будь ласка'],a:0},
+ {q:'«поясни фотосинтез»',o:['Поясни фотосинтез дуже-дуже докладно','Фотосинтез?','Поясни фотосинтез для учня 7 класу простими словами, з одним прикладом, до 60 слів'],a:2},
+ {q:'«чи правда, що ШІ все знає»',o:['ШІ знає все, так?','Поясни, чому чат-боти можуть помилятися, і як учню перевірити їхню відповідь. Дай 3 поради','Скажи, що ШІ найрозумніший'],a:1},
+ {q:'«фільм на вечір»',o:['Порадь фільм','Порадь 3 сімейні фільми до 2 годин українською мовою, з коротким описом кожного','Фільм на вечір щоб був гарний і цікавий і щоб не нудно'],a:1},
+ {q:'(голосом) «нагадай»',o:['Нагадай','Нагадай колись про щось','Нагадай у понеділок о 7:30 взяти форму на фізкультуру'],a:2}];
+const trA={};
+function drawTr(){$('#trn').innerHTML=TR.map((r,i)=>`<div class="card q"><b>${i+1}. Початковий запит: ${esc(r.q)}</b><div class="row" style="margin-top:8px">${r.o.map((o,j)=>{let c='';if(i in trA){if(j===r.a)c='good';else if(j===trA[i])c='bad'}return `<button type="button" class="opt ${c}" data-i="${i}" data-j="${j}" ${i in trA?'disabled':''}>${esc(o)}</button>`}).join('')}</div></div>`).join('');
+ document.querySelectorAll('#trn button').forEach(b=>b.onclick=()=>{trA[b.dataset.i]=+b.dataset.j;drawTr();const p=TR.reduce((a,r,i)=>a+(trA[i]===r.a?2:0),0);setScore('trn',p,Object.keys(trA).length===TR.length||S.dn.trn)})}
+drawTr();
+
+/* ---------- 13 TEST ---------- */
+const TS=[
+ {q:'Що робить запит до чат-бота точнішим?',o:['Одне ключове слово','Контекст, аудиторія, формат і обмеження','Великі літери'],a:1},
+ {q:'Чому ШІ може «галюцинувати»?',o:['Бо він прогнозує найімовірніші слова, а не перевіряє факти','Бо він утомився','Бо інтернет повільний'],a:0},
+ {q:'Голосовий помічник почув «50» замість «15». Що робити?',o:['Нічого, він точно знає краще','Повторити чіткіше в тихішому місці й перевірити підтвердження','Вимкнути телефон'],a:1},
+ {q:'На якому етапі рекламний сайт найімовірніше потрапить у відповідь?',o:['Вибір джерел','Виведення','Запит'],a:0},
+ {q:'Який запит до голосового помічника найкращий?',o:['Нагадай','Нагадай про те','Нагадай завтра о 8:00 взяти зошит'],a:2},
+ {q:'Що таке упередженість ШІ?',o:['Повільна робота','Однобокість відповіді через викривлені дані або формулювання','Помилка в правописі'],a:1},
+ {q:'Яке джерело найнадійніше для перевірки факту?',o:['Анонімний канал','Коментарі під відео','Офіційний сайт або фактчекінговий ресурс'],a:2},
+ {q:'Чому на те саме питання ШІ може відповісти по-різному?',o:['Генерація має елемент випадковості','Він ображається','Так не буває'],a:0},
+ {q:'Що з переліченого — ознака можливого дипфейку?',o:['Висока якість відео','Губи не збігаються зі звуком','Багато переглядів'],a:1},
+ {q:'Найкраща модель роботи з ШІ — це…',o:['Повністю довіряти ШІ','Не користуватися ШІ взагалі','ШІ дає швидку інформацію, людина перевіряє та вирішує'],a:2}];
+const tsA={};
+function drawTs(){$('#test').innerHTML=TS.map((r,i)=>`<div class="q"><b>${i+1}. ${esc(r.q)}</b><div class="row" style="margin-top:6px">${r.o.map((o,j)=>{let c='';if(i in tsA){if(j===r.a)c='good';else if(j===tsA[i])c='bad'}return `<button type="button" class="chip ${c}" data-i="${i}" data-j="${j}" ${i in tsA?'disabled':''}>${esc(o)}</button>`}).join('')}</div></div>`).join('')+`<div class="fb ok">${Object.keys(tsA).length===TS.length?'Тест завершено: '+(S.sc.test||0)+' з 10.':''}</div>`;
+ document.querySelectorAll('#test button').forEach(b=>b.onclick=()=>{tsA[b.dataset.i]=+b.dataset.j;const p=TS.reduce((a,r,i)=>a+(tsA[i]===r.a?1:0),0);setScore('test',p,Object.keys(tsA).length===TS.length||S.dn.test);drawTs()})}
+drawTs();
+
+/* ---------- 14 CONCLUSIONS ---------- */
+const FL=[['Чіткий запит','Чим конкретніше питання (хто, що, коли, для кого, у якому форматі), тим кращий результат.'],['Уточнення — це норма','Якщо відповідь не підійшла, переформулюй: додай деталі або обмеження.'],['ШІ може помилятися','Він прогнозує текст, а не знає правду, тому може вигадувати факти.'],['Упередженість','Викривлені дані чи формулювання запиту роблять відповідь однобокою.'],['Голос — окремий виклик','Говори чітко, коротко, без шуму та перевіряй, що помічник підтвердив.'],['Людина + ШІ','ШІ — швидкий помічник. Перевіряти й вирішувати — завдання людини.']];
+$('#flips').innerHTML=FL.map(f=>`<div class="card flip" tabindex="0" role="button"><div class="f"><h3>${f[0]}</h3><span class="small">Натисни, щоб відкрити</span></div><div class="b"><h3 style="color:var(--blue)">${f[0]}</h3><p style="margin:0">${f[1]}</p></div></div>`).join('');
+document.querySelectorAll('.flip').forEach(c=>{c.onclick=()=>c.classList.toggle('op');c.onkeydown=e=>{if(e.key==='Enter')c.classList.toggle('op')}});
+
+/* ---------- 15 REFLECTION ---------- */
+const scRef=()=>{const f=['#r1','#r2','#r3'].filter(id=>$(id).value.trim().length>=5).length;setScore('ref',f+(f===3?1:0),f>0)};
+['#r1','#r2','#r3'].forEach(id=>$(id).addEventListener('input',scRef));
+
+/* ---------- 16 CERTIFICATE ---------- */
+const cv=$('#cv'),cx=cv.getContext('2d');
+function code(){const s=(S.name||'')+(S.cls||'')+total()+new Date().toDateString();let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return 'U17-'+h.toString(36).toUpperCase().slice(0,6)}
+function drawCert(){const W=1600,H=1130,p=total(),g=grade(p);
+ cx.fillStyle='#ffffff';cx.fillRect(0,0,W,H);
+ cx.fillStyle='#0b4f8a';cx.fillRect(0,0,W,16);cx.fillStyle='#c1121f';cx.fillRect(0,H-16,W,16);
+ cx.strokeStyle='#0b4f8a';cx.lineWidth=3;cx.strokeRect(40,48,W-80,H-96);
+ cx.fillStyle='#10131a';cx.textAlign='center';
+ cx.font='600 30px "Golos Text",sans-serif';cx.fillStyle='#c1121f';cx.fillText('ІНФОРМАТИКА · 9 КЛАС · УРОК 17',W/2,120);
+ cx.fillStyle='#10131a';cx.font='700 76px Literata,Georgia,serif';cx.fillText('Сертифікат',W/2,205);
+ cx.font='400 26px "Golos Text",sans-serif';cx.fillStyle='#5a6170';cx.fillText('засвідчує, що',W/2,255);
+ cx.fillStyle='#0b4f8a';cx.font='600 56px Literata,Georgia,serif';cx.fillText((S.name||'Ім’я учня').slice(0,40)+(S.cls?', '+S.cls.slice(0,10):''),W/2,325);
+ cx.fillStyle='#10131a';cx.font='400 26px "Golos Text",sans-serif';
+ cx.fillText('виконав(-ла) інтерактивний урок «Пошукові запити до розмовних агентів і голосових помічників»',W/2,375);
+ // checklist
+ const x0=150,y0=430,colW=650;cx.textAlign='left';
+ TASKS.forEach((t,i)=>{const col=i<5?0:1,row=i%5,x=x0+col*colW,y=y0+row*62,dn=S.dn[t.k],v=S.sc[t.k]||0;
+  cx.fillStyle=dn?'#11703c':'#c9ced8';cx.beginPath();cx.arc(x+14,y-9,16,0,7);cx.fill();
+  cx.strokeStyle='#fff';cx.lineWidth=4;if(dn){cx.beginPath();cx.moveTo(x+6,y-9);cx.lineTo(x+12,y-2);cx.lineTo(x+23,y-17);cx.stroke()}
+  cx.fillStyle='#10131a';cx.font='400 24px "Golos Text",sans-serif';cx.fillText(t.t,x+44,y);
+  cx.textAlign='right';cx.font='600 24px "Golos Text",sans-serif';cx.fillStyle=dn?'#0b4f8a':'#9aa3b2';cx.fillText(v+'/'+t.m,x+colW-40,y);cx.textAlign='left'});
+ // total
+ cx.fillStyle='#f3f6fa';cx.fillRect(150,760,W-300,170);
+ cx.textAlign='center';cx.fillStyle='#10131a';cx.font='400 28px "Golos Text",sans-serif';cx.fillText('Набрано балів',470,815);cx.fillText('Оцінка (12-бальна шкала)',1130,815);
+ cx.font='700 80px Literata,Georgia,serif';cx.fillStyle='#0b4f8a';cx.fillText(p+' / 100',470,900);cx.fillStyle='#c1121f';cx.fillText(String(g),1130,900);
+ cx.fillStyle='#5a6170';cx.font='400 22px "Golos Text",sans-serif';cx.fillText('рівень: '+level(g),1130,925);
+ const done=TASKS.filter(t=>S.dn[t.k]).length;
+ cx.fillStyle='#10131a';cx.font='400 24px "Golos Text",sans-serif';cx.fillText('Виконано завдань: '+done+' з '+TASKS.length,W/2,985);
+ cx.textAlign='left';cx.fillStyle='#5a6170';cx.font='400 22px "Golos Text",sans-serif';
+ const d=new Date();cx.fillText('Дата: '+d.toLocaleDateString('uk-UA')+' '+d.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'}),150,1050);
+ cx.textAlign='right';cx.fillText('Код перевірки: '+code(),W-150,1050);
+ $('#chk').innerHTML=TASKS.map(t=>`<li>${S.dn[t.k]?'<b style="color:var(--ok)">✓</b>':'<span class="small">○</span>'} ${esc(t.t)} — ${S.sc[t.k]||0}/${t.m}</li>`).join('');
+ $('#cTot').textContent=`Разом: ${p}/100 · оцінка ${g} (${level(g)})`}
+function report(){const p=total();return `Урок 17. Запити до ШІ\nУчень: ${S.name||'—'}, клас ${S.cls||'—'}\n`+TASKS.map(t=>`${S.dn[t.k]?'[x]':'[ ]'} ${t.t}: ${S.sc[t.k]||0}/${t.m}`).join('\n')+`\nРазом: ${p}/100, оцінка ${grade(p)}\nКод: ${code()}`}
+$('#dl').onclick=()=>{if(!S.name.trim()){$('#dlHint').textContent='Спершу впиши прізвище та ім’я на першому слайді.';$('#dlHint').style.color='var(--red)';go(0);setTimeout(()=>$('#nm').focus(),600);return}
+ drawCert();const fn='Сертифікат_Урок17_'+S.name.trim().replace(/\s+/g,'_')+'.png';
+ if(dlCap){cv.toBlob(async bl=>{try{await dlCap.save({filename:fn,data:bl})}catch(e){try{await dlCap.save({filename:fn,data:new Uint8Array(await bl.arrayBuffer())})}catch(e2){$('#dlHint').style.color='var(--red)'}}},'image/png');return}
+ try{const a=document.createElement('a');a.download=fn;a.href=cv.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove()}catch(e){}};
+$('#pr').onclick=()=>{try{window.print()}catch(e){}};
+$('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(report());$('#cp').textContent='Скопійовано ✓'}catch(e){$('#cp').textContent='Не вдалося скопіювати'}};
+$('#restart').onclick=()=>{if($('#restart').dataset.c!=='1'){$('#restart').dataset.c='1';$('#restart').textContent='Точно? Натисни ще раз';return}
+ try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+
+let dlCap=null;try{if(window.claude&&window.claude.use)window.claude.use('downloads').then(d=>{dlCap=d}).catch(()=>{})}catch(e){}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawCert);
+refresh();
+}
+</script>
+</body>
+</html>
